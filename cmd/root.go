@@ -12,7 +12,8 @@ var rootCmd = &cobra.Command{
 	Short: "goplay is a music player",
 	Long:  `goplay is a music player`,
 	Run: func(_ *cobra.Command, _ []string) {
-
+		fmt.Println("goplay is a music player")
+		fmt.Println("use goplay --help to see available commands")
 	},
 }
 
@@ -26,7 +27,7 @@ func Execute() {
 func init() {
 	playCmd.Flags().StringP("dir", "d", "", "add all songs in a directory to the queue")
 	playCmd.Flags().StringP("file", "f", "", "play a single song")
-
+	playCmd.Flags().StringP("youtube", "y", "", "play music from youtube")
 	serverCmd.Flags().StringP("port", "p", "1234", "port to listen on")
 
 	rootCmd.AddCommand(playCmd)

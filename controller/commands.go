@@ -18,26 +18,6 @@ func Play(client *rpc.Client) {
 	}
 }
 
-func PlayDir(dir string, client *rpc.Client) {
-	dir_p, err := os.Open(dir)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	entries, err := dir_p.Readdir(0)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			fmt.Println("Adding music: ", dir+"/"+entry.Name())
-			AddMusic(dir+"/"+entry.Name(), client)
-		}
-	}
-	Play(client)
-}
-
 func PlayFile(file string, client *rpc.Client) {
 	fmt.Println("Adding music: ", file)
 	AddMusic(file, client)
@@ -94,6 +74,16 @@ func Stop(client *rpc.Client) {
 	}
 }
 
+func PlayDir(dir string, client *rpc.Client) {
+	args := dir
+	var reply int
+	err := client.Call("Player.RPCAddDir", args, &reply)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
 func AddMusic(music string, client *rpc.Client) {
 	args := music
 	var reply int
@@ -122,6 +112,27 @@ func GetPlayerStatus(client *rpc.Client) {
 		os.Exit(1)
 	}
 	fmt.Println("Player status:", reply)
+}
+
+func PlayYoutube(url string, client *rpc.Client) {
+	args := url
+	var reply int
+	err := client.Call("Player.RPCPlayYoutube", args, &reply)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	fmt.Println("this may take a while before the music starts playing")
+}
+
+func DetectAndPlay(query string, client *rpc.Client) []shared.SearchResult {
+	var reply []shared.SearchResult
+	err := client.Call("Player.RPCDetectAndPlay", query, &reply)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	return reply
 }
 
 var client *rpc.Client

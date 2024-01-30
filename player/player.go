@@ -2,11 +2,17 @@ package player
 
 import (
 	"fmt"
+	"io"
+	"log"
+	"os"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/Malwarize/goplay/player/online"
 	"github.com/Malwarize/goplay/shared"
 	"github.com/gopxl/beep"
+	"github.com/gopxl/beep/mp3"
 	"github.com/gopxl/beep/speaker"
 )
 
@@ -34,6 +40,8 @@ type Player struct {
 	playerState       int
 	done              chan struct{}
 	initialised       bool
+	Converter         *Converter
+	Director          *online.OnlineDirector
 	mu                sync.Mutex
 }
 
@@ -46,12 +54,22 @@ func NewMusic(name string, streamer beep.StreamSeekCloser, format beep.Format) M
 }
 
 func NewPlayer() *Player {
+	converter, err := NewConverter("ffmpeg", "ffprobe")
+	if err != nil {
+		log.Fatal(err)
+	}
+	director, err := online.NewDefaultDirector()
+	if err != nil {
+		log.Fatal(err)
+	}
 	return &Player{
 		MusicList:         make([]Music, 0),
 		CurrentMusicIndex: 0,
 		playerState:       Stopped,
 		done:              make(chan struct{}),
 		initialised:       false,
+		Converter:         converter,
+		Director:          director,
 	}
 }
 
@@ -68,7 +86,7 @@ func (p *Player) AddMusic(music Music) {
 
 func (p *Player) Play() {
 	music := p.MusicList[p.CurrentMusicIndex]
-	if p.initialised == false {
+	if !p.initialised {
 		speaker.Init(music.Format.SampleRate, music.Format.SampleRate.N(time.Second/10))
 		p.initialised = true
 	} else {
@@ -86,6 +104,126 @@ func (p *Player) Play() {
 	}()
 }
 
+func (p *Player) AddMusicFromFile(path string) {
+	f, err := os.Open(path)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	streamer, format, err := mp3.Decode(f)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	p.AddMusic(NewMusic(path, streamer, format))
+	if p.playerState == Stopped {
+		p.Play()
+	}
+}
+
+func (p *Player) youtubeToMusic(urlOrQueryOrID string) (Music, error) {
+	searchResults, err := p.Director.Search("youtube", urlOrQueryOrID, 1)
+	if err != nil {
+		return Music{}, err
+	}
+	reader, path, err := p.Director.Download("youtube", searchResults[0].Url)
+	if err != nil {
+		return Music{}, err
+	}
+	isMp3, err := p.Converter.IsMp3(path)
+	if err != nil {
+		return Music{}, err
+	}
+	musicName := strings.Split(path, "/")[len(strings.Split(path, "/"))-1]
+	if !isMp3 {
+		err = p.Converter.ConvertToMP3(path)
+		if err != nil {
+			return Music{}, err
+		}
+		reader, err = os.Open(path)
+		if err != nil {
+			return Music{}, err
+		}
+		streamer, format, err := mp3.Decode(reader)
+		if err != nil {
+			return Music{}, err
+		}
+		return NewMusic(musicName, streamer, format), nil
+	}
+	streamer, format, err := mp3.Decode(reader)
+	if err != nil {
+		return Music{}, err
+	}
+	return NewMusic(musicName, streamer, format), nil
+}
+
+func (p *Player) AddMusicFromYoutube(urlOrQueryOrID string) {
+	music, err := p.youtubeToMusic(urlOrQueryOrID)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	p.AddMusic(music)
+	if p.playerState == Stopped {
+		p.Play()
+	}
+}
+
+func (p *Player) convertAndPlayInTemp(path string) bool {
+	f, err := os.CreateTemp("", "goplay")
+	defer os.Remove(f.Name())
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	sourceFile, err := os.Open(path)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	_, err = io.Copy(f, sourceFile)
+	if err != nil {
+		log.Println(err)
+	}
+
+	err = p.Converter.ConvertToMP3(f.Name())
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	p.AddMusicFromFile(f.Name())
+	return true
+}
+
+func (p *Player) AddMusicsFromDir(dirPath string) {
+	dir, err := os.Open(dirPath)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	entries, err := dir.Readdir(0)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			isMp3, err := p.Converter.IsMp3(dirPath + "/" + entry.Name())
+			if err != nil {
+				log.Println(err)
+			}
+			if isMp3 {
+				p.AddMusicFromFile(dirPath + "/" + entry.Name())
+			} else {
+				p.convertAndPlayInTemp(dirPath + "/" + entry.Name())
+			}
+		}
+	}
+	if p.playerState == Stopped {
+		p.Play()
+	}
+}
 func (p *Player) Next() {
 	if len(p.MusicList) < 1 || p.playerState == Stopped {
 		return
@@ -189,6 +327,90 @@ func (p *Player) getMusicList() []string {
 		musicList = append(musicList, music.Name)
 	}
 	return musicList
+}
+
+func (p *Player) CheckWhatIsThis(unknown string) string {
+	if strings.Contains(unknown, "youtube.com") || strings.Contains(unknown, "youtu.be") {
+		return "youtube"
+	}
+	// check if its a dir
+	if fi, err := os.Stat(unknown); err == nil {
+		if err == nil {
+			if fi.IsDir() {
+				// check if there is music files in the dir
+				files, err := os.Open(unknown)
+				if err != nil {
+					return "unknown"
+				}
+
+				entries, err := files.Readdir(0)
+				if err != nil {
+					return "unknown"
+				}
+
+				for _, entry := range entries {
+					if !entry.IsDir() {
+						isMp3, err := p.Converter.IsMp3(unknown + "/" + entry.Name())
+						if err != nil {
+							return "unknown"
+						}
+						if isMp3 {
+							return "dir"
+						} else {
+							return "unknown"
+						}
+					}
+				}
+				return "unknown"
+			}
+			return "file"
+		}
+	}
+	if len(unknown) == 11 {
+		engines := p.Director.GetEngines()
+		engine, ok := engines["youtube"]
+		if !ok {
+			return "unknown"
+		}
+		exists, err := engine.Exists(unknown)
+		if err != nil {
+			return "unknown"
+		}
+		if exists {
+			return "youtube"
+		}
+
+	}
+	return "unknown"
+}
+
+func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
+	musics, err := p.Director.Search("youtube", query, 5)
+	if err != nil {
+		log.Println("Failed to search for", query, ":", err)
+		return []shared.SearchResult{}
+	}
+	return musics
+}
+
+func (p *Player) DetectAndPlay(unknown string) []shared.SearchResult {
+	fmt.Println("Checking what is this")
+	whatIsThis := p.CheckWhatIsThis(unknown)
+	switch whatIsThis {
+	case "youtube":
+		log.Println("Detected youtube")
+		go p.AddMusicFromYoutube(unknown)
+	case "dir":
+		log.Println("Detected dir")
+		p.AddMusicsFromDir(unknown)
+	case "file":
+		log.Println("Detected file")
+		p.AddMusicFromFile(unknown)
+	case "unknown":
+		log.Println("Detected unknown, searching for", unknown)
+		return p.GetAvailableMusicOptions(unknown)
+	}
+	return []shared.SearchResult{}
 }
 
 func (p *Player) GetPlayerStatus() shared.Status {

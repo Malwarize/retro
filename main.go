@@ -1,10 +1,7 @@
 package main
 
-import (
-	"github.com/Malwarize/goplay/online"
-)
+import "github.com/Malwarize/goplay/cmd"
 
 func main() {
-	// cmd.Execute()
-	online.Test()
+	cmd.Execute()
 }

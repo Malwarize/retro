@@ -2,6 +2,7 @@ package shared
 
 import (
 	"fmt"
+	"net/url"
 	"time"
 )
 
@@ -40,4 +41,17 @@ func (s Status) String() string {
 	}
 	str += "]"
 	return str
+}
+
+type SearchResult struct {
+	Title string
+	Url   string
+}
+
+func EscapeSpecialDirChars(path string) string {
+	// escape special chars
+	path = url.PathEscape(path)
+	//first 40 chars
+	path = path[:40]
+	return path
 }

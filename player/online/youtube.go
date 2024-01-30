@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"io"
+	"strings"
 
+	"github.com/Malwarize/goplay/shared"
 	"github.com/kkdai/youtube/v2"
 	"google.golang.org/api/option"
 	gyoutube "google.golang.org/api/youtube/v3"
@@ -17,6 +19,9 @@ type youtubeEngine struct {
 	Client  *youtube.Client
 }
 
+func getYoutubeIdFromUrl(url string) string {
+	return strings.Split(url, "=")[1]
+}
 func newYoutubeEngine() (*youtubeEngine, error) {
 	if len(apiKey) == 0 {
 		return nil, errors.New("API key not found")
@@ -35,18 +40,21 @@ func newYoutubeEngine() (*youtubeEngine, error) {
 	}, nil
 }
 
-func (yt *youtubeEngine) Search(query string, maxResults int) ([]string, error) {
+func (yt *youtubeEngine) Search(query string, maxResults int) ([]shared.SearchResult, error) {
 	call := yt.Service.Search.List([]string{"id", "snippet"}).Q(query).MaxResults(int64(maxResults))
 	response, err := call.Do()
 	if err != nil {
 		return nil, err
 	}
-	var videos []string
+	var videos []shared.SearchResult
 	for _, item := range response.Items {
 		if item.Id.VideoId == "" {
 			continue
 		}
-		videos = append(videos, item.Id.VideoId)
+		videos = append(videos, shared.SearchResult{
+			Title: item.Snippet.Title,
+			Url:   "https://www.youtube.com/watch?v=" + item.Id.VideoId,
+		})
 	}
 	return videos, nil
 }
@@ -63,4 +71,12 @@ func (yt *youtubeEngine) Download(videoUrl string) (io.ReadCloser, string, error
 		return nil, "", err
 	}
 	return stream, video.Title, nil
+}
+
+func (yt *youtubeEngine) Exists(videoUrl string) (bool, error) {
+	_, err := yt.Client.GetVideo(videoUrl)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

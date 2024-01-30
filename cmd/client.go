@@ -16,20 +16,39 @@ var playCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client := controller.GetClient()
 		if dir, err := cmd.Flags().GetString("dir"); err == nil && dir != "" {
-			fmt.Println("dir is set", dir)
 			controller.PlayDir(dir, client)
 			os.Exit(0)
 		}
 
 		if file, err := cmd.Flags().GetString("file"); err == nil && file != "" {
-			fmt.Println("file is set", file)
 			controller.PlayFile(file, client)
 			os.Exit(0)
 		}
-		// check if string passed
+
+		if youtube, err := cmd.Flags().GetString("youtube"); err == nil && youtube != "" {
+			controller.PlayYoutube(youtube, client)
+			os.Exit(0)
+		}
+
 		if len(args) > 0 {
 			song := args[0]
-			fmt.Println("song:", song)
+			musics := controller.DetectAndPlay(song, client)
+			fmt.Println("Available music options:")
+			for i, music := range musics {
+				fmt.Printf("%d: %s\n", i, music.Title)
+			}
+			fmt.Println("Enter the number of the song you want to play:")
+			if len(musics) == 0 {
+				fmt.Println("no song found")
+				return
+			}
+			songNumber := 0
+			fmt.Scanln(&songNumber)
+			if songNumber < 0 || songNumber >= len(musics) {
+				fmt.Println("invalid song number")
+				return
+			}
+			controller.PlayYoutube(musics[songNumber].Url, client)
 		} else {
 			fmt.Println("no song specified")
 			return
