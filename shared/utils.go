@@ -19,7 +19,6 @@ type Status struct {
 	MusicList            []string
 }
 
-// to string
 func (s Status) String() string {
 	var str string
 	str += "CurrentMusicIndex: " + fmt.Sprintf("%d", s.CurrentMusicIndex) + "\n"

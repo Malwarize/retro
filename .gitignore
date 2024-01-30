@@ -21,3 +21,6 @@
 go.work
 bin/*
 audio/*
+cache/*
+cache/
+.vscode
