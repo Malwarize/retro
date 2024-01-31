@@ -44,8 +44,9 @@ func (s Status) String() string {
 }
 
 type SearchResult struct {
-	Title string
-	Url   string
+	Title       string
+	Destination string
+	Type        string
 }
 
 func EscapeSpecialDirChars(path string) string {

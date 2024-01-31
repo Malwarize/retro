@@ -14,22 +14,23 @@ type OnlineEngine interface {
 	Search(query string, maxResults int) ([]shared.SearchResult, error)
 	Download(url string) (io.ReadCloser, string, error)
 	Exists(url string) (bool, error)
+	GetName() string
 }
 
 type OnlineDirector struct {
 	engines map[string]OnlineEngine // key: engine name, value: engine
-	cached  *CachedFiles
+	Cached  *CachedFiles
 }
 
 func NewOnlineDirector() *OnlineDirector {
 	return &OnlineDirector{
 		engines: make(map[string]OnlineEngine),
-		cached:  NewCachedFiles("./cache"),
+		Cached:  NewCachedFiles("./cache"),
 	}
 }
 func NewDefaultDirector() (*OnlineDirector, error) {
 	director := NewOnlineDirector()
-	director.cached.Fetch()
+	director.Cached.Fetch()
 	youtubeEngine, err := newYoutubeEngine()
 	if err != nil {
 		return director, fmt.Errorf("failed to create youtube engine: %w", err)
@@ -54,8 +55,8 @@ func (od *OnlineDirector) Download(engineName, url string) (io.ReadCloser, strin
 	if !ok {
 		return nil, "", errors.New("engine not found")
 	}
-	// check if file is cached
-	name, err := od.cached.GetFileByUrl(url, engineName)
+	// check if file is Cached
+	name, err := od.Cached.GetFileByKey(url, engineName)
 	if err == nil {
 		f, err := os.Open(name)
 		if err != nil {
@@ -66,7 +67,6 @@ func (od *OnlineDirector) Download(engineName, url string) (io.ReadCloser, strin
 
 	log.Println("Downloading file from ", url)
 	reader, name, err := engine.Download(url)
-	fmt.Println("NAMEEEEEE ", name)
 	log.Println("Downloaded file from ", url)
 	if err != nil {
 		return nil, "", err
@@ -76,9 +76,10 @@ func (od *OnlineDirector) Download(engineName, url string) (io.ReadCloser, strin
 	if err != nil {
 		return nil, "", err
 	}
-	od.cached.AddFile(data, name, engineName, url)
-	path := od.cached.BaseDir + "/" + engineName + "/" + shared.EscapeSpecialDirChars(name) + "_" + getYoutubeIdFromUrl(url)
-
+	path := od.Cached.AddFile(data, name, engineName, url)
+	if path == "" {
+		return nil, "", errors.New("failed to cache file")
+	}
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, "", err

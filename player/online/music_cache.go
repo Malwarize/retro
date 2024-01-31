@@ -5,14 +5,13 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
-
-	"github.com/Malwarize/goplay/shared"
 )
 
 type CachedFile struct {
 	Name  string
-	Url   string
+	Key   string
 	Ftype string // youtube, soundcloud, spotify, ...
 }
 
@@ -27,13 +26,27 @@ func NewCachedFiles(baseDir string) *CachedFiles {
 	}
 }
 
+const separator = "_#__#_"
+
 func parseCachedFileName(filename string) (string, string) {
-	return strings.Split(filename, "_")[0], strings.Split(filename, "_")[1]
+	// split filename by __
+	split := strings.Split(filename, separator)
+	if len(split) != 2 {
+		return "", ""
+	}
+	return split[0], split[1]
 }
 
-func getYoutubeIdFromUrl(url string) string {
-	return strings.Split(url, "=")[1]
+func combineNameWithKey(name string, key string) string {
+	return name + separator + key
 }
+
+func sanitizeName(name string) string {
+	re := regexp.MustCompile(`[\/\\\:\*\?\"\<\>\|]`)
+	return re.ReplaceAllString(name, "")
+}
+
+// check if item already exists in cache
 
 func (cf *CachedFiles) Fetch() error {
 	log.Println("Fetching cached files")
@@ -77,11 +90,12 @@ func (cf *CachedFiles) Fetch() error {
 		if err != nil {
 			return err
 		}
+		clear(cf.Files)
 		for _, file := range files {
-			name, url := parseCachedFileName(file)
+			name, key := parseCachedFileName(file)
 			cf.Files = append(cf.Files, CachedFile{
 				Name:  name,
-				Url:   url,
+				Key:   key,
 				Ftype: ftype,
 			})
 		}
@@ -90,53 +104,64 @@ func (cf *CachedFiles) Fetch() error {
 	return nil
 }
 
-func (cf *CachedFiles) GetFileByUrl(url string, ftype string) (string, error) {
+func (cf *CachedFiles) GetFileByKey(key string, ftype string) (string, error) {
 	for _, file := range cf.Files {
-		log.Println("Searching for file in cache: ", file.Url, url)
-		if file.Url == getYoutubeIdFromUrl(url) && file.Ftype == ftype {
-			log.Println("File found in cache: ", url)
-			return filepath.Join(cf.BaseDir, ftype, file.Name+"_"+file.Url), nil
+		if file.Key == sanitizeName(key) && file.Ftype == ftype {
+			log.Println("File found in cache: ", key)
+			return filepath.Join(cf.BaseDir, ftype, combineNameWithKey(file.Name, file.Key)), nil
 		}
 	}
 	return "", errors.New("file not found")
 }
 
-func (cf *CachedFiles) AddFile(filedata []byte, name string, ftype string, url string) {
+func (cf *CachedFiles) GetFileByName(name string, ftype string) (string, error) {
+	for _, file := range cf.Files {
+		if file.Name == name && file.Ftype == ftype {
+			log.Println("File found in cache: ", name)
+			return filepath.Join(cf.BaseDir, ftype, combineNameWithKey(file.Name, file.Key)), nil
+		}
+	}
+	return "", errors.New("file not found")
+}
+
+func (cf *CachedFiles) Search(query string) []string {
+	var results []string
+	for _, file := range cf.Files {
+		log.Println("Searching in cache: ", file.Name, " for ", query)
+		if strings.Contains(strings.ToLower(file.Name), strings.ToLower(sanitizeName(query))) {
+			results = append(results, file.Name)
+		}
+	}
+	return results
+}
+
+func (cf *CachedFiles) AddFile(filedata []byte, name string, ftype string, key string) string {
 	cf.Fetch()
 	log.Println("Adding file to cache: ", name)
 	dirPath := filepath.Join(cf.BaseDir, ftype)
 	_, err := os.Open(dirPath)
 	if err != nil {
 		log.Printf("Error opening dir: %v", err)
-		return
+		return ""
 	}
 	if os.IsNotExist(err) {
 		err = os.Mkdir(dirPath, 0755)
 		if err != nil {
 			log.Printf("Error creating dir: %v", err)
-			return
+			return ""
 		}
-		log.Println(dirPath, " not found, creating it")
+		log.Println(dirPath, "not found, creating it")
 	}
 
-	name = shared.EscapeSpecialDirChars(name)
-	filePath := filepath.Join(dirPath, name+"_"+getYoutubeIdFromUrl(url))
+	filePath := filepath.Join(dirPath, sanitizeName(combineNameWithKey(name, key)))
+	log.Println("Writing file to: ", filePath)
 	f, err := os.Create(filePath)
 	if err != nil {
 		log.Printf("Error creating file: %v", err)
-		return
+		return ""
 	}
 	defer f.Close()
 	f.Write(filedata)
 	cf.Fetch()
-}
-
-func (cf *CachedFiles) RemoveFile(name string) error {
-	for _, file := range cf.Files {
-		if file.Name == name {
-			log.Println("Removing file from cache: ", name)
-			return os.Remove(filepath.Join(cf.BaseDir, file.Ftype, file.Name+"_"+file.Url))
-		}
-	}
-	return nil
+	return filePath
 }

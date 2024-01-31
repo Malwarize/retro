@@ -126,7 +126,7 @@ func (p *Player) youtubeToMusic(urlOrQueryOrID string) (Music, error) {
 	if err != nil {
 		return Music{}, err
 	}
-	reader, path, err := p.Director.Download("youtube", searchResults[0].Url)
+	reader, path, err := p.Director.Download("youtube", searchResults[0].Destination)
 	if err != nil {
 		return Music{}, err
 	}
@@ -390,6 +390,21 @@ func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
 		log.Println("Failed to search for", query, ":", err)
 		return []shared.SearchResult{}
 	}
+	// search in cache
+	p.Director.Cached.Fetch()
+	files := p.Director.Cached.Search(query)
+	for _, f := range files {
+		musics = append(
+			musics,
+			shared.SearchResult{
+				Title:       strings.Split(f, "/")[len(strings.Split(f, "/"))-1],
+				Type:        "cache",
+				Destination: f,
+			},
+		)
+	}
+	// etc ...
+
 	return musics
 }
 

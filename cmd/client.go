@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/Malwarize/goplay/controller"
 	"github.com/spf13/cobra"
@@ -31,11 +32,12 @@ var playCmd = &cobra.Command{
 		}
 
 		if len(args) > 0 {
-			song := args[0]
+			song := strings.Join(args, " ")
+			fmt.Println("Searching for:", song)
 			musics := controller.DetectAndPlay(song, client)
 			fmt.Println("Available music options:")
 			for i, music := range musics {
-				fmt.Printf("%d: %s\n", i, music.Title)
+				fmt.Printf("%d: %s (%s)\n", i, music.Title, music.Type)
 			}
 			fmt.Println("Enter the number of the song you want to play:")
 			if len(musics) == 0 {
@@ -48,7 +50,7 @@ var playCmd = &cobra.Command{
 				fmt.Println("invalid song number")
 				return
 			}
-			controller.PlayYoutube(musics[songNumber].Url, client)
+			controller.PlayYoutube(musics[songNumber].Destination, client)
 		} else {
 			fmt.Println("no song specified")
 			return

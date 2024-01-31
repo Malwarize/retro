@@ -22,6 +22,7 @@ type youtubeEngine struct {
 func getYoutubeIdFromUrl(url string) string {
 	return strings.Split(url, "=")[1]
 }
+
 func newYoutubeEngine() (*youtubeEngine, error) {
 	if len(apiKey) == 0 {
 		return nil, errors.New("API key not found")
@@ -52,8 +53,9 @@ func (yt *youtubeEngine) Search(query string, maxResults int) ([]shared.SearchRe
 			continue
 		}
 		videos = append(videos, shared.SearchResult{
-			Title: item.Snippet.Title,
-			Url:   "https://www.youtube.com/watch?v=" + item.Id.VideoId,
+			Title:       item.Snippet.Title,
+			Destination: "https://www.youtube.com/watch?v=" + item.Id.VideoId,
+			Type:        "youtube",
 		})
 	}
 	return videos, nil
@@ -79,4 +81,8 @@ func (yt *youtubeEngine) Exists(videoUrl string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func (yt *youtubeEngine) GetName() string {
+	return "youtube"
 }
