@@ -1,6 +1,7 @@
 package player
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -134,6 +135,9 @@ func (p *Player) youtubeToMusic(urlOrQueryOrID string) (Music, error) {
 	if err != nil {
 		return Music{}, err
 	}
+	if len(strings.Split(path, "/")) < 1 {
+		return Music{}, errors.New("Music name not found")
+	}
 	musicName := strings.Split(path, "/")[len(strings.Split(path, "/"))-1]
 	if !isMp3 {
 		err = p.Converter.ConvertToMP3(path)
@@ -265,6 +269,7 @@ func (p *Player) Stop() {
 	for _, music := range p.MusicList {
 		music.Streamer.Close()
 	}
+	p.CurrentMusicIndex = 0
 	p.MusicList = make([]Music, 0)
 	p.playerState = Stopped
 }
@@ -330,9 +335,6 @@ func (p *Player) getMusicList() []string {
 }
 
 func (p *Player) CheckWhatIsThis(unknown string) string {
-	if strings.Contains(unknown, "youtube.com") || strings.Contains(unknown, "youtu.be") {
-		return "youtube"
-	}
 	// check if its a dir
 	if fi, err := os.Stat(unknown); err == nil {
 		if err == nil {
@@ -366,6 +368,10 @@ func (p *Player) CheckWhatIsThis(unknown string) string {
 			return "file"
 		}
 	}
+	// check if its youtube url
+	if strings.Contains(unknown, "youtube.com") || strings.Contains(unknown, "youtu.be") {
+		return "youtube"
+	}
 	if len(unknown) == 11 {
 		engines := p.Director.GetEngines()
 		engine, ok := engines["youtube"]
@@ -385,19 +391,37 @@ func (p *Player) CheckWhatIsThis(unknown string) string {
 }
 
 func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
-	musics, err := p.Director.Search("youtube", query, 5)
-	if err != nil {
-		log.Println("Failed to search for", query, ":", err)
-		return []shared.SearchResult{}
+	//add time out
+	var musics []shared.SearchResult
+	var err error
+	searchDone := make(chan bool)
+	go func() {
+		musics, err = p.Director.Search("youtube", query, 5)
+		searchDone <- true
+		if err != nil {
+			log.Println("Failed to search for", query, ":", err)
+		}
+	}()
+
+	select {
+	case <-time.After(6 * time.Second):
+		log.Println("Timeout searching for", query)
+		break
+	case <-searchDone:
+		close(searchDone)
+		break
+
 	}
+
 	// search in cache
 	p.Director.Cached.Fetch()
 	files := p.Director.Cached.Search(query)
 	for _, f := range files {
+		name, _ := online.ParseCachedFileName(strings.Split(f, "/")[len(strings.Split(f, "/"))-1])
 		musics = append(
 			musics,
 			shared.SearchResult{
-				Title:       strings.Split(f, "/")[len(strings.Split(f, "/"))-1],
+				Title:       name,
 				Type:        "cache",
 				Destination: f,
 			},
@@ -417,10 +441,10 @@ func (p *Player) DetectAndPlay(unknown string) []shared.SearchResult {
 		go p.AddMusicFromYoutube(unknown)
 	case "dir":
 		log.Println("Detected dir")
-		p.AddMusicsFromDir(unknown)
+		go p.AddMusicsFromDir(unknown)
 	case "file":
 		log.Println("Detected file")
-		p.AddMusicFromFile(unknown)
+		go p.AddMusicFromFile(unknown)
 	case "unknown":
 		log.Println("Detected unknown, searching for", unknown)
 		return p.GetAvailableMusicOptions(unknown)

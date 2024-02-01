@@ -28,10 +28,11 @@ func NewCachedFiles(baseDir string) *CachedFiles {
 
 const separator = "_#__#_"
 
-func parseCachedFileName(filename string) (string, string) {
+func ParseCachedFileName(filename string) (string, string) {
 	// split filename by __
 	split := strings.Split(filename, separator)
 	if len(split) != 2 {
+		log.Println("Invalid cached file name: ", filename)
 		return "", ""
 	}
 	return split[0], split[1]
@@ -92,7 +93,7 @@ func (cf *CachedFiles) Fetch() error {
 		}
 		clear(cf.Files)
 		for _, file := range files {
-			name, key := parseCachedFileName(file)
+			name, key := ParseCachedFileName(file)
 			cf.Files = append(cf.Files, CachedFile{
 				Name:  name,
 				Key:   key,
@@ -127,9 +128,9 @@ func (cf *CachedFiles) GetFileByName(name string, ftype string) (string, error) 
 func (cf *CachedFiles) Search(query string) []string {
 	var results []string
 	for _, file := range cf.Files {
-		log.Println("Searching in cache: ", file.Name, " for ", query)
 		if strings.Contains(strings.ToLower(file.Name), strings.ToLower(sanitizeName(query))) {
-			results = append(results, file.Name)
+			log.Println("File found in cache: ", file.Name)
+			results = append(results, filepath.Join(cf.BaseDir, file.Ftype, combineNameWithKey(file.Name, file.Key)))
 		}
 	}
 	return results

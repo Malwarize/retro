@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Malwarize/goplay/cmd/views"
 	"github.com/Malwarize/goplay/controller"
 	"github.com/spf13/cobra"
 )
@@ -33,24 +34,7 @@ var playCmd = &cobra.Command{
 
 		if len(args) > 0 {
 			song := strings.Join(args, " ")
-			fmt.Println("Searching for:", song)
-			musics := controller.DetectAndPlay(song, client)
-			fmt.Println("Available music options:")
-			for i, music := range musics {
-				fmt.Printf("%d: %s (%s)\n", i, music.Title, music.Type)
-			}
-			fmt.Println("Enter the number of the song you want to play:")
-			if len(musics) == 0 {
-				fmt.Println("no song found")
-				return
-			}
-			songNumber := 0
-			fmt.Scanln(&songNumber)
-			if songNumber < 0 || songNumber >= len(musics) {
-				fmt.Println("invalid song number")
-				return
-			}
-			controller.PlayYoutube(musics[songNumber].Destination, client)
+			views.SearchThenSelect(song, client)
 		} else {
 			fmt.Println("no song specified")
 			return
@@ -106,9 +90,7 @@ var prevCmd = &cobra.Command{
 		controller.Prev(client)
 	},
 }
-
-var seekCmd = &cobra.Command{
-	Use:   "seek",
+var seekCmd = &cobra.Command{Use: "seek",
 	Short: "seek to a position in the current song",
 	Long:  `seek to a position in the current song`,
 	Run: func(cmd *cobra.Command, args []string) {

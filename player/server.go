@@ -132,9 +132,9 @@ func (p *Player) RPCGetPlayerStatus(_ int, reply *shared.Status) error {
 }
 
 func (p *Player) RPCDetectAndPlay(query string, reply *[]shared.SearchResult) error {
-	log.Println("RPCGetAvailableMusicOptions called")
+	log.Println("RPCDetectAndPlay called with query :", query)
 	*reply = p.DetectAndPlay(query)
-	log.Println("RPCGetAvailableMusicOptions done with reply :", reply)
+	log.Println("RPCDetectAndPlay done with reply :", reply)
 	return nil
 }
 
