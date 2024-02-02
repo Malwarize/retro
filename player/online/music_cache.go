@@ -7,12 +7,14 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/Malwarize/goplay/shared"
 )
 
 type CachedFile struct {
 	Name  string
 	Key   string
-	Ftype string // youtube, soundcloud, spotify, ...
+	Ftype string // youtube, soundcloud, spotify, ...online
 }
 
 type CachedFiles struct {
@@ -24,22 +26,6 @@ func NewCachedFiles(baseDir string) *CachedFiles {
 	return &CachedFiles{
 		BaseDir: baseDir,
 	}
-}
-
-const separator = "_#__#_"
-
-func ParseCachedFileName(filename string) (string, string) {
-	// split filename by __
-	split := strings.Split(filename, separator)
-	if len(split) != 2 {
-		log.Println("Invalid cached file name: ", filename)
-		return "", ""
-	}
-	return split[0], split[1]
-}
-
-func combineNameWithKey(name string, key string) string {
-	return name + separator + key
 }
 
 func sanitizeName(name string) string {
@@ -93,7 +79,7 @@ func (cf *CachedFiles) Fetch() error {
 		}
 		clear(cf.Files)
 		for _, file := range files {
-			name, key := ParseCachedFileName(file)
+			name, key := shared.ParseCachedFileName(file)
 			cf.Files = append(cf.Files, CachedFile{
 				Name:  name,
 				Key:   key,
@@ -109,7 +95,7 @@ func (cf *CachedFiles) GetFileByKey(key string, ftype string) (string, error) {
 	for _, file := range cf.Files {
 		if file.Key == sanitizeName(key) && file.Ftype == ftype {
 			log.Println("File found in cache: ", key)
-			return filepath.Join(cf.BaseDir, ftype, combineNameWithKey(file.Name, file.Key)), nil
+			return filepath.Join(cf.BaseDir, ftype, shared.CombineNameWithKey(file.Name, file.Key)), nil
 		}
 	}
 	return "", errors.New("file not found")
@@ -119,7 +105,7 @@ func (cf *CachedFiles) GetFileByName(name string, ftype string) (string, error) 
 	for _, file := range cf.Files {
 		if file.Name == name && file.Ftype == ftype {
 			log.Println("File found in cache: ", name)
-			return filepath.Join(cf.BaseDir, ftype, combineNameWithKey(file.Name, file.Key)), nil
+			return filepath.Join(cf.BaseDir, ftype, shared.CombineNameWithKey(file.Name, file.Key)), nil
 		}
 	}
 	return "", errors.New("file not found")
@@ -130,7 +116,7 @@ func (cf *CachedFiles) Search(query string) []string {
 	for _, file := range cf.Files {
 		if strings.Contains(strings.ToLower(file.Name), strings.ToLower(sanitizeName(query))) {
 			log.Println("File found in cache: ", file.Name)
-			results = append(results, filepath.Join(cf.BaseDir, file.Ftype, combineNameWithKey(file.Name, file.Key)))
+			results = append(results, filepath.Join(cf.BaseDir, file.Ftype, shared.CombineNameWithKey(file.Name, file.Key)))
 		}
 	}
 	return results
@@ -154,7 +140,7 @@ func (cf *CachedFiles) AddFile(filedata []byte, name string, ftype string, key s
 		log.Println(dirPath, "not found, creating it")
 	}
 
-	filePath := filepath.Join(dirPath, sanitizeName(combineNameWithKey(name, key)))
+	filePath := filepath.Join(dirPath, sanitizeName(shared.CombineNameWithKey(name, key)))
 	log.Println("Writing file to: ", filePath)
 	f, err := os.Create(filePath)
 	if err != nil {

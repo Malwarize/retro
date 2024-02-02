@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/Malwarize/goplay/shared"
 	"github.com/kkdai/youtube/v2"
@@ -41,7 +42,29 @@ func newYoutubeEngine() (*youtubeEngine, error) {
 	}, nil
 }
 
+var DEBUG = false
+
 func (yt *youtubeEngine) Search(query string, maxResults int) ([]shared.SearchResult, error) {
+	if DEBUG {
+		time.Sleep(1 * time.Second)
+		return []shared.SearchResult{
+			{
+				Title:       "Test",
+				Destination: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+				Type:        "youtube",
+			},
+			{
+				Title:       "Test2",
+				Destination: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+				Type:        "youtube",
+			},
+			{
+				Title:       "Test3",
+				Destination: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+				Type:        "youtube",
+			},
+		}, nil
+	}
 	call := yt.Service.Search.List([]string{"id", "snippet"}).Q(query).MaxResults(int64(maxResults))
 	response, err := call.Do()
 	if err != nil {
@@ -63,6 +86,9 @@ func (yt *youtubeEngine) Search(query string, maxResults int) ([]shared.SearchRe
 
 // returns stream, title, error
 func (yt *youtubeEngine) Download(videoUrl string) (io.ReadCloser, string, error) {
+	if DEBUG {
+		return nil, "Test", nil
+	}
 	video, err := yt.Client.GetVideo(videoUrl)
 	if err != nil {
 		return nil, "", err
@@ -76,6 +102,9 @@ func (yt *youtubeEngine) Download(videoUrl string) (io.ReadCloser, string, error
 }
 
 func (yt *youtubeEngine) Exists(videoUrl string) (bool, error) {
+	if DEBUG {
+		return true, nil
+	}
 	_, err := yt.Client.GetVideo(videoUrl)
 	if err != nil {
 		return false, err

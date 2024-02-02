@@ -417,7 +417,7 @@ func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
 	p.Director.Cached.Fetch()
 	files := p.Director.Cached.Search(query)
 	for _, f := range files {
-		name, _ := online.ParseCachedFileName(strings.Split(f, "/")[len(strings.Split(f, "/"))-1])
+		name, _ := shared.ParseCachedFileName(strings.Split(f, "/")[len(strings.Split(f, "/"))-1])
 		musics = append(
 			musics,
 			shared.SearchResult{
@@ -459,6 +459,7 @@ func (p *Player) GetPlayerStatus() shared.Status {
 		CurrentMusicLength:   p.GetCurrentMusicLength(),
 		PlayerState:          p.playerState,
 		MusicList:            p.getMusicList(),
+		Tasks:                p.Director.Tasks,
 	}
 }
 

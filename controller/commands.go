@@ -104,14 +104,14 @@ func Seek(d int, client *rpc.Client) {
 	}
 }
 
-func GetPlayerStatus(client *rpc.Client) {
+func GetPlayerStatus(client *rpc.Client) shared.Status {
 	var reply shared.Status
 	err := client.Call("Player.RPCGetPlayerStatus", 0, &reply)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	fmt.Println("Player status:", reply)
+	return reply
 }
 
 func PlayYoutube(url string, client *rpc.Client) {

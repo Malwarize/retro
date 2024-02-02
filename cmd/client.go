@@ -114,6 +114,6 @@ var statusCmd = &cobra.Command{
 	Long:  `get the current status of the player`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := controller.GetClient()
-		controller.GetPlayerStatus(client)
+		views.DisplayStatus(client)
 	},
 }

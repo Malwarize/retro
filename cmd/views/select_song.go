@@ -2,14 +2,17 @@ package views
 
 import (
 	"fmt"
+	"math/rand"
 	"net/rpc"
 	"sync"
 	"time"
 
 	"github.com/Malwarize/goplay/controller"
+	"github.com/Malwarize/goplay/shared"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type searchResultItem struct {
@@ -19,14 +22,8 @@ type searchResultItem struct {
 }
 
 func (i searchResultItem) Title() string       { return i.title }
-func (i searchResultItem) Description() string { return i.desc }
-func (i searchResultItem) FilterValue() string { return i.title }
-
-const (
-	notStarted = iota
-	running
-	finished
-)
+func (i searchResultItem) Description() string { return emojiesType[i.ftype] + " " + i.ftype }
+func (i searchResultItem) FilterValue() string { return "" }
 
 type model struct {
 	client *rpc.Client
@@ -35,6 +32,7 @@ type model struct {
 	selectList  list.Model
 	spin        spinner.Model
 	searchState int
+	quit        bool
 	mu          *sync.Mutex
 }
 
@@ -47,7 +45,7 @@ func (m model) Init() tea.Cmd {
 
 func NewModel(client *rpc.Client, query string) *model {
 	spin := spinner.New()
-	spin.Spinner = spinner.Dot
+	spin.Spinner = spinner.Points
 	spin.Style = spinnerStyle
 	return &model{
 		client: client,
@@ -57,8 +55,21 @@ func NewModel(client *rpc.Client, query string) *model {
 	}
 }
 
+func NewList(items []list.Item) list.Model {
+	listModel := list.New(items, list.NewDefaultDelegate(), 50, 14)
+	listModel.Title = "Select a song"
+	listModel.SetFilteringEnabled(false)
+	listModel.SetShowHelp(false)
+	listModel.Styles.Title = lipgloss.NewStyle()
+	return listModel
+}
+
 func (m model) View() string {
-	if m.searchState == finished {
+	if m.quit {
+		randEmoji := playingEmojies[rand.Intn(len(playingEmojies))]
+		return quitTextStyle.Render(randEmoji + " Playing song " + m.query + " this may take a while, please wait")
+	}
+	if m.searchState == shared.Finished {
 		return docStyle.Render(m.selectList.View())
 	}
 
@@ -80,12 +91,9 @@ func selectUpdate(msg tea.Msg, m model) (model, tea.Cmd) {
 		if msg.String() == "enter" {
 			i := m.selectList.Index()
 			controller.DetectAndPlay(m.selectList.Items()[i].(searchResultItem).desc, m.client)
+			m.quit = true
 			return m, tea.Quit
 		}
-	case tea.WindowSizeMsg:
-		fmt.Println("window size msg")
-		h, v := docStyle.GetFrameSize()
-		m.selectList.SetSize(msg.Width-h, msg.Height-v)
 	}
 
 	var cmd tea.Cmd
@@ -101,14 +109,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case searchDone:
-		m.selectList = list.New(msg.(searchDone).results, list.NewDefaultDelegate(), 50, 14)
-		m.selectList.Title = "Select a song"
-		m.searchState = finished
-		m.selectList.SetFilteringEnabled(false)
-		m.selectList.SetShowHelp(false)
+		m.selectList = NewList(t.results)
+		m.searchState = shared.Finished
 		return selectUpdate(msg, m)
 	}
-	if m.searchState == finished {
+	if m.searchState == shared.Finished {
 		return selectUpdate(msg, m)
 	}
 	return spinnerUpdate(msg, m)

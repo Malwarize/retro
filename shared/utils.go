@@ -2,7 +2,9 @@ package shared
 
 import (
 	"fmt"
+	"log"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -12,12 +14,18 @@ const (
 	Stopped
 )
 
+type Task struct {
+	Target string // download "url", search "query"
+	Type   string // download search
+}
+
 type Status struct {
 	CurrentMusicIndex    int
 	CurrentMusicPosition time.Duration
 	CurrentMusicLength   time.Duration
 	PlayerState          int
 	MusicList            []string
+	Tasks                []Task
 }
 
 func (s Status) String() string {
@@ -40,6 +48,11 @@ func (s Status) String() string {
 		str += "\t" + music + "\n"
 	}
 	str += "]"
+
+	for _, task := range s.Tasks {
+		str += "Task: " + task.Type + " " + task.Target + "\n"
+	}
+
 	return str
 }
 
@@ -56,3 +69,25 @@ func EscapeSpecialDirChars(path string) string {
 	path = path[:40]
 	return path
 }
+
+var separator = "_#__#_"
+
+func ParseCachedFileName(filename string) (string, string) {
+	// split filename by __
+	split := strings.Split(filename, separator)
+	if len(split) != 2 {
+		log.Println("Invalid cached file name: ", filename)
+		return "", ""
+	}
+	return split[0], split[1]
+}
+
+func CombineNameWithKey(name string, key string) string {
+	return name + separator + key
+}
+
+const (
+	NotStarted = iota
+	Running
+	Finished
+)
