@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Malwarize/goplay/cmd/views"
-	"github.com/Malwarize/goplay/controller"
+	"github.com/Malwarize/goplay/client/cmd/views"
+	"github.com/Malwarize/goplay/client/controller"
 	"github.com/spf13/cobra"
 )
 

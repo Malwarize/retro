@@ -6,11 +6,12 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/Malwarize/goplay/player/online"
+	"github.com/Malwarize/goplay/server/player/online"
 	"github.com/Malwarize/goplay/shared"
 	"github.com/gopxl/beep"
 	"github.com/gopxl/beep/mp3"
@@ -352,20 +353,25 @@ func (p *Player) CheckWhatIsThis(unknown string) string {
 
 				for _, entry := range entries {
 					if !entry.IsDir() {
-						isMp3, err := p.Converter.IsMp3(unknown + "/" + entry.Name())
-						if err != nil {
-							return "unknown"
-						}
+						isMp3, _ := p.Converter.IsMp3(unknown + "/" + entry.Name())
 						if isMp3 {
 							return "dir"
-						} else {
-							return "unknown"
 						}
 					}
 				}
 				return "unknown"
+			} else {
+				isMp3, _ := p.Converter.IsMp3(unknown)
+				if isMp3 {
+					return "file"
+				}
 			}
-			return "file"
+		}
+	}
+	// check if its queue index
+	if index, err := strconv.Atoi(unknown); err == nil {
+		if ok := index < len(p.MusicList); ok {
+			return "queue"
 		}
 	}
 	// check if its youtube url
@@ -404,7 +410,7 @@ func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
 	}()
 
 	select {
-	case <-time.After(6 * time.Second):
+	case <-time.After(60 * time.Second):
 		log.Println("Timeout searching for", query)
 		break
 	case <-searchDone:
@@ -445,6 +451,10 @@ func (p *Player) DetectAndPlay(unknown string) []shared.SearchResult {
 	case "file":
 		log.Println("Detected file")
 		go p.AddMusicFromFile(unknown)
+	case "queue":
+		log.Println("Detected queue")
+		p.CurrentMusicIndex, _ = strconv.Atoi(unknown)
+		p.Play()
 	case "unknown":
 		log.Println("Detected unknown, searching for", unknown)
 		return p.GetAvailableMusicOptions(unknown)

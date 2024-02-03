@@ -28,7 +28,6 @@ func init() {
 	playCmd.Flags().StringP("dir", "d", "", "add all songs in a directory to the queue")
 	playCmd.Flags().StringP("file", "f", "", "play a single song")
 	playCmd.Flags().StringP("youtube", "y", "", "play music from youtube")
-	serverCmd.Flags().StringP("port", "p", "1234", "port to listen on")
 
 	rootCmd.AddCommand(playCmd)
 	rootCmd.AddCommand(pauseCmd)
@@ -36,7 +35,6 @@ func init() {
 	rootCmd.AddCommand(stopCmd)
 	rootCmd.AddCommand(nextCmd)
 	rootCmd.AddCommand(prevCmd)
-	rootCmd.AddCommand(serverCmd)
 	rootCmd.AddCommand(seekCmd)
 	rootCmd.AddCommand(statusCmd)
 

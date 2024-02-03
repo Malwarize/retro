@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"math/rand"
 	"net/rpc"
+	"strconv"
 	"strings"
 	"time"
 
-	"github.com/Malwarize/goplay/controller"
+	"github.com/Malwarize/goplay/client/controller"
 	"github.com/Malwarize/goplay/shared"
 	"github.com/charmbracelet/bubbles/progress"
 )
@@ -24,16 +25,16 @@ func DisplayStatus(client *rpc.Client) {
 		return
 	}
 	queue := status.MusicList
-	currentMusicName, _ := shared.ParseCachedFileName(queue[status.CurrentMusicIndex])
+	currentMusicName := queue[status.CurrentMusicIndex]
 
 	//split by / if exists
-
-	pathSplits := strings.Split(currentMusicName, "/")
-	if len(pathSplits) > 1 {
-		currentMusicName = pathSplits[len(pathSplits)-1]
-	} else {
-		currentMusicName = pathSplits[0]
+	if strings.Contains(currentMusicName, "/") {
+		currentMusicName = strings.Split(currentMusicName, "/")[len(strings.Split(currentMusicName, "/"))-1]
+		if strings.Contains(currentMusicName, shared.Separator) {
+			currentMusicName = strings.Split(currentMusicName, shared.Separator)[0]
+		}
 	}
+
 	currentPosition := status.CurrentMusicPosition
 	currentPositionStr := reformatDuration(currentPosition)
 
@@ -53,5 +54,12 @@ func DisplayStatus(client *rpc.Client) {
 	case shared.Paused:
 		fmt.Println(pausedStyle.Render(emojiesStatus[shared.Paused], " Paused"))
 	}
-
+	// display queue
+	for i, music := range queue {
+		if i == status.CurrentMusicIndex {
+			fmt.Println(selectMusicStyle.Render("->", strconv.Itoa(i), ":", music))
+		} else {
+			fmt.Println("  ", i, ":", music)
+		}
+	}
 }

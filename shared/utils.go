@@ -70,11 +70,9 @@ func EscapeSpecialDirChars(path string) string {
 	return path
 }
 
-var separator = "_#__#_"
-
 func ParseCachedFileName(filename string) (string, string) {
 	// split filename by __
-	split := strings.Split(filename, separator)
+	split := strings.Split(filename, Separator)
 	if len(split) != 2 {
 		log.Println("Invalid cached file name: ", filename)
 		return "", ""
@@ -83,11 +81,5 @@ func ParseCachedFileName(filename string) (string, string) {
 }
 
 func CombineNameWithKey(name string, key string) string {
-	return name + separator + key
+	return name + Separator + key
 }
-
-const (
-	NotStarted = iota
-	Running
-	Finished
-)

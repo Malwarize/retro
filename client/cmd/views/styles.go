@@ -36,4 +36,5 @@ var stoppedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000")).Mar
 var pausedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#0000FF")).Margin(1, 0, 2, 3)
 
 var positionStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3)
+var selectMusicStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(0, 0, 0, 1)
 var durationStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3)

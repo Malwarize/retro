@@ -10,3 +10,4 @@ run:
 
 clean:
 	rm -rf build/
+

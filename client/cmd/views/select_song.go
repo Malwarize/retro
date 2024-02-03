@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Malwarize/goplay/controller"
+	"github.com/Malwarize/goplay/client/controller"
 	"github.com/Malwarize/goplay/shared"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/spinner"
@@ -109,6 +109,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case searchDone:
+		if len(t.results) == 0 {
+			return m, tea.Quit
+		}
 		m.selectList = NewList(t.results)
 		m.searchState = shared.Finished
 		return selectUpdate(msg, m)

@@ -29,6 +29,7 @@ func NewOnlineDirector() *OnlineDirector {
 		Cached:  NewCachedFiles("./cache"),
 	}
 }
+
 func NewDefaultDirector() (*OnlineDirector, error) {
 	director := NewOnlineDirector()
 	director.Cached.Fetch()
@@ -39,6 +40,7 @@ func NewDefaultDirector() (*OnlineDirector, error) {
 	director.Register("youtube", youtubeEngine)
 	return director, nil
 }
+
 func (od *OnlineDirector) Register(name string, engine OnlineEngine) {
 	od.engines[name] = engine
 }
