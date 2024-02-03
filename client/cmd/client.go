@@ -22,16 +22,6 @@ var playCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
-		if file, err := cmd.Flags().GetString("file"); err == nil && file != "" {
-			controller.PlayFile(file, client)
-			os.Exit(0)
-		}
-
-		if youtube, err := cmd.Flags().GetString("youtube"); err == nil && youtube != "" {
-			controller.PlayYoutube(youtube, client)
-			os.Exit(0)
-		}
-
 		if len(args) > 0 {
 			song := strings.Join(args, " ")
 			views.SearchThenSelect(song, client)

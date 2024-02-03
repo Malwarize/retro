@@ -96,9 +96,35 @@ import (
 // }
 
 // // returns stream, title, error
-func (yt *youtubeEngine) Download(videoUrl string) (io.ReadCloser, string, error) {
+// func (yt *youtubeEngine) Download(videoUrl string) (io.ReadCloser, string, error) {
+// 	tmpFile, err := os.CreateTemp("", "goplay-youtube-*.mp3")
+// 	if err != nil {
+// 		return nil, "", err
+// 	}
+// 	defer tmpFile.Close()
 
-}
+// 	// --audio-format mp3 --get-title -o tmp.mp3
+// 	cmd := exec.Command(yt.ytdlpPath, "-x", "--audio-format", "mp3", "--get-title", "-o", tmpFile.Name(), videoUrl)
+// 	out, err := cmd.Output()
+// 	if err != nil {
+// 		fmt.Println("Error:", err)
+// 		return nil, "", err
+// 	}
+
+// 	title := strings.TrimSpace(string(out))
+// 	tmpReader, err := os.Open(tmpFile.Name())
+// 	if err != nil {
+// 		return nil, "", err
+// 	}
+// 	var buffer []byte
+// 	buffer, err = io.ReadAll(tmpReader)
+// 	if err != nil {
+// 		return nil, "", err
+// 	}
+// 	reader := io.NopCloser(strings.NewReader(string(buffer)))
+// 	os.Remove(tmpFile.Name())
+// 	return reader, title, nil
+// }
 
 func (yt *youtubeEngine) Exists(videoUrl string) (bool, error) {
 	_, err := yt.Client.GetVideo(videoUrl)
@@ -118,7 +144,6 @@ type youtubeEngine struct {
 }
 
 func newYoutubeEngine() (*youtubeEngine, error) {
-	// check if yt-dlp exits\
 	path := "yt-dlp"
 	absPath, err := exec.LookPath(path)
 	if err != nil {
@@ -131,9 +156,9 @@ func newYoutubeEngine() (*youtubeEngine, error) {
 	}, nil
 }
 
+//why I used ytdlp instead of youtube lib : because ytdlp doesn't need API key to search
 func (yt *youtubeEngine) Search(query string, maxResults int) ([]shared.SearchResult, error) {
 	cmd := exec.Command(yt.ytdlpPath, "--get-id", "--get-title", "--skip-download", "--flat-playlist", "ytsearch"+strconv.Itoa(maxResults)+":"+query)
-	// --get-id --get-title --skip-download --simulate ytsearch<maxResults>:<query>
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
@@ -148,4 +173,19 @@ func (yt *youtubeEngine) Search(query string, maxResults int) ([]shared.SearchRe
 		})
 	}
 	return results, nil
+}
+
+// returns stream, title, error
+// why don't use ytdlp : because this lib much faster
+func (yt *youtubeEngine) Download(videoUrl string) (io.ReadCloser, string, error) {
+	video, err := yt.Client.GetVideo(videoUrl)
+	if err != nil {
+		return nil, "", err
+	}
+	formats := video.Formats.Itag(140)
+	stream, _, err := yt.Client.GetStream(video, &formats[0])
+	if err != nil {
+		return nil, "", err
+	}
+	return stream, video.Title, nil
 }

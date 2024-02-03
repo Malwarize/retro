@@ -18,16 +18,6 @@ func (p *Player) RPCPlay(_ int, reply *int) error {
 	return nil
 }
 
-func (p *Player) RPCPlayYoutube(youtube string, reply *int) error {
-	go func() {
-		log.Println("RPCPlayYoutube called")
-		p.AddMusicFromYoutube(youtube)
-		*reply = 1
-		log.Println("RPCPlayYoutube done")
-	}()
-	return nil
-}
-
 func (p *Player) RPCNext(_ int, reply *int) error {
 	go func() {
 		log.Println("RPCNext called")

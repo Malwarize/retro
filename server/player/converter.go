@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/Malwarize/goplay/shared"
 )
 
 type Converter struct {
@@ -12,21 +14,21 @@ type Converter struct {
 	ffprobePath string
 }
 
-func NewConverter(ffmpegPath, ffprobePath string) (*Converter, error) {
+func NewConverter() (*Converter, error) {
 	// check if ffmpegPath and ffprobePath exist and are executable
-	_, err := exec.LookPath(ffmpegPath)
+	ppegPath, err := exec.LookPath(shared.Pathffmpeg)
 	if err != nil {
 		return nil, fmt.Errorf("ffmpeg not found: %v", err)
 	}
 
-	_, err = exec.LookPath(ffprobePath)
+	probePath, err := exec.LookPath(shared.Pathffprobe)
 	if err != nil {
 		return nil, fmt.Errorf("ffprobe not found: %v", err)
 	}
 
 	return &Converter{
-		ffmpegPath:  ffmpegPath,
-		ffprobePath: ffprobePath,
+		ffmpegPath:  ppegPath,
+		ffprobePath: probePath,
 	}, nil
 }
 

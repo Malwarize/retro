@@ -8,15 +8,9 @@ import (
 	"time"
 )
 
-const (
-	Playing = iota
-	Paused
-	Stopped
-)
-
 type Task struct {
-	Target string // download "url", search "query"
-	Type   string // download search
+	Type  int // download, search
+	Error string
 }
 
 type Status struct {
@@ -25,7 +19,7 @@ type Status struct {
 	CurrentMusicLength   time.Duration
 	PlayerState          int
 	MusicList            []string
-	Tasks                []Task
+	Tasks                map[string]Task // key: target, value: task
 }
 
 func (s Status) String() string {
@@ -49,8 +43,8 @@ func (s Status) String() string {
 	}
 	str += "]"
 
-	for _, task := range s.Tasks {
-		str += "Task: " + task.Type + " " + task.Target + "\n"
+	for target, task := range s.Tasks {
+		str += fmt.Sprintf("Target: %s, Type: %d, Error: %v\n", target, task.Type, task.Error)
 	}
 
 	return str

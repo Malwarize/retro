@@ -44,6 +44,7 @@ type Player struct {
 	initialised       bool
 	Converter         *Converter
 	Director          *online.OnlineDirector
+	Tasks             map[string]shared.Task
 	mu                sync.Mutex
 }
 
@@ -56,7 +57,7 @@ func NewMusic(name string, streamer beep.StreamSeekCloser, format beep.Format) M
 }
 
 func NewPlayer() *Player {
-	converter, err := NewConverter("ffmpeg", "ffprobe")
+	converter, err := NewConverter()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -72,6 +73,32 @@ func NewPlayer() *Player {
 		initialised:       false,
 		Converter:         converter,
 		Director:          director,
+		Tasks:             make(map[string]shared.Task),
+	}
+}
+
+func (p *Player) addTask(target string, typeTask int) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.Tasks[target] = shared.Task{
+		Type:  typeTask,
+		Error: "",
+	}
+}
+
+func (p *Player) removeTask(target string) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	delete(p.Tasks, target)
+}
+
+func (p *Player) errorifyTask(target string, err error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	task, ok := p.Tasks[target]
+	if ok {
+		task.Error = err.Error()
+		p.Tasks[target] = task
 	}
 }
 
@@ -123,17 +150,15 @@ func (p *Player) AddMusicFromFile(path string) {
 	}
 }
 
-func (p *Player) youtubeToMusic(urlOrQueryOrID string) (Music, error) {
-	searchResults, err := p.Director.Search("youtube", urlOrQueryOrID, 1)
+func (p *Player) youtubeToMusic(urlOrId string) (Music, error) {
+	reader, path, err := p.Director.Download("youtube", urlOrId)
 	if err != nil {
-		return Music{}, err
-	}
-	reader, path, err := p.Director.Download("youtube", searchResults[0].Destination)
-	if err != nil {
+		p.errorifyTask(urlOrId, err)
 		return Music{}, err
 	}
 	isMp3, err := p.Converter.IsMp3(path)
 	if err != nil {
+		p.errorifyTask(urlOrId, err)
 		return Music{}, err
 	}
 	if len(strings.Split(path, "/")) < 1 {
@@ -143,20 +168,24 @@ func (p *Player) youtubeToMusic(urlOrQueryOrID string) (Music, error) {
 	if !isMp3 {
 		err = p.Converter.ConvertToMP3(path)
 		if err != nil {
+			p.errorifyTask(urlOrId, err)
 			return Music{}, err
 		}
 		reader, err = os.Open(path)
 		if err != nil {
+			p.errorifyTask(urlOrId, err)
 			return Music{}, err
 		}
 		streamer, format, err := mp3.Decode(reader)
 		if err != nil {
+			p.errorifyTask(urlOrId, err)
 			return Music{}, err
 		}
 		return NewMusic(musicName, streamer, format), nil
 	}
 	streamer, format, err := mp3.Decode(reader)
 	if err != nil {
+		p.errorifyTask(urlOrId, err)
 		return Music{}, err
 	}
 	return NewMusic(musicName, streamer, format), nil
@@ -260,6 +289,7 @@ func (p *Player) Prev() {
 }
 
 func (p *Player) Stop() {
+	clear(p.Tasks)
 	if p.playerState == Stopped {
 		return
 	}
@@ -336,7 +366,7 @@ func (p *Player) getMusicList() []string {
 }
 
 func (p *Player) CheckWhatIsThis(unknown string) string {
-	// check if its a dir
+	// check if its a dir or file
 	if fi, err := os.Stat(unknown); err == nil {
 		if err == nil {
 			if fi.IsDir() {
@@ -398,6 +428,8 @@ func (p *Player) CheckWhatIsThis(unknown string) string {
 
 func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
 	//add time out
+	p.addTask(query, shared.Search)
+	defer p.removeTask(query)
 	var musics []shared.SearchResult
 	var err error
 	searchDone := make(chan bool)
@@ -405,18 +437,19 @@ func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
 		musics, err = p.Director.Search("youtube", query, 5)
 		searchDone <- true
 		if err != nil {
+			p.errorifyTask(query, err)
 			log.Println("Failed to search for", query, ":", err)
 		}
 	}()
 
 	select {
 	case <-time.After(60 * time.Second):
+		p.errorifyTask(query, errors.New("Timeout searching for "+query))
 		log.Println("Timeout searching for", query)
 		break
 	case <-searchDone:
 		close(searchDone)
 		break
-
 	}
 
 	// search in cache
@@ -434,7 +467,6 @@ func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
 		)
 	}
 	// etc ...
-
 	return musics
 }
 
@@ -469,7 +501,7 @@ func (p *Player) GetPlayerStatus() shared.Status {
 		CurrentMusicLength:   p.GetCurrentMusicLength(),
 		PlayerState:          p.playerState,
 		MusicList:            p.getMusicList(),
-		Tasks:                p.Director.Tasks,
+		Tasks:                p.Tasks,
 	}
 }
 

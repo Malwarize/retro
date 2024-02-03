@@ -25,10 +25,6 @@ func Execute() {
 }
 
 func init() {
-	playCmd.Flags().StringP("dir", "d", "", "add all songs in a directory to the queue")
-	playCmd.Flags().StringP("file", "f", "", "play a single song")
-	playCmd.Flags().StringP("youtube", "y", "", "play music from youtube")
-
 	rootCmd.AddCommand(playCmd)
 	rootCmd.AddCommand(pauseCmd)
 	rootCmd.AddCommand(resumeCmd)

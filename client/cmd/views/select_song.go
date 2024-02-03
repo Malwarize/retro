@@ -67,7 +67,7 @@ func NewList(items []list.Item) list.Model {
 func (m model) View() string {
 	if m.quit {
 		randEmoji := playingEmojies[rand.Intn(len(playingEmojies))]
-		return quitTextStyle.Render(randEmoji + " Playing song " + m.query + " this may take a while, please wait")
+		return quitTextStyle.Render(randEmoji + " Playing song " + m.selectList.Items()[m.selectList.Index()].(searchResultItem).title + ", this may take a while if download needed")
 	}
 	if m.searchState == shared.Finished {
 		return docStyle.Render(m.selectList.View())

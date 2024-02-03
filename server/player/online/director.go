@@ -20,7 +20,6 @@ type OnlineEngine interface {
 type OnlineDirector struct {
 	engines map[string]OnlineEngine // key: engine name, value: engine
 	Cached  *CachedFiles
-	Tasks   []shared.Task
 }
 
 func NewOnlineDirector() *OnlineDirector {
@@ -44,6 +43,8 @@ func NewDefaultDirector() (*OnlineDirector, error) {
 func (od *OnlineDirector) Register(name string, engine OnlineEngine) {
 	od.engines[name] = engine
 }
+
+var times = 0
 
 func (od *OnlineDirector) Search(engineName, query string, maxResults int) ([]shared.SearchResult, error) {
 	engine, ok := od.engines[engineName]
@@ -69,14 +70,7 @@ func (od *OnlineDirector) Download(engineName, url string) (io.ReadCloser, strin
 	}
 
 	log.Println("Downloading file from ", url)
-	task := shared.Task{
-		Target: url,
-		Type:   "download",
-	}
-	od.Tasks = append(od.Tasks, task)
 	reader, name, err := engine.Download(url)
-	od.Tasks = od.Tasks[:len(od.Tasks)-1]
-
 	log.Println("Downloaded file from ", url)
 	if err != nil {
 		return nil, "", err
