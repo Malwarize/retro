@@ -77,3 +77,13 @@ func ParseCachedFileName(filename string) (string, string) {
 func CombineNameWithKey(name string, key string) string {
 	return name + Separator + key
 }
+
+type AddToPlayListArgs struct {
+	PlayListName string
+	Query        string
+}
+
+type RemoveSongFromPlayListArgs struct {
+	PlayListName string
+	Index        int
+}

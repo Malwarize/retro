@@ -33,5 +33,8 @@ func init() {
 	rootCmd.AddCommand(prevCmd)
 	rootCmd.AddCommand(seekCmd)
 	rootCmd.AddCommand(statusCmd)
-
+	rootCmd.AddCommand(playlistCmd)
+	playlistCmd.AddCommand(playlistCreateCmd)
+	playlistCmd.AddCommand(playlistRemoveCmd)
+	playlistCmd.AddCommand(playlistAddCmd)
 }

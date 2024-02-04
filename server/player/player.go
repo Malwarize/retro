@@ -47,6 +47,7 @@ func NewPlayer() *Player {
 	}
 	playlistManager := NewPlayListManager()
 	err = playlistManager.Fetch()
+	log.Println(playlistManager)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,7 +101,6 @@ func (p *Player) Next() {
 	}
 	p.GetCurrentMusic().Streamer.Seek(0)
 	p.QueueNext()
-	log.Println("Next music index", p.Queue.GetCurrentIndex())
 	p.Play()
 }
 
@@ -143,6 +143,29 @@ func (p *Player) Resume() {
 	}
 	p.playerState = Playing
 	speaker.Unlock()
+}
+
+// player playlist command
+func (p *Player) CreatePlayList(name string) {
+	p.PlayListManager.Create(name)
+}
+
+//delete playlist
+func (p *Player) RemovePlayList(name string) {
+	p.PlayListManager.Remove(name)
+}
+
+// list play list names
+func (p *Player) PlayListsNames() []string {
+	return p.PlayListManager.PlayListsNames()
+}
+func (p *Player) RemoveSongFromPlayList(name string, index int) {
+	p.PlayListManager.RemoveMusic(name, index)
+}
+
+// list play list songs
+func (p *Player) PlayListSongs(name string) []string {
+	return p.PlayListManager.PlayListSongs(name)
 }
 
 func (p *Player) Seek(d time.Duration) {
@@ -265,6 +288,32 @@ func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
 	}
 	// etc ...
 	return musics
+}
+
+func (p *Player) DetectAndAddToPlayList(name string, query string) []shared.SearchResult {
+	whatIsThis := p.CheckWhatIsThis(query)
+	switch whatIsThis {
+	case "dir":
+		log.Println("Detected dir")
+		err := p.PlayListManager.AddToPlayListFromDir(name, query, p.Converter)
+		if err != nil {
+			log.Println("Failed to add dir to playlist", err)
+		}
+	case "file":
+		log.Println("Detected file")
+		go p.PlayListManager.AddToPlayListFromFile(name, query)
+	case "queue":
+		index, _ := strconv.Atoi(query)
+		music := p.Queue.queue[index]
+		go p.PlayListManager.AddToPlayListFromFile(name, music.Path)
+	case "unknown":
+		log.Println("Detected unknown, searching for", query)
+		return p.GetAvailableMusicOptions(query)
+	default:
+		log.Println("Detected Engine", whatIsThis)
+		go p.PlayListManager.AddToPlayListFromOnline(name, query, whatIsThis, p.Director, p.Converter)
+	}
+	return []shared.SearchResult{}
 }
 
 //if result is empty, it means it detects and plays the music if succeed other wise it returns the search results

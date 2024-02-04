@@ -11,10 +11,12 @@ import (
 )
 
 func (p *Player) RPCPlay(_ int, reply *int) error {
-	log.Println("RPCPlay called")
-	p.Play()
-	*reply = 1
-	log.Println("RPCPlay done")
+	go func() {
+		log.Println("RPCPlay called")
+		p.Play()
+		*reply = 1
+		log.Println("RPCPlay done")
+	}()
 	return nil
 }
 
@@ -58,26 +60,6 @@ func (p *Player) RPCStop(_ int, reply *int) error {
 	return nil
 }
 
-func (p *Player) RPCGetCurrentMusic(_ int, reply *Music) error {
-	go func() {
-		log.Println("RPCGetCurrentMusic called")
-		*reply = *p.GetCurrentMusic()
-		log.Println("RPCGetCurrentMusic done with reply :", reply)
-	}()
-
-	return nil
-}
-
-func (p *Player) RPCGetCurrentMusicPosition(_ int, reply *int) error {
-	go func() {
-		log.Println("RPCGetCurrentMusicPosition called")
-		*reply = int(p.GetCurrentMusicPosition().Seconds())
-		log.Println("RPCGetCurrentMusicPosition done with reply :", reply)
-	}()
-
-	return nil
-}
-
 func (p *Player) RPCSeek(d time.Duration, reply *int) error {
 	go func() {
 		log.Println("RPCSeek called with duration in seconds :", d*time.Second)
@@ -112,6 +94,49 @@ func (p *Player) RPCDetectAndPlay(query string, reply *[]shared.SearchResult) er
 	return nil
 }
 
+func (p *Player) RPCPlayListsNames(_ int, reply *[]string) error {
+	log.Println("RPCPlayLists called")
+	*reply = p.PlayListsNames()
+	log.Println("RPCPlayLists done with reply :", reply)
+	return nil
+}
+
+func (p *Player) RPCCreatePlayList(name string, reply *int) error {
+	log.Println("RPCCreatePlaylist called with name :", name)
+	p.CreatePlayList(name)
+	*reply = 1
+	log.Println("RPCCreatePlaylist done")
+	return nil
+}
+
+func (p *Player) RPCRemovePlayList(name string, reply *int) error {
+	log.Println("RPCRemovePlaylist called with name :", name)
+	p.RemovePlayList(name)
+	*reply = 1
+	log.Println("RPCRemovePlaylist done")
+	return nil
+}
+
+func (p *Player) RPCDetectAndAddToPlayList(args shared.AddToPlayListArgs, reply *[]shared.SearchResult) error {
+	log.Println("RPCDetectAndAddToPlayList called with query :", args.Query, " and playlist name :", args.PlayListName)
+	*reply = p.DetectAndAddToPlayList(args.PlayListName, args.Query)
+	log.Println("RPCDetectAndAddToPlayList done")
+	return nil
+}
+
+func (p *Player) RPCPlayListSongs(name string, reply *[]string) error {
+	log.Println("RPCPlayListSongs called with name :", name)
+	*reply = p.PlayListSongs(name)
+	log.Println("RPCPlayListSongs done with reply :", reply)
+	return nil
+}
+func (p *Player) RPCRemoveSongFromPlayList(args shared.RemoveSongFromPlayListArgs, reply *int) error {
+	log.Println("RPCRemoveSongFromPlayList called with name :", args.PlayListName, " and index :", args.Index)
+	p.RemoveSongFromPlayList(args.PlayListName, args.Index)
+	*reply = 1
+	log.Println("RPCRemoveSongFromPlayList done")
+	return nil
+}
 func StartIPCServer(port string) {
 	log.Println("Creating Player instance")
 	player := NewPlayer()

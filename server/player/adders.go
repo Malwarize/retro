@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/Malwarize/goplay/shared"
 )
 
 func (p *Player) AddMusicFromFile(path string) {
@@ -85,5 +87,46 @@ func (p *Player) AddMusicFromOnline(unique string, engineName string) {
 	}
 	if path != "" {
 		p.AddMusicFromFile(path)
+	}
+}
+
+func (p *Player) AddMusicFromPlaylistByName(playlistName string, musicName string) {
+	playlistPath := filepath.Join(shared.GoPlayPath, shared.PlaylistPath, playlistName, musicName)
+	p.AddMusicFromFile(playlistPath)
+}
+
+func (p *Player) AddMusicFromPlaylistByIndex(playlistName string, index int) {
+	playlistPath := filepath.Join(shared.GoPlayPath, shared.PlaylistPath, playlistName)
+	dir, err := os.Open(playlistPath)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	entries, err := dir.Readdir(0)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if index < len(entries) && index >= 0 {
+		p.AddMusicFromFile(filepath.Join(playlistPath, entries[index].Name()))
+	}
+}
+
+func (p *Player) AddMusicsFromPlaylist(playlistName string) {
+	playlistPath := filepath.Join(shared.GoPlayPath, shared.PlaylistPath, playlistName)
+	dir, err := os.Open(playlistPath)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	entries, err := dir.Readdir(0)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			p.AddMusicFromFile(filepath.Join(playlistPath, entry.Name()))
+		}
 	}
 }

@@ -107,3 +107,88 @@ var statusCmd = &cobra.Command{
 		views.DisplayStatus(client)
 	},
 }
+
+var playlistCmd = &cobra.Command{
+	Use:   "list",
+	Short: "list playlists",
+	Long:  `list playlists`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) > 0 {
+			musics := controller.PlayListSongs(args[0], controller.GetClient())
+			fmt.Println("Songs in playlist", args[0])
+			for i, music := range musics {
+				fmt.Printf("%d. %s\n", i, music)
+			}
+			return
+		}
+		client := controller.GetClient()
+		lists := controller.PlayListsNames(client)
+		fmt.Println("Playlists:")
+		for i, list := range lists {
+			fmt.Printf("%d. %s\n", i, list)
+		}
+	},
+}
+
+var playlistCreateCmd = &cobra.Command{
+	Use:   "create",
+	Short: "create a new playlist",
+	Long:  `create a new playlist`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client := controller.GetClient()
+		if len(args) > 0 {
+			name := strings.Join(args, " ")
+			controller.CreatePlayList(name, client)
+		} else {
+			fmt.Println("no playlist name specified")
+		}
+	},
+}
+
+// remove
+var playlistRemoveCmd = &cobra.Command{
+	Use:   "remove",
+	Short: "remove a playlist (and its songs)",
+	Long:  `remove a playlist (and its songs)`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client := controller.GetClient()
+		controller.RemovePlayList(args[0], client)
+	},
+}
+
+//add song to a playlist
+var playlistAddCmd = &cobra.Command{
+	Use:   "add",
+	Short: "add music(s) to a playlist",
+	Long:  `add music(s) to a playlist`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client := controller.GetClient()
+		if len(args) < 2 {
+			fmt.Println("playlist name and query required")
+			return
+		}
+		name := args[0]
+		query := strings.Join(args[1:], " ")
+		views.SearchThenAddToPlayList(name, query, client)
+	},
+}
+
+var playlistRemoveSongCmd = &cobra.Command{
+	Use:   "remove",
+	Short: "remove a song from a playlist",
+	Long:  `remove a song from a playlist`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client := controller.GetClient()
+		if len(args) < 2 {
+			fmt.Println("playlist name and index required")
+			return
+		}
+		name := args[0]
+		index, err := strconv.Atoi(args[1])
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		controller.RemoveSongFromPlayList(name, index, client)
+	},
+}

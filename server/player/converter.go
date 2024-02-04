@@ -2,6 +2,7 @@ package player
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -56,6 +57,7 @@ func (c *Converter) IsMp3(file string) (bool, error) {
 	cmd := exec.Command("ffprobe", "-v", "error", "-show_entries", "format=format_name", "-of", "default=noprint_wrappers=1:nokey=1", file)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
+		log.Println("Error checking file format:", string(output))
 		return false, fmt.Errorf("error checking file format: %v", err)
 	}
 	fileFormat := strings.TrimSpace(string(output))
