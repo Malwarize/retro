@@ -21,7 +21,12 @@ type searchResultItem struct {
 	ftype string
 }
 
-func (i searchResultItem) Title() string       { return i.title }
+func (i searchResultItem) Title() string {
+	if i.ftype == "cache" {
+		return parseName(i.title)
+	}
+	return i.title
+}
 func (i searchResultItem) Description() string { return emojiesType[i.ftype] + " " + i.ftype }
 func (i searchResultItem) FilterValue() string { return "" }
 

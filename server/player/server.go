@@ -61,7 +61,7 @@ func (p *Player) RPCStop(_ int, reply *int) error {
 func (p *Player) RPCGetCurrentMusic(_ int, reply *Music) error {
 	go func() {
 		log.Println("RPCGetCurrentMusic called")
-		*reply = p.GetCurrentMusic()
+		*reply = *p.GetCurrentMusic()
 		log.Println("RPCGetCurrentMusic done with reply :", reply)
 	}()
 
@@ -95,22 +95,6 @@ func (p *Player) RPCResume(_ int, reply *int) error {
 		*reply = 1
 		log.Println("RPCResume done")
 	}()
-	return nil
-}
-
-func (p *Player) RPCAddMusic(music string, reply *int) error {
-	log.Println("RPCAddMusic called with music :", music)
-	p.AddMusicFromFile(music)
-	*reply = 1
-	log.Println("RPCAddMusic done")
-	return nil
-
-}
-
-func (p *Player) RPCAddDirectory(path string, reply *int) error {
-	log.Println("AddDirectory called with path :", path)
-	p.AddMusicsFromDir(path)
-	log.Println("AddDirectory done")
 	return nil
 }
 

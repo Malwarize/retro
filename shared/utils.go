@@ -18,7 +18,7 @@ type Status struct {
 	CurrentMusicPosition time.Duration
 	CurrentMusicLength   time.Duration
 	PlayerState          int
-	MusicList            []string
+	MusicQueue           []string
 	Tasks                map[string]Task // key: target, value: task
 }
 
@@ -36,9 +36,9 @@ func (s Status) String() string {
 		str += "PlayerState: Stopped\n"
 	}
 
-	str += "MusicList: " + "\n"
+	str += "MusicQueue " + "\n"
 	str += "[\n"
-	for _, music := range s.MusicList {
+	for _, music := range s.MusicQueue {
 		str += "\t" + music + "\n"
 	}
 	str += "]"

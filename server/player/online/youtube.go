@@ -134,7 +134,7 @@ func (yt *youtubeEngine) Exists(videoUrl string) (bool, error) {
 	return true, nil
 }
 
-func (yt *youtubeEngine) GetName() string {
+func (yt *youtubeEngine) Name() string {
 	return "youtube"
 }
 

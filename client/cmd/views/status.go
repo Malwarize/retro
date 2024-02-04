@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/rpc"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -18,9 +19,7 @@ func reformatDuration(duration time.Duration) string {
 }
 
 func parseName(name string) string {
-	if strings.Contains(name, "/") {
-		name = strings.Split(name, "/")[len(strings.Split(name, "/"))-1]
-	}
+	name = filepath.Base(name)
 	if strings.Contains(name, shared.Separator) {
 		name = strings.Split(name, shared.Separator)[0]
 	}
@@ -29,7 +28,7 @@ func parseName(name string) string {
 
 func DisplayStatus(client *rpc.Client) {
 	status := controller.GetPlayerStatus(client)
-	queue := status.MusicList
+	queue := status.MusicQueue
 	if status.PlayerState == shared.Stopped {
 		fmt.Println(stoppedStyle.Render(emojiesStatus[shared.Stopped], " Stopped"))
 	} else {
