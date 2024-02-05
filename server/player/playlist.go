@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Malwarize/goplay/config"
 	"github.com/Malwarize/goplay/server/player/online"
-	"github.com/Malwarize/goplay/shared"
 )
 
 type PlayList struct {
@@ -24,7 +24,7 @@ func NewPlayListManager() *PlayListManager {
 
 func (plm *PlayListManager) Fetch() error {
 	// fetch all playlists
-	files, err := os.ReadDir(shared.PlaylistPath)
+	files, err := os.ReadDir(config.GetConfig().PlaylistPath)
 	if err != nil {
 		return err
 	}
@@ -35,7 +35,7 @@ func (plm *PlayListManager) Fetch() error {
 		}
 		pl := PlayList{Name: file.Name()}
 		pl.Items = make([]Music, 0)
-		songs, err := os.ReadDir(filepath.Join(shared.PlaylistPath, file.Name()))
+		songs, err := os.ReadDir(filepath.Join(config.GetConfig().PlaylistPath, file.Name()))
 		if err != nil {
 			return err
 		}
@@ -43,7 +43,7 @@ func (plm *PlayListManager) Fetch() error {
 			if song.IsDir() {
 				continue
 			}
-			pl.Items = append(pl.Items, Music{Path: filepath.Join(shared.PlaylistPath, file.Name(), song.Name())})
+			pl.Items = append(pl.Items, Music{Path: filepath.Join(config.GetConfig().PlaylistPath, file.Name(), song.Name())})
 		}
 
 		plm.PlayLists[file.Name()] = pl
@@ -54,7 +54,7 @@ func (plm *PlayListManager) Fetch() error {
 
 // Create a new playlist
 func (plm *PlayListManager) Create(name string) error {
-	err := os.Mkdir(filepath.Join(shared.PlaylistPath, name), 0755)
+	err := os.Mkdir(filepath.Join(config.GetConfig().PlaylistPath, name), 0755)
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func (plm *PlayListManager) Create(name string) error {
 
 // remove a playlist
 func (plm *PlayListManager) Remove(name string) error {
-	err := os.RemoveAll(filepath.Join(shared.PlaylistPath, name))
+	err := os.RemoveAll(filepath.Join(config.GetConfig().PlaylistPath, name))
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (plm *PlayListManager) Remove(name string) error {
 
 // add music to a playlist
 func (plm *PlayListManager) AddMusic(name string, music Music) error {
-	err := copyFile(music.Path, filepath.Join(shared.PlaylistPath, name, music.Name()))
+	err := copyFile(music.Path, filepath.Join(config.GetConfig().PlaylistPath, name, music.Name()))
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (plm *PlayListManager) AddMusic(name string, music Music) error {
 
 func (plm *PlayListManager) RemoveMusic(name string, index int) error {
 	music := plm.PlayLists[name].Items[index]
-	err := os.Remove(filepath.Join(shared.PlaylistPath, name, music.Name()))
+	err := os.Remove(filepath.Join(config.GetConfig().PlaylistPath, name, music.Name()))
 	if err != nil {
 		return err
 	}

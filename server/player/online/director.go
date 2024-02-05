@@ -24,7 +24,7 @@ type OnlineDirector struct {
 func NewOnlineDirector() *OnlineDirector {
 	return &OnlineDirector{
 		engines: make(map[string]OnlineEngine),
-		Cached:  NewCachedFiles(shared.CachePath),
+		Cached:  NewCachedFiles(),
 	}
 }
 

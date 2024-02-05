@@ -29,5 +29,4 @@ func (p *Player) errorifyTask(target string, err error) {
 
 func (p *Player) taskerror(target string, err error) {
 	p.errorifyTask(target, err)
-	return
 }

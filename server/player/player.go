@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Malwarize/goplay/config"
 	"github.com/Malwarize/goplay/server/player/online"
 	"github.com/Malwarize/goplay/shared"
 	"github.com/gopxl/beep"
@@ -305,7 +306,7 @@ func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
 		}()
 
 		select {
-		case <-time.After(shared.SearchTimeOut):
+		case <-time.After(config.GetConfig().SearchTimeOut):
 			log.Println("Timeout searching for", query)
 			p.errorifyTask(query, fmt.Errorf("timeout searching for %s", query))
 		case <-searchDone:

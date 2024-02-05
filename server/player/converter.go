@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/Malwarize/goplay/shared"
+	"github.com/Malwarize/goplay/config"
 )
 
 type Converter struct {
@@ -17,12 +17,12 @@ type Converter struct {
 
 func NewConverter() (*Converter, error) {
 	// check if ffmpegPath and ffprobePath exist and are executable
-	ppegPath, err := exec.LookPath(shared.Pathffmpeg)
+	ppegPath, err := exec.LookPath(config.GetConfig().Pathffmpeg)
 	if err != nil {
 		return nil, fmt.Errorf("ffmpeg not found: %v", err)
 	}
 
-	probePath, err := exec.LookPath(shared.Pathffprobe)
+	probePath, err := exec.LookPath(config.GetConfig().Pathffprobe)
 	if err != nil {
 		return nil, fmt.Errorf("ffprobe not found: %v", err)
 	}

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Malwarize/goplay/config"
 	"github.com/Malwarize/goplay/shared"
 )
 
@@ -102,12 +103,12 @@ func (p *Player) AddMusicFromOnline(unique string, engineName string) {
 }
 
 func (p *Player) AddMusicFromPlaylistByName(playlistName string, musicName string) {
-	playlistPath := filepath.Join(shared.GoPlayPath, shared.PlaylistPath, playlistName, musicName)
+	playlistPath := filepath.Join(config.GetConfig().GoPlayPath, config.GetConfig().PlaylistPath, playlistName, musicName)
 	p.AddMusicFromFile(playlistPath)
 }
 
 func (p *Player) AddMusicFromPlaylistByIndex(playlistName string, index int) {
-	playlistPath := filepath.Join(shared.PlaylistPath, playlistName)
+	playlistPath := filepath.Join(config.GetConfig().GoPlayPath, config.GetConfig().PlaylistPath, playlistName)
 	dir, err := os.Open(playlistPath)
 	if err != nil {
 		log.Println(err)
@@ -124,7 +125,7 @@ func (p *Player) AddMusicFromPlaylistByIndex(playlistName string, index int) {
 }
 
 func (p *Player) AddMusicsFromPlaylist(playlistName string) {
-	playlistPath := filepath.Join(shared.PlaylistPath, playlistName)
+	playlistPath := filepath.Join(config.GetConfig().GoPlayPath, config.GetConfig().PlaylistPath, playlistName)
 	dir, err := os.Open(playlistPath)
 	if err != nil {
 		log.Println(err)

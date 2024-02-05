@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/Malwarize/goplay/config"
 	"github.com/Malwarize/goplay/shared"
 )
 
@@ -22,9 +23,9 @@ type CachedFiles struct {
 	Files   []CachedFile
 }
 
-func NewCachedFiles(baseDir string) *CachedFiles {
+func NewCachedFiles() *CachedFiles {
 	return &CachedFiles{
-		BaseDir: baseDir,
+		BaseDir: config.GetConfig().CacheDir,
 	}
 }
 
@@ -36,7 +37,8 @@ func sanitizeName(name string) string {
 func (cf *CachedFiles) Fetch() error {
 	log.Println("Fetching cached files")
 	dir := filepath.Join(cf.BaseDir)
-	f, err := os.Open(dir)
+	var f *os.File
+	_, err := os.Open(dir)
 	if os.IsNotExist(err) {
 		err = os.Mkdir(dir, 0755)
 		if err != nil {
@@ -56,7 +58,8 @@ func (cf *CachedFiles) Fetch() error {
 	}
 	for _, ftype := range ftypes {
 		dirPath := filepath.Join(cf.BaseDir, ftype)
-		fs, err := os.Open(dirPath)
+		var fs *os.File
+		_, err := os.Open(dirPath)
 		if os.IsNotExist(err) {
 			err = os.Mkdir(dirPath, 0755)
 			if err != nil {

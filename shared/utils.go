@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/Malwarize/goplay/config"
 )
 
 type Task struct {
@@ -66,7 +68,7 @@ func EscapeSpecialDirChars(path string) string {
 
 func ParseCachedFileName(filename string) (string, string) {
 	// split filename by __
-	split := strings.Split(filename, Separator)
+	split := strings.Split(filename, config.GetConfig().Separator)
 	if len(split) != 2 {
 		log.Println("Invalid cached file name: ", filename)
 		return "", ""
@@ -75,7 +77,7 @@ func ParseCachedFileName(filename string) (string, string) {
 }
 
 func CombineNameWithKey(name string, key string) string {
-	return name + Separator + key
+	return name + config.GetConfig().Separator + key
 }
 
 type AddToPlayListArgs struct {

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Malwarize/goplay/client/controller"
+	"github.com/Malwarize/goplay/config"
 	"github.com/Malwarize/goplay/shared"
 	"github.com/charmbracelet/bubbles/progress"
 )
@@ -20,8 +21,8 @@ func reformatDuration(duration time.Duration) string {
 
 func parseName(name string) string {
 	name = filepath.Base(name)
-	if strings.Contains(name, shared.Separator) {
-		name = strings.Split(name, shared.Separator)[0]
+	if strings.Contains(name, config.GetConfig().Separator) {
+		name = strings.Split(name, config.GetConfig().Separator)[0]
 	}
 	return name
 }
