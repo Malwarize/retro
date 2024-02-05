@@ -28,8 +28,8 @@ var emojiesStatus = map[int]string{
 }
 
 var tasksEmojies = map[int]string{
-	shared.Download: "📥",
-	shared.Search:   "🔍",
+	shared.Downloading: "📥",
+	shared.Searching:   "🔍",
 }
 
 var failedEmojie = "❌"
@@ -46,6 +46,6 @@ var positionStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin
 var selectMusicStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(0, 0, 0, 1)
 var durationStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3)
 var taskStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFFF")).Margin(1, 0, 0, 3)
-var failedtaskStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000")).Margin(1, 0, 0, 3)
+var failedtaskStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#FFA500")).Margin(1, 0, 0, 3)
 
 var playListNameStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3)

@@ -33,8 +33,6 @@ func sanitizeName(name string) string {
 	return re.ReplaceAllString(name, "")
 }
 
-// check if item already exists in cache
-
 func (cf *CachedFiles) Fetch() error {
 	log.Println("Fetching cached files")
 	dir := filepath.Join(cf.BaseDir)
@@ -123,7 +121,6 @@ func (cf *CachedFiles) Search(query string) []string {
 }
 
 func (cf *CachedFiles) AddFile(filedata []byte, name string, ftype string, key string) string {
-	cf.Fetch()
 	log.Println("Adding file to cache: ", name)
 	dirPath := filepath.Join(cf.BaseDir, ftype)
 	_, err := os.Open(dirPath)
@@ -138,6 +135,7 @@ func (cf *CachedFiles) AddFile(filedata []byte, name string, ftype string, key s
 			return ""
 		}
 		log.Println(dirPath, "not found, creating it")
+		return ""
 	}
 
 	filePath := filepath.Join(dirPath, sanitizeName(shared.CombineNameWithKey(name, key)))
@@ -149,6 +147,12 @@ func (cf *CachedFiles) AddFile(filedata []byte, name string, ftype string, key s
 	}
 	defer f.Close()
 	f.Write(filedata)
-	cf.Fetch()
+
+	// update cache
+	cf.Files = append(cf.Files, CachedFile{
+		Name:  name,
+		Key:   key,
+		Ftype: ftype,
+	})
 	return filePath
 }

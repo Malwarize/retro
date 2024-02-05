@@ -60,6 +60,7 @@ func (p *Player) AddMusicsFromDir(dirPath string) {
 			isMp3, err := p.Converter.IsMp3(dirPath + "/" + entry.Name())
 			if err != nil {
 				log.Println(err)
+				continue
 			}
 			if isMp3 {
 				log.Println("Playing music from dir", dirPath+"/"+entry.Name())
@@ -73,21 +74,31 @@ func (p *Player) AddMusicsFromDir(dirPath string) {
 
 // the unique is the unique id of the music in the engine it can be url or id
 func (p *Player) AddMusicFromOnline(unique string, engineName string) {
+	p.addTask(unique, shared.Downloading)
 	path, err := p.Director.Download(engineName, unique)
 	if err != nil {
 		log.Println(err)
+		p.errorifyTask(unique, err)
+		return
 	}
 	err = p.Converter.ConvertToMP3(path)
 	if err != nil {
 		log.Println(err)
+		p.errorifyTask(unique, err)
+		return
 	}
 
 	if err != nil {
 		log.Println(err)
+		p.errorifyTask(unique, err)
+		return
 	}
-	if path != "" {
-		p.AddMusicFromFile(path)
+	if path == "" {
+		p.errorifyTask(unique, fmt.Errorf("failed to download music: %s", unique))
+		return
 	}
+	p.AddMusicFromFile(path)
+	p.removeTask(unique)
 }
 
 func (p *Player) AddMusicFromPlaylistByName(playlistName string, musicName string) {

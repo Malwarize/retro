@@ -1,5 +1,7 @@
 package shared
 
+import "time"
+
 const (
 	NotStarted = iota
 	Running
@@ -7,8 +9,8 @@ const (
 )
 
 const (
-	Download = iota
-	Search
+	Downloading = iota
+	Searching
 )
 
 const (
@@ -27,3 +29,5 @@ var PlaylistPath = GoPlayPath + "playlists/"
 var Pathytldpl = "yt-dlp"
 var Pathffmpeg = "ffmpeg"
 var Pathffprobe = "ffprobe"
+
+var SearchTimeOut = 60 * time.Second

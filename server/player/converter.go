@@ -41,11 +41,14 @@ func (c *Converter) ConvertToMP3(inputFile string) error {
 	defer os.Remove(tmpFile.Name())
 	outputFile := tmpFile.Name() + ".mp3"
 	defer os.Remove(outputFile)
+
 	cmd := exec.Command(c.ffmpegPath, "-i", inputFile, "-vn", "-ar", "44100", "-ac", "2", "-b:a", "192k", outputFile)
-	err = cmd.Run()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
+		log.Println("error converting to MP3:", string(out))
 		return fmt.Errorf("error converting to MP3: %v", err)
 	}
+
 	err = os.Rename(outputFile, inputFile)
 	if err != nil {
 		return fmt.Errorf("error converting to MP3: %v", err)

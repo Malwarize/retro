@@ -1,7 +1,6 @@
 package player
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -289,10 +288,13 @@ func (p *Player) CheckWhatIsThis(unknown string) string {
 }
 
 func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
+	// add task : this task displayed in the status: if the task is done, it will be removed
+	p.addTask(query, shared.Searching)
 	var musics []shared.SearchResult
 	for engineName := range p.Director.GetEngines() {
 		searchDone := make(chan bool)
 		go func() {
+			defer close(searchDone)
 			searchRes, err := p.Director.Search(engineName, query, 5)
 			searchDone <- true
 			if err != nil {
@@ -303,14 +305,12 @@ func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
 		}()
 
 		select {
-		case <-time.After(60 * time.Second):
-			p.errorifyTask(query, errors.New("Timeout searching for "+query))
+		case <-time.After(shared.SearchTimeOut):
 			log.Println("Timeout searching for", query)
+			p.errorifyTask(query, fmt.Errorf("timeout searching for %s", query))
 		case <-searchDone:
-			close(searchDone)
 		}
 	}
-	p.Director.Cached.Fetch()
 	files := p.Director.Cached.Search(query)
 	for _, f := range files {
 		name := filepath.Base(f)
@@ -323,7 +323,7 @@ func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
 			},
 		)
 	}
-	// etc ...
+	p.removeTask(query)
 	return musics
 }
 

@@ -67,13 +67,20 @@ func DisplayStatus(client *rpc.Client) {
 	// display tasks
 	for target, task := range status.Tasks {
 		if task.Error != "" {
-			fmt.Println(failedtaskStyle.Render(tasksEmojies[task.Type], " ", target, " ", fmt.Sprintf("%v", task.Error)))
+			switch task.Type {
+			case shared.Downloading:
+				fmt.Println(failedtaskStyle.Render(failedEmojie, "Failed to download ", target, ":", task.Error))
+			case shared.Searching:
+				fmt.Println(failedtaskStyle.Render(failedEmojie, "Failed to search ", target, ":", task.Error))
+			default:
+				fmt.Println(failedtaskStyle.Render(failedEmojie, "Failed to ", target, ":", task.Error))
+			}
 			continue
 		}
 		switch task.Type {
-		case shared.Download:
+		case shared.Downloading:
 			fmt.Println(taskStyle.Render(tasksEmojies[task.Type], "Downloading ", target))
-		case shared.Search:
+		case shared.Searching:
 			fmt.Println(taskStyle.Render(tasksEmojies[task.Type], "Searching ", target))
 		}
 	}
