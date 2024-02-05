@@ -91,7 +91,8 @@ func (plm *PlayListManager) AddMusic(name string, music Music) error {
 }
 
 func (plm *PlayListManager) RemoveMusic(name string, index int) error {
-	err := os.Remove(filepath.Join(shared.PlaylistPath, name))
+	music := plm.PlayLists[name].Items[index]
+	err := os.Remove(filepath.Join(shared.PlaylistPath, name, music.Name()))
 	if err != nil {
 		return err
 	}
@@ -174,4 +175,9 @@ func (plm *PlayListManager) AddToPlayListFromOnline(name string, query string, e
 		return err
 	}
 	return nil
+}
+
+func (plm *PlayListManager) Exists(name string) bool {
+	_, ok := plm.PlayLists[name]
+	return ok
 }

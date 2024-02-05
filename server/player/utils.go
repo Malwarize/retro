@@ -15,6 +15,7 @@ func MusicDecode(path string) (beep.StreamSeekCloser, beep.Format, error) {
 	}
 	return mp3.Decode(f)
 }
+
 func copyFile(sourcePath, destinationPath string) error {
 	sourceFile, err := os.Open(sourcePath)
 	if err != nil {

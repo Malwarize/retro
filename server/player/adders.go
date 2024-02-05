@@ -96,7 +96,7 @@ func (p *Player) AddMusicFromPlaylistByName(playlistName string, musicName strin
 }
 
 func (p *Player) AddMusicFromPlaylistByIndex(playlistName string, index int) {
-	playlistPath := filepath.Join(shared.GoPlayPath, shared.PlaylistPath, playlistName)
+	playlistPath := filepath.Join(shared.PlaylistPath, playlistName)
 	dir, err := os.Open(playlistPath)
 	if err != nil {
 		log.Println(err)
@@ -113,7 +113,7 @@ func (p *Player) AddMusicFromPlaylistByIndex(playlistName string, index int) {
 }
 
 func (p *Player) AddMusicsFromPlaylist(playlistName string) {
-	playlistPath := filepath.Join(shared.GoPlayPath, shared.PlaylistPath, playlistName)
+	playlistPath := filepath.Join(shared.PlaylistPath, playlistName)
 	dir, err := os.Open(playlistPath)
 	if err != nil {
 		log.Println(err)

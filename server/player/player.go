@@ -73,6 +73,9 @@ func GetPlayer() *Player {
 }
 
 func (p *Player) Play() {
+	if p.Queue.IsEmpty() {
+		return
+	}
 	music := p.GetCurrentMusic()
 	if !p.initialised {
 		speaker.Init(music.Format.SampleRate, music.Format.SampleRate.N(time.Second/10))
@@ -144,30 +147,6 @@ func (p *Player) Resume() {
 	p.playerState = Playing
 	speaker.Unlock()
 }
-
-// player playlist command
-func (p *Player) CreatePlayList(name string) {
-	p.PlayListManager.Create(name)
-}
-
-//delete playlist
-func (p *Player) RemovePlayList(name string) {
-	p.PlayListManager.Remove(name)
-}
-
-// list play list names
-func (p *Player) PlayListsNames() []string {
-	return p.PlayListManager.PlayListsNames()
-}
-func (p *Player) RemoveSongFromPlayList(name string, index int) {
-	p.PlayListManager.RemoveMusic(name, index)
-}
-
-// list play list songs
-func (p *Player) PlayListSongs(name string) []string {
-	return p.PlayListManager.PlayListSongs(name)
-}
-
 func (p *Player) Seek(d time.Duration) {
 	if p.playerState == Stopped {
 		return
@@ -184,6 +163,59 @@ func (p *Player) Seek(d time.Duration) {
 	}
 }
 
+func (p *Player) Remove(index int) {
+	if p.Queue.IsEmpty() {
+		return
+	}
+	if p.Queue.Size() == 1 {
+		p.Stop()
+		return
+	}
+	if index == p.Queue.GetCurrentIndex() {
+		p.Next()
+	}
+	p.RemoveMusicFromQueue(index)
+}
+
+// player playlist command
+func (p *Player) CreatePlayList(name string) {
+	p.PlayListManager.Create(name)
+}
+
+//delete playlist
+func (p *Player) RemovePlayList(name string) {
+	p.PlayListManager.Remove(name)
+}
+
+// list play list names
+func (p *Player) PlayListsNames() []string {
+	return p.PlayListManager.PlayListsNames()
+}
+
+func (p *Player) RemoveSongFromPlayList(name string, index int) {
+	p.PlayListManager.RemoveMusic(name, index)
+}
+
+// list play list songs
+func (p *Player) PlayListSongs(name string) []string {
+	return p.PlayListManager.PlayListSongs(name)
+}
+
+func (p *Player) PlayListPlaySong(name string, index int) {
+	p.AddMusicFromPlaylistByIndex(name, index)
+	p.Play()
+	if p.playerState == Stopped {
+		p.Play()
+	}
+
+}
+
+func (p *Player) PlayListPlayAll(name string) {
+	p.AddMusicsFromPlaylist(name)
+	if p.playerState == Stopped {
+		p.Play()
+	}
+}
 func (p *Player) GetCurrentMusicPosition() time.Duration {
 	if p.playerState == Stopped {
 		return 0
@@ -235,6 +267,11 @@ func (p *Player) CheckWhatIsThis(unknown string) string {
 			}
 		}
 	}
+	// check if its play list name
+	if p.PlayListManager.Exists(unknown) {
+		return "playlist"
+	}
+
 	// check if its queue index
 	if index, err := strconv.Atoi(unknown); err == nil && index >= 0 && index < p.Queue.Size() {
 		return "queue"
@@ -338,6 +375,12 @@ func (p *Player) DetectAndPlay(unknown string) []shared.SearchResult {
 		index, _ := strconv.Atoi(unknown)
 		go func() {
 			p.Queue.SetCurrentIndex(index)
+			p.Play()
+		}()
+	case "playlist":
+		log.Println("Detected playlist")
+		go func() {
+			p.AddMusicsFromPlaylist(unknown)
 			p.Play()
 		}()
 	case "unknown":

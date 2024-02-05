@@ -31,6 +31,7 @@ func (m model) AddSearch() tea.Msg {
 		results: results,
 	}
 }
+
 func SearchThenAddToPlayList(playlist, query string, client *rpc.Client) error {
 	model := NewModel(client, query)
 	model.callback = addToPlayListCallback

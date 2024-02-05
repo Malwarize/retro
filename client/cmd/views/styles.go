@@ -20,6 +20,7 @@ var playingEmojies = []string{
 	"🎹",
 	"🎺",
 }
+
 var emojiesStatus = map[int]string{
 	shared.Playing: "▶️",
 	shared.Stopped: "🛑",
@@ -46,3 +47,5 @@ var selectMusicStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Mar
 var durationStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3)
 var taskStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFFF")).Margin(1, 0, 0, 3)
 var failedtaskStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000")).Margin(1, 0, 0, 3)
+
+var playListNameStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3)

@@ -33,6 +33,7 @@ func (m model) PlaySearch() tea.Msg {
 		results: results,
 	}
 }
+
 func SearchThenSelect(query string, client *rpc.Client) error {
 	model := NewModel(client, query)
 	p := tea.NewProgram(model)

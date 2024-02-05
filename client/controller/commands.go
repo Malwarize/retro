@@ -104,6 +104,16 @@ func Seek(d int, client *rpc.Client) {
 	}
 }
 
+func Remove(index int, client *rpc.Client) {
+	args := index
+	var reply int
+	err := client.Call("Player.RPCRemoveMusic", args, &reply)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
 func GetPlayerStatus(client *rpc.Client) shared.Status {
 	var reply shared.Status
 	err := client.Call("Player.RPCGetPlayerStatus", 0, &reply)
@@ -140,9 +150,9 @@ var client *rpc.Client
 func GetClient() *rpc.Client {
 	if client == nil {
 		var err error
-		client, err = rpc.Dial("tcp", "localhost:1234")
+		client, err = rpc.Dial("tcp", "localhost:3131")
 		if err != nil {
-			fmt.Println("the player " + "localhost:1234" + " not running")
+			fmt.Println("the player " + "localhost:3131" + " not running")
 			os.Exit(1)
 		}
 	}

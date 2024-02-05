@@ -80,6 +80,16 @@ func (p *Player) RPCResume(_ int, reply *int) error {
 	return nil
 }
 
+func (p *Player) RPCRemoveMusic(index int, reply *int) error {
+	go func() {
+		log.Println("RPCRemoveMusic called with index :", index)
+		p.Remove(index)
+		*reply = 1
+		log.Println("RPCRemoveMusic done")
+	}()
+	return nil
+}
+
 func (p *Player) RPCGetPlayerStatus(_ int, reply *shared.Status) error {
 	log.Println("RPCGetPlayerStatus called")
 	*reply = p.GetPlayerStatus()
@@ -130,13 +140,31 @@ func (p *Player) RPCPlayListSongs(name string, reply *[]string) error {
 	log.Println("RPCPlayListSongs done with reply :", reply)
 	return nil
 }
+
 func (p *Player) RPCRemoveSongFromPlayList(args shared.RemoveSongFromPlayListArgs, reply *int) error {
-	log.Println("RPCRemoveSongFromPlayList called with name :", args.PlayListName, " and index :", args.Index)
+	log.Println("RPCRemoveSongFromPlayList called with name :", args.PlayListName, "and index :", args.Index)
 	p.RemoveSongFromPlayList(args.PlayListName, args.Index)
 	*reply = 1
 	log.Println("RPCRemoveSongFromPlayList done")
 	return nil
 }
+
+func (p *Player) RPCPlayListPlaySong(args shared.PlayListPlaySongArgs, reply *int) error {
+	log.Println("RPCPlayListPlaySong called with name :", args.PlayListName, " and index :", args.Index)
+	p.PlayListPlaySong(args.PlayListName, args.Index)
+	*reply = 1
+	log.Println("RPCPlayListPlaySong done")
+	return nil
+}
+
+func (p *Player) RPCPlayListPlayAll(name string, reply *int) error {
+	log.Println("RPCPlayListPlayAll called with name :", name)
+	p.PlayListPlayAll(name)
+	*reply = 1
+	log.Println("RPCPlayListPlayAll done")
+	return nil
+}
+
 func StartIPCServer(port string) {
 	log.Println("Creating Player instance")
 	player := NewPlayer()
