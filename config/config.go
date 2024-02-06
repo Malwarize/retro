@@ -1,7 +1,5 @@
 package config
 
-// Path: config.go
-
 import (
 	"os"
 	"sync"
@@ -11,7 +9,7 @@ import (
 var once sync.Once
 var cfg *Config // singleton instance
 
-var DEBUG = true // set to true for debug mode
+var DEBUG = false // set to true for debug mode
 
 type Config struct {
 	GoPlayPath    string // used to store cache, playlists, etc

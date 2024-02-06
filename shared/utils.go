@@ -89,6 +89,7 @@ type RemoveSongFromPlayListArgs struct {
 	PlayListName string
 	Index        int
 }
+
 type PlayListPlaySongArgs struct {
 	PlayListName string
 	Index        int

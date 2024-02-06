@@ -2,6 +2,7 @@ package online
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -24,6 +25,14 @@ type CachedFiles struct {
 }
 
 func NewCachedFiles() *CachedFiles {
+	if _, err := os.Stat(config.GetConfig().CacheDir); os.IsNotExist(err) {
+		log.Println("Cache dir not found, creating it")
+		err = os.Mkdir(config.GetConfig().CacheDir, 0755)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	return &CachedFiles{
 		BaseDir: config.GetConfig().CacheDir,
 	}
@@ -36,18 +45,7 @@ func sanitizeName(name string) string {
 
 func (cf *CachedFiles) Fetch() error {
 	log.Println("Fetching cached files")
-	dir := filepath.Join(cf.BaseDir)
-	var f *os.File
-	_, err := os.Open(dir)
-	if os.IsNotExist(err) {
-		err = os.Mkdir(dir, 0755)
-		if err != nil {
-			return err
-		}
-		log.Println("Cache dir not found, creating it")
-	}
-
-	f, err = os.Open(dir)
+	f, err := os.Open(cf.BaseDir)
 	if err != nil {
 		return err
 	}
@@ -126,11 +124,8 @@ func (cf *CachedFiles) Search(query string) []string {
 func (cf *CachedFiles) AddFile(filedata []byte, name string, ftype string, key string) string {
 	log.Println("Adding file to cache: ", name)
 	dirPath := filepath.Join(cf.BaseDir, ftype)
+	// cehck if dir exists if not create it
 	_, err := os.Open(dirPath)
-	if err != nil {
-		log.Printf("Error opening dir: %v", err)
-		return ""
-	}
 	if os.IsNotExist(err) {
 		err = os.Mkdir(dirPath, 0755)
 		if err != nil {
@@ -138,7 +133,6 @@ func (cf *CachedFiles) AddFile(filedata []byte, name string, ftype string, key s
 			return ""
 		}
 		log.Println(dirPath, "not found, creating it")
-		return ""
 	}
 
 	filePath := filepath.Join(dirPath, sanitizeName(shared.CombineNameWithKey(name, key)))
@@ -152,9 +146,10 @@ func (cf *CachedFiles) AddFile(filedata []byte, name string, ftype string, key s
 	f.Write(filedata)
 
 	// update cache
+	fmt.Println(name, key, ftype)
 	cf.Files = append(cf.Files, CachedFile{
-		Name:  name,
-		Key:   key,
+		Name:  sanitizeName(name),
+		Key:   sanitizeName(key),
 		Ftype: ftype,
 	})
 	return filePath

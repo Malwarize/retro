@@ -66,7 +66,7 @@ func NewModel(client *rpc.Client, query string) *model {
 
 func NewList(items []list.Item) list.Model {
 	listModel := list.New(items, list.NewDefaultDelegate(), 50, 14)
-	listModel.Title = "Select a song"
+	listModel.Title = "Select a song 👇"
 	listModel.SetFilteringEnabled(false)
 	listModel.SetShowHelp(false)
 	listModel.Styles.Title = lipgloss.NewStyle()

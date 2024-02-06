@@ -80,6 +80,7 @@ var prevCmd = &cobra.Command{
 		controller.Prev(client)
 	},
 }
+
 var seekCmd = &cobra.Command{Use: "seek",
 	Short: "seek to a position in the current song",
 	Long:  `seek to a position in the current song`,

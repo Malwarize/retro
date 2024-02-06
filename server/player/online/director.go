@@ -35,6 +35,7 @@ func NewDefaultDirector() (*OnlineDirector, error) {
 	if err != nil {
 		return director, fmt.Errorf("failed to create youtube engine: %w", err)
 	}
+
 	// register the engines here
 	director.Register("youtube", youtubeEngine)
 	return director, nil

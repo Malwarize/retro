@@ -37,6 +37,13 @@ type Player struct {
 }
 
 func NewPlayer() *Player {
+	if _, err := os.Stat(config.GetConfig().GoPlayPath); os.IsNotExist(err) {
+		log.Println("goplay dir not found, creating it")
+		err = os.Mkdir(config.GetConfig().GoPlayPath, 0755)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 	converter, err := NewConverter()
 	if err != nil {
 		log.Fatal(err)
@@ -45,9 +52,11 @@ func NewPlayer() *Player {
 	if err != nil {
 		log.Fatal(err)
 	}
-	playlistManager := NewPlayListManager()
+	playlistManager, err := NewPlayListManager()
+	if err != nil {
+		log.Fatal(err)
+	}
 	err = playlistManager.Fetch()
-	log.Println(playlistManager)
 	if err != nil {
 		log.Fatal(err)
 	}
