@@ -4,6 +4,7 @@ import (
 	"net/rpc"
 
 	"github.com/Malwarize/goplay/client/controller"
+	"github.com/Malwarize/goplay/shared"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -22,9 +23,10 @@ func (m model) AddSearch() tea.Msg {
 	musics := controller.DetectAndAddToPlayList(m.args[0].(string), m.query, m.client)
 	for _, music := range musics {
 		results = append(results, searchResultItem{
-			title: music.Title,
-			desc:  music.Destination,
-			ftype: music.Type,
+			title:    music.Title,
+			desc:     music.Destination,
+			ftype:    music.Type,
+			duration: shared.DurationToString(music.Duration),
 		})
 	}
 	return searchDone{

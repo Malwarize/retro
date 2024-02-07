@@ -17,6 +17,7 @@ import (
 )
 
 var PlayerInstance *Player
+var once sync.Once
 
 const (
 	Playing = iota
@@ -75,9 +76,9 @@ func NewPlayer() *Player {
 
 //singleton player
 func GetPlayer() *Player {
-	if PlayerInstance == nil {
+	once.Do(func() {
 		PlayerInstance = NewPlayer()
-	}
+	})
 	return PlayerInstance
 }
 
@@ -85,7 +86,7 @@ func (p *Player) Play() {
 	if p.Queue.IsEmpty() {
 		return
 	}
-	music := p.GetCurrentMusic()
+	music := p.Queue.GetCurrentMusic()
 	if !p.initialised {
 		speaker.Init(music.Format.SampleRate, music.Format.SampleRate.N(time.Second/10))
 		p.initialised = true
@@ -93,7 +94,7 @@ func (p *Player) Play() {
 		speaker.Clear()
 		speaker.Init(music.Format.SampleRate, music.Format.SampleRate.N(time.Second/10))
 	}
-	p.playerState = Playing
+	p.setPlayerState(Playing)
 	go func() {
 		done := make(chan struct{})
 		speaker.Play(beep.Seq(music.Streamer, beep.Callback(func() {
@@ -104,65 +105,83 @@ func (p *Player) Play() {
 	}()
 }
 
+func (p *Player) getPlayerState() int {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.playerState
+}
+
+func (p *Player) setPlayerState(state int) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.playerState = state
+}
+
 func (p *Player) Next() {
-	if p.Queue.IsEmpty() || p.playerState == Stopped {
+	if p.Queue.IsEmpty() || p.getPlayerState() == Stopped {
 		return
 	}
-	if p.playerState == Paused {
+	if p.getPlayerState() == Paused {
 		p.Resume()
 	}
-	p.GetCurrentMusic().Streamer.Seek(0)
-	p.QueueNext()
+	p.Queue.GetCurrentMusic().Streamer.Seek(0)
+	p.Queue.QueueNext()
 	p.Play()
 }
 
 func (p *Player) Prev() {
-	if p.Queue.IsEmpty() || p.playerState == Stopped {
+	state := p.getPlayerState()
+	if p.Queue.IsEmpty() || state == Stopped {
 		return
 	}
-	if p.playerState == Paused {
+	if state == Paused {
 		p.Resume()
 	}
-	p.GetCurrentMusic().Streamer.Seek(0)
-	p.QueuePrev()
+	currentMusic := p.Queue.GetCurrentMusic()
+	currentMusic.Streamer.Seek(0)
+	p.Queue.QueuePrev()
 	p.Play()
 }
 
 func (p *Player) Stop() {
 	clear(p.Tasks)
-	if p.playerState == Stopped {
+
+	state := p.getPlayerState()
+	if state == Stopped {
 		return
 	}
-	if p.playerState == Paused {
+	if state == Paused {
 		p.Resume()
 	}
 	speaker.Clear()
 	p.Queue.Clear()
-	p.playerState = Stopped
+	p.setPlayerState(Stopped)
 }
 
 func (p *Player) Pause() {
-	if p.playerState == Paused || p.playerState == Stopped {
+	state := p.getPlayerState()
+	if state == Paused || state == Stopped {
 		return
 	}
-	p.playerState = Paused
+	p.setPlayerState(Paused)
 	speaker.Lock()
 }
 
 func (p *Player) Resume() {
-	if p.playerState == Playing || p.playerState == Stopped {
+	state := p.getPlayerState()
+	if state == Playing || state == Stopped {
 		return
 	}
-	p.playerState = Playing
+	p.setPlayerState(Playing)
 	speaker.Unlock()
 }
 func (p *Player) Seek(d time.Duration) {
-	if p.playerState == Stopped {
+	if p.getPlayerState() == Stopped {
 		return
 	}
 	speaker.Lock()
 	defer speaker.Unlock()
-	currentMusic := p.GetCurrentMusic()
+	currentMusic := p.Queue.GetCurrentMusic()
 	currentSamplePos := currentMusic.Streamer.Position()
 	curretnTimePos := currentMusic.Format.SampleRate.D(currentSamplePos)
 	newTimePos := (curretnTimePos + d) % p.GetCurrentMusicLength()
@@ -178,12 +197,10 @@ func (p *Player) Remove(index int) {
 	}
 	if p.Queue.Size() == 1 {
 		p.Stop()
-		return
-	}
-	if index == p.Queue.GetCurrentIndex() {
+	} else if index == p.Queue.GetCurrentIndex() {
 		p.Next()
 	}
-	p.RemoveMusicFromQueue(index)
+	p.Queue.Remove(index)
 }
 
 // player playlist command
@@ -202,6 +219,12 @@ func (p *Player) PlayListsNames() []string {
 }
 
 func (p *Player) RemoveSongFromPlayList(name string, index int) {
+	// check if the exists in the queue and remove it
+	for i, music := range p.Queue.queue {
+		if music.Path == filepath.Join(p.PlayListManager.PlayListPath, name, p.PlayListManager.PlayListSongs(name)[index]) {
+			p.Queue.Remove(i)
+		}
+	}
 	p.PlayListManager.RemoveMusic(name, index)
 }
 
@@ -213,23 +236,22 @@ func (p *Player) PlayListSongs(name string) []string {
 func (p *Player) PlayListPlaySong(name string, index int) {
 	p.AddMusicFromPlaylistByIndex(name, index)
 	p.Play()
-	if p.playerState == Stopped {
+	if p.getPlayerState() == Stopped {
 		p.Play()
 	}
-
 }
 
 func (p *Player) PlayListPlayAll(name string) {
 	p.AddMusicsFromPlaylist(name)
-	if p.playerState == Stopped {
+	if p.getPlayerState() == Stopped {
 		p.Play()
 	}
 }
 func (p *Player) GetCurrentMusicPosition() time.Duration {
-	if p.playerState == Stopped {
+	if p.getPlayerState() == Stopped {
 		return 0
 	}
-	currentMusic := p.GetCurrentMusic()
+	currentMusic := p.Queue.GetCurrentMusic()
 	currentSamplePos := currentMusic.Streamer.Position()
 	curretnTimePos := currentMusic.Format.SampleRate.D(currentSamplePos)
 	return curretnTimePos
@@ -239,7 +261,7 @@ func (p *Player) GetCurrentMusicLength() time.Duration {
 	if p.Queue.IsEmpty() {
 		return 0
 	}
-	music := p.GetCurrentMusic()
+	music := p.Queue.GetCurrentMusic()
 	return music.Format.SampleRate.D(music.Streamer.Len())
 }
 
@@ -322,17 +344,8 @@ func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
 		}
 	}
 	files := p.Director.Cached.Search(query)
-	for _, f := range files {
-		name := filepath.Base(f)
-		musics = append(
-			musics,
-			shared.SearchResult{
-				Title:       name,
-				Type:        "cache",
-				Destination: f,
-			},
-		)
-	}
+	fmt.Println("Cached files", files)
+	musics = append(musics, files...)
 	p.removeTask(query)
 	return musics
 }
@@ -351,21 +364,21 @@ func (p *Player) DetectAndAddToPlayList(name string, query string) []shared.Sear
 		go p.PlayListManager.AddToPlayListFromFile(name, query)
 	case "queue":
 		index, _ := strconv.Atoi(query)
-		music := p.Queue.queue[index]
+		music := p.Queue.GetMusicByIndex(index)
 		go p.PlayListManager.AddToPlayListFromFile(name, music.Path)
 	case "unknown":
 		log.Println("Detected unknown, searching for", query)
 		return p.GetAvailableMusicOptions(query)
 	default:
 		log.Println("Detected Engine", whatIsThis)
-		go p.PlayListManager.AddToPlayListFromOnline(name, query, whatIsThis, p.Director, p.Converter)
+		go p.AddToPlayListFromOnline(name, query, whatIsThis, p.Director, p.Converter)
 	}
 	return []shared.SearchResult{}
 }
 
 //if result is empty, it means it detects and plays the music if succeed other wise it returns the search results
 func (p *Player) DetectAndPlay(unknown string) []shared.SearchResult {
-	fmt.Println("Checking what is this")
+	log.Println("Checking what is this", unknown)
 	whatIsThis := p.CheckWhatIsThis(unknown)
 	switch whatIsThis {
 	case "dir":
@@ -411,7 +424,7 @@ func (p *Player) GetPlayerStatus() shared.Status {
 		CurrentMusicIndex:    p.Queue.GetCurrentIndex(),
 		CurrentMusicPosition: p.GetCurrentMusicPosition(),
 		CurrentMusicLength:   p.GetCurrentMusicLength(),
-		PlayerState:          p.playerState,
+		PlayerState:          p.getPlayerState(),
 		MusicQueue:           p.Queue.GetTitles(),
 		Tasks:                p.Tasks,
 	}

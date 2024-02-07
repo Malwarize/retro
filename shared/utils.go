@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/Malwarize/goplay/config"
+	"github.com/gopxl/beep/mp3"
 )
 
 type Task struct {
@@ -56,6 +58,7 @@ type SearchResult struct {
 	Title       string
 	Destination string
 	Type        string
+	Duration    time.Duration
 }
 
 func EscapeSpecialDirChars(path string) string {
@@ -93,4 +96,43 @@ type RemoveSongFromPlayListArgs struct {
 type PlayListPlaySongArgs struct {
 	PlayListName string
 	Index        int
+}
+
+//helper function to get mp3 duration
+func GetMp3Duration(path string) (time.Duration, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return 0, err
+	}
+	defer f.Close()
+	music, format, err := mp3.Decode(f)
+	if err != nil {
+		return 0, err
+	}
+	return format.SampleRate.D(music.Len()), nil
+}
+
+// function converts 00:00:00 to time.Duration
+func StringToDuration(s string) (time.Duration, error) {
+	sp := strings.Split(s, ":")
+	l := len(sp)
+	sec := "0"
+	min := "0"
+	hour := "0"
+	if l > 0 {
+		sec = sp[l-1]
+	}
+
+	if l > 1 {
+		min = sp[l-2]
+	}
+	if l > 2 {
+		hour = sp[l-3]
+	}
+	return time.ParseDuration(hour + "h" + min + "m" + sec + "s")
+}
+
+func DurationToString(d time.Duration) string {
+	// to format 00:00:00
+	return fmt.Sprintf("%02d:%02d:%02d", int(d.Hours()), int(d.Minutes())%60, int(d.Seconds())%60)
 }

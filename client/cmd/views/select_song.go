@@ -13,9 +13,10 @@ import (
 )
 
 type searchResultItem struct {
-	title string
-	desc  string
-	ftype string
+	title    string
+	desc     string
+	ftype    string
+	duration string
 }
 
 func (i searchResultItem) Title() string {
@@ -24,7 +25,9 @@ func (i searchResultItem) Title() string {
 	}
 	return i.title
 }
-func (i searchResultItem) Description() string { return emojiesType[i.ftype] + " " + i.ftype }
+func (i searchResultItem) Description() string {
+	return emojiesType[i.ftype] + " " + i.ftype + " " + i.duration
+}
 func (i searchResultItem) FilterValue() string { return "" }
 
 type model struct {

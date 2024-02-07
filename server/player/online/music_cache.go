@@ -79,6 +79,9 @@ func (cf *CachedFiles) Fetch() error {
 		clear(cf.Files)
 		for _, file := range files {
 			name, key := shared.ParseCachedFileName(file)
+			if name == "" || key == "" {
+				continue
+			}
 			cf.Files = append(cf.Files, CachedFile{
 				Name:  name,
 				Key:   key,
@@ -110,12 +113,18 @@ func (cf *CachedFiles) GetFileByName(name string, ftype string) (string, error) 
 	return "", errors.New("file not found")
 }
 
-func (cf *CachedFiles) Search(query string) []string {
-	var results []string
+func (cf *CachedFiles) Search(query string) []shared.SearchResult {
+	var results []shared.SearchResult
 	for _, file := range cf.Files {
 		if strings.Contains(strings.ToLower(file.Name), strings.ToLower(sanitizeName(query))) {
 			log.Println("File found in cache: ", file.Name)
-			results = append(results, filepath.Join(cf.BaseDir, file.Ftype, shared.CombineNameWithKey(file.Name, file.Key)))
+			dur, _ := shared.GetMp3Duration(filepath.Join(cf.BaseDir, file.Ftype, shared.CombineNameWithKey(file.Name, file.Key)))
+			results = append(results, shared.SearchResult{
+				Title:       file.Name,
+				Type:        "cache",
+				Destination: shared.CombineNameWithKey(file.Name, file.Key),
+				Duration:    dur,
+			})
 		}
 	}
 	return results

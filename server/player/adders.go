@@ -16,7 +16,7 @@ func (p *Player) AddMusicFromFile(path string) {
 	if err != nil {
 		log.Println(err)
 	}
-	p.AddMusicToQueue(music)
+	p.Queue.Enqueue(music)
 }
 
 // this function is used to play music from a file that is not mp3/ it will convert it to mp3 in temp and add it to the queue
@@ -103,12 +103,12 @@ func (p *Player) AddMusicFromOnline(unique string, engineName string) {
 }
 
 func (p *Player) AddMusicFromPlaylistByName(playlistName string, musicName string) {
-	playlistPath := filepath.Join(config.GetConfig().GoPlayPath, config.GetConfig().PlaylistPath, playlistName, musicName)
+	playlistPath := filepath.Join(config.GetConfig().PlaylistPath, playlistName, musicName)
 	p.AddMusicFromFile(playlistPath)
 }
 
 func (p *Player) AddMusicFromPlaylistByIndex(playlistName string, index int) {
-	playlistPath := filepath.Join(config.GetConfig().GoPlayPath, config.GetConfig().PlaylistPath, playlistName)
+	playlistPath := filepath.Join(config.GetConfig().PlaylistPath, playlistName)
 	dir, err := os.Open(playlistPath)
 	if err != nil {
 		log.Println(err)
@@ -125,7 +125,7 @@ func (p *Player) AddMusicFromPlaylistByIndex(playlistName string, index int) {
 }
 
 func (p *Player) AddMusicsFromPlaylist(playlistName string) {
-	playlistPath := filepath.Join(config.GetConfig().GoPlayPath, config.GetConfig().PlaylistPath, playlistName)
+	playlistPath := filepath.Join(config.GetConfig().PlaylistPath, playlistName)
 	dir, err := os.Open(playlistPath)
 	if err != nil {
 		log.Println(err)

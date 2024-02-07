@@ -7,6 +7,7 @@ import (
 
 	"github.com/Malwarize/goplay/config"
 	"github.com/Malwarize/goplay/server/player/online"
+	"github.com/Malwarize/goplay/shared"
 )
 
 type PlayList struct {
@@ -107,7 +108,6 @@ func (plm *PlayListManager) RemoveMusic(name string, index int) error {
 		return os.ErrNotExist
 	}
 	pl.Items = append(pl.Items[:index], pl.Items[index+1:]...)
-
 	plm.PlayLists[name] = pl
 	return nil
 }
@@ -167,20 +167,24 @@ func (plm *PlayListManager) AddToPlayListFromFile(name string, file string) erro
 	return nil
 }
 
-func (plm *PlayListManager) AddToPlayListFromOnline(name string, query string, engineName string, director *online.OnlineDirector, converter *Converter) error {
+func (p *Player) AddToPlayListFromOnline(name string, query string, engineName string, director *online.OnlineDirector, converter *Converter) {
+	p.addTask(query, shared.Downloading)
 	path, err := director.Download(engineName, query)
 	if err != nil {
-		return err
+		p.errorifyTask(query, err)
+		return
 	}
-	err = plm.AddMusic(name, Music{Path: path})
+	err = p.PlayListManager.AddMusic(name, Music{Path: path})
 	if err != nil {
-		return err
+		p.errorifyTask(query, err)
+		return
 	}
 	err = converter.ConvertToMP3(path)
 	if err != nil {
-		return err
+		p.errorifyTask(query, err)
+		return
 	}
-	return nil
+	p.removeTask(query)
 }
 
 func (plm *PlayListManager) Exists(name string) bool {

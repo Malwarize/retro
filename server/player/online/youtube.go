@@ -2,6 +2,7 @@ package online
 
 import (
 	"io"
+	"log"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -158,18 +159,22 @@ func newYoutubeEngine() (*youtubeEngine, error) {
 
 //why I used ytdlp instead of youtube lib : because ytdlp doesn't need API key to search
 func (yt *youtubeEngine) Search(query string, maxResults int) ([]shared.SearchResult, error) {
-	cmd := exec.Command(yt.ytdlpPath, "--get-id", "--get-title", "--skip-download", "--flat-playlist", "ytsearch"+strconv.Itoa(maxResults)+":"+query)
+	cmd := exec.Command(yt.ytdlpPath, "--get-id", "--get-title", "--skip-download", "--get-duration", "--flat-playlist", "ytsearch"+strconv.Itoa(maxResults)+":"+query)
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
 	}
+	log.Println("yt-dlp output:\n", string(out))
 	lines := strings.Split(string(out), "\n")
 	var results []shared.SearchResult
-	for i := 0; i < len(lines)-1; i += 2 {
+	// convert string to duration
+	for i := 0; i < len(lines)-1; i += 3 {
+		dur, _ := shared.StringToDuration(lines[i+2])
 		results = append(results, shared.SearchResult{
 			Title:       lines[i],
 			Destination: "https://www.youtube.com/watch?v=" + lines[i+1],
 			Type:        "youtube",
+			Duration:    dur,
 		})
 	}
 	return results, nil

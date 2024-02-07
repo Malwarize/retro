@@ -6,6 +6,9 @@ build:
 	go build -o bin/goplay client/main.go
 	go build -o bin/goplayer server/main.go
 
+s:
+	go run server/main.go
+
 run:
 	./build/goplay
 
