@@ -49,7 +49,12 @@ func (c *Converter) ConvertToMP3(inputFile string) error {
 		return fmt.Errorf("error converting to MP3: %v", err)
 	}
 
-	err = os.Rename(outputFile, inputFile)
+	err = copyFile(outputFile, inputFile)
+	if err != nil {
+		return fmt.Errorf("error copying file: %v", err)
+	}
+
+	err = os.Remove(outputFile)
 	if err != nil {
 		return fmt.Errorf("error converting to MP3: %v", err)
 	}

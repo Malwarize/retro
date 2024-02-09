@@ -31,16 +31,7 @@ install_yt-dlp:
 
 install_ffmpeg:
 	@echo "Installing ffmpeg"
-	@distro=$$(lsb_release -i | awk '{print $$3}'); \
-	if [ "$$distro" = "Ubuntu" ]; then \
-		sudo apt-get install ffmpeg; \
-	elif [ "$$distro" = "Fedora" ]; then \
-		sudo dnf install ffmpeg; \
-	elif [ "$$distro" = "CentOS" ]; then \
-		sudo yum install ffmpeg; \
-	else \
-		echo "Unsupported distro"; \
-	fi
+	@command -v apt > /dev/null && sudo apt install ffmpeg -y || sudo pacman -S ffmpeg --noconfirm || sudo dnf install ffmpeg -y || echo "Please install ffmpeg manually"
 
 get_goplayer: build
 	@echo "Downloading goplayer"
