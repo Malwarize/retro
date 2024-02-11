@@ -82,8 +82,9 @@ var prevCmd = &cobra.Command{
 }
 
 var seekCmd = &cobra.Command{
-	Use:  "seek",
-	Long: `seek to a position in the current song`,
+	Use:   "seek [seconds]",
+	Short: "seek to a position in the current song",
+	Long:  `seek to a position in the current song`,
 	Run: func(_ *cobra.Command, args []string) {
 		client := controller.GetClient()
 		var seekSeconds int
