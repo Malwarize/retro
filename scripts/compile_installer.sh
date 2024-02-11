@@ -13,7 +13,6 @@ installer_path=./bin/install.sh
 function build_binary {
     local binary_name=$1
     local binary_source=$2
-
     go build -o $binary_name $binary_source
 
     if [ $? -eq 0 ]; then

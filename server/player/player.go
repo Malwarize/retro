@@ -186,6 +186,13 @@ func (p *Player) Seek(d time.Duration) {
 	curretnTimePos := currentMusic.Format.SampleRate.D(currentSamplePos)
 	newTimePos := (curretnTimePos + d) % p.GetCurrentMusicLength()
 	newSamplePos := currentMusic.Format.SampleRate.N(newTimePos)
+	// check if seek is out of bounds
+	if newTimePos < 0 {
+		newSamplePos = 0
+	}
+	if newTimePos > p.GetCurrentMusicLength() {
+		newSamplePos = currentMusic.Streamer.Len()
+	}
 	if err := currentMusic.Streamer.Seek(newSamplePos); err != nil {
 		fmt.Println(err)
 	}

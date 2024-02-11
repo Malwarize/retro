@@ -81,9 +81,9 @@ var prevCmd = &cobra.Command{
 	},
 }
 
-var seekCmd = &cobra.Command{Use: "seek",
-	Short: "seek to a position in the current song",
-	Long:  `seek to a position in the current song`,
+var seekCmd = &cobra.Command{
+	Use:  "seek",
+	Long: `seek to a position in the current song`,
 	Run: func(_ *cobra.Command, args []string) {
 		client := controller.GetClient()
 		var seekSeconds int
@@ -96,6 +96,24 @@ var seekCmd = &cobra.Command{Use: "seek",
 			}
 		}
 		controller.Seek(seekSeconds, client)
+	},
+}
+
+var seekBackCmd = &cobra.Command{
+	Use:   "seekback [seconds]",
+	Short: "seek back by a number of seconds", Long: `seek back by a number of seconds`,
+	Run: func(_ *cobra.Command, args []string) {
+		client := controller.GetClient()
+		var seekSeconds int
+		if len(args) > 0 {
+			var err error
+			seekSeconds, err = strconv.Atoi(args[0])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+		controller.Seek(-seekSeconds, client)
 	},
 }
 
