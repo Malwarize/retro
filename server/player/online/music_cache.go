@@ -117,12 +117,11 @@ func (cf *CachedFiles) Search(query string) []shared.SearchResult {
 	var results []shared.SearchResult
 	for _, file := range cf.Files {
 		if strings.Contains(strings.ToLower(file.Name), strings.ToLower(sanitizeName(query))) {
-			log.Println("File found in cache: ", file.Name)
 			dur, _ := shared.GetMp3Duration(filepath.Join(cf.BaseDir, file.Ftype, shared.CombineNameWithKey(file.Name, file.Key)))
 			results = append(results, shared.SearchResult{
 				Title:       file.Name,
 				Type:        "cache",
-				Destination: shared.CombineNameWithKey(file.Name, file.Key),
+				Destination: filepath.Join(cf.BaseDir, file.Ftype, shared.CombineNameWithKey(file.Name, file.Key)),
 				Duration:    dur,
 			})
 		}
@@ -144,7 +143,7 @@ func (cf *CachedFiles) AddFile(filedata []byte, name string, ftype string, key s
 		log.Println(dirPath, "not found, creating it")
 	}
 
-	filePath := filepath.Join(dirPath, sanitizeName(shared.CombineNameWithKey(name, key)))
+	filePath := filepath.Join(dirPath, shared.CombineNameWithKey(sanitizeName(name), sanitizeName(key)))
 	log.Println("Writing file to: ", filePath)
 	f, err := os.Create(filePath)
 	if err != nil {
