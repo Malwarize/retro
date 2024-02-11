@@ -26,6 +26,18 @@ func parseName(name string) string {
 	}
 	return name
 }
+func convertVolumeToEmojie(volume int) string {
+	if volume == 0 {
+		return volumeLevels[0]
+	}
+	if volume < 50 {
+		return volumeLevels[1]
+	}
+	if volume < 85 {
+		return volumeLevels[2]
+	}
+	return volumeLevels[3]
+}
 
 func DisplayStatus(client *rpc.Client) {
 	status := controller.GetPlayerStatus(client)
@@ -52,7 +64,7 @@ func DisplayStatus(client *rpc.Client) {
 
 		switch status.PlayerState {
 		case shared.Playing:
-			fmt.Println(runningStyle.Render(emojiesStatus[shared.Playing], " Playing"))
+			fmt.Println(runningStyle.Render(emojiesStatus[shared.Playing], " Playing", convertVolumeToEmojie(status.Volume)))
 		case shared.Paused:
 			fmt.Println(pausedStyle.Render(emojiesStatus[shared.Paused], " Paused"))
 		}

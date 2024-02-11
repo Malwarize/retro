@@ -446,6 +446,7 @@ func (p *Player) GetPlayerStatus() shared.Status {
 		CurrentMusicLength:   p.GetCurrentMusicLength(),
 		PlayerState:          p.getPlayerState(),
 		MusicQueue:           p.Queue.GetTitles(),
+		Volume:               p.Vol,
 		Tasks:                p.Tasks,
 	}
 }

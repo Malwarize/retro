@@ -23,6 +23,7 @@ type Status struct {
 	CurrentMusicLength   time.Duration
 	PlayerState          int
 	MusicQueue           []string
+	Volume               int
 	Tasks                map[string]Task // key: target, value: task
 }
 
@@ -39,6 +40,8 @@ func (s Status) String() string {
 	case Stopped:
 		str += "PlayerState: Stopped\n"
 	}
+
+	str += "Volume: " + fmt.Sprintf("%d", s.Volume) + "\n"
 
 	str += "MusicQueue " + "\n"
 	str += "[\n"

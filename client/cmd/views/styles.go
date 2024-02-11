@@ -32,6 +32,13 @@ var tasksEmojies = map[int]string{
 	shared.Searching:   "🔍",
 }
 
+var volumeLevels = []string{
+	"🔇",
+	"🔈",
+	"🔉",
+	"🔊",
+}
+
 var failedEmojie = "❌"
 var docStyle = lipgloss.NewStyle().Margin(1, 2)
 var quitTextStyle = lipgloss.NewStyle().Margin(1, 0, 2, 4)
