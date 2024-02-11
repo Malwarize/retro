@@ -70,6 +70,16 @@ func (p *Player) RPCSeek(d time.Duration, reply *int) error {
 	return nil
 }
 
+func (p *Player) RPCVolume(vp int /*volume percentage*/, reply *int) error {
+	go func() {
+		log.Println("RPCVolume called with volume percentage :", vp)
+		p.Volume(vp)
+		*reply = 0
+		log.Println("RPCVolume done")
+	}()
+	return nil
+}
+
 func (p *Player) RPCResume(_ int, reply *int) error {
 	go func() {
 		log.Println("RPCResume called")

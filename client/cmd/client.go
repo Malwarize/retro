@@ -117,6 +117,25 @@ var seekBackCmd = &cobra.Command{
 	},
 }
 
+var volumeCmd = &cobra.Command{
+	Use:   "vol [percentage]",
+	Short: "set the volume",
+	Long:  `set the volume`,
+	Run: func(_ *cobra.Command, args []string) {
+		client := controller.GetClient()
+		if len(args) > 0 {
+			vol, err := strconv.Atoi(args[0])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			controller.Volume(vol, client)
+		} else {
+			fmt.Println("no volume specified")
+		}
+	},
+}
+
 var removeCmd = &cobra.Command{
 	Use:   "remove",
 	Short: "remove a song from the queue",

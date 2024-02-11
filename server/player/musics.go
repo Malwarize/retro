@@ -4,12 +4,13 @@ import (
 	"path/filepath"
 
 	"github.com/gopxl/beep"
+	"github.com/gopxl/beep/effects"
 )
 
 type Music struct {
-	Streamer beep.StreamSeekCloser
-	Format   beep.Format
-	Path     string
+	Volume *effects.Volume
+	Format beep.Format
+	Path   string
 }
 
 func NewMusic(path string) (Music, error) {
@@ -18,9 +19,13 @@ func NewMusic(path string) (Music, error) {
 		return Music{}, err
 	}
 	return Music{
-		Streamer: streamer,
-		Format:   format,
-		Path:     path,
+		Volume: &effects.Volume{
+			Streamer: streamer,
+			Base:     2,
+			Silent:   false,
+		},
+		Format: format,
+		Path:   path,
 	}, nil
 }
 
@@ -30,4 +35,18 @@ func (m Music) String() string {
 
 func (m Music) Name() string {
 	return filepath.Base(m.Path)
+}
+
+func (m Music) Streamer() beep.StreamSeekCloser {
+	return m.Volume.Streamer.(beep.StreamSeekCloser)
+}
+
+func (m Music) SetVolume(vp int) {
+	if vp == 0 {
+		m.Volume.Silent = true
+	} else {
+		m.Volume.Silent = false
+		volume := float64(vp-100) / 16.0
+		m.Volume.Volume = volume
+	}
 }

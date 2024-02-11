@@ -34,6 +34,7 @@ type Player struct {
 	Director        *online.OnlineDirector
 	Tasks           map[string]shared.Task
 	PlayListManager *PlayListManager
+	Vol             int
 	mu              sync.Mutex
 }
 
@@ -70,6 +71,7 @@ func NewPlayer() *Player {
 		Converter:       converter,
 		Director:        director,
 		PlayListManager: playlistManager,
+		Vol:             100,
 		Tasks:           make(map[string]shared.Task),
 	}
 }
@@ -97,7 +99,8 @@ func (p *Player) Play() {
 	p.setPlayerState(Playing)
 	go func() {
 		done := make(chan struct{})
-		speaker.Play(beep.Seq(music.Streamer, beep.Callback(func() {
+		music.SetVolume(p.Vol)
+		speaker.Play(beep.Seq(music.Volume, beep.Callback(func() {
 			done <- struct{}{}
 		})))
 		<-done
@@ -124,7 +127,7 @@ func (p *Player) Next() {
 	if p.getPlayerState() == Paused {
 		p.Resume()
 	}
-	p.Queue.GetCurrentMusic().Streamer.Seek(0)
+	p.Queue.GetCurrentMusic().Streamer().Seek(0)
 	p.Queue.QueueNext()
 	p.Play()
 }
@@ -138,7 +141,7 @@ func (p *Player) Prev() {
 		p.Resume()
 	}
 	currentMusic := p.Queue.GetCurrentMusic()
-	currentMusic.Streamer.Seek(0)
+	currentMusic.Streamer().Seek(0)
 	p.Queue.QueuePrev()
 	p.Play()
 }
@@ -182,7 +185,7 @@ func (p *Player) Seek(d time.Duration) {
 	speaker.Lock()
 	defer speaker.Unlock()
 	currentMusic := p.Queue.GetCurrentMusic()
-	currentSamplePos := currentMusic.Streamer.Position()
+	currentSamplePos := currentMusic.Streamer().Position()
 	curretnTimePos := currentMusic.Format.SampleRate.D(currentSamplePos)
 	newTimePos := (curretnTimePos + d) % p.GetCurrentMusicLength()
 	newSamplePos := currentMusic.Format.SampleRate.N(newTimePos)
@@ -191,11 +194,21 @@ func (p *Player) Seek(d time.Duration) {
 		newSamplePos = 0
 	}
 	if newTimePos > p.GetCurrentMusicLength() {
-		newSamplePos = currentMusic.Streamer.Len()
+		newSamplePos = currentMusic.Streamer().Len()
 	}
-	if err := currentMusic.Streamer.Seek(newSamplePos); err != nil {
+	if err := currentMusic.Streamer().Seek(newSamplePos); err != nil {
 		fmt.Println(err)
 	}
+}
+func (p *Player) Volume(vp int /*volume percentage*/) {
+	if p.getPlayerState() == Stopped {
+		return
+	}
+	p.Vol = vp
+	currentMusic := p.Queue.GetCurrentMusic()
+	speaker.Lock()
+	currentMusic.SetVolume(vp)
+	speaker.Unlock()
 }
 
 func (p *Player) Remove(index int) {
@@ -259,7 +272,7 @@ func (p *Player) GetCurrentMusicPosition() time.Duration {
 		return 0
 	}
 	currentMusic := p.Queue.GetCurrentMusic()
-	currentSamplePos := currentMusic.Streamer.Position()
+	currentSamplePos := currentMusic.Streamer().Position()
 	curretnTimePos := currentMusic.Format.SampleRate.D(currentSamplePos)
 	return curretnTimePos
 }
@@ -269,7 +282,7 @@ func (p *Player) GetCurrentMusicLength() time.Duration {
 		return 0
 	}
 	music := p.Queue.GetCurrentMusic()
-	return music.Format.SampleRate.D(music.Streamer.Len())
+	return music.Format.SampleRate.D(music.Streamer().Len())
 }
 
 func (p *Player) CheckWhatIsThis(unknown string) string {

@@ -104,6 +104,25 @@ func Seek(d int, client *rpc.Client) {
 	}
 }
 
+func Volume(vp int, client *rpc.Client) {
+	if vp > 100 {
+		// health warning
+		fmt.Print("    ⚠️ Volume greater than 100% may damage your ears, skip this warning? (y/n)")
+		var response string
+		fmt.Scanln(&response)
+		if response != "y" {
+			return
+		}
+	}
+	args := vp
+	var reply int
+	err := client.Call("Player.RPCVolume", args, &reply)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
 func Remove(index int, client *rpc.Client) {
 	args := index
 	var reply int

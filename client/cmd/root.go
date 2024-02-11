@@ -33,6 +33,7 @@ func init() {
 	rootCmd.AddCommand(prevCmd)
 	rootCmd.AddCommand(seekCmd)
 	rootCmd.AddCommand(seekBackCmd)
+	rootCmd.AddCommand(volumeCmd)
 	rootCmd.AddCommand(removeCmd)
 	rootCmd.AddCommand(statusCmd)
 	rootCmd.AddCommand(playlistCmd)

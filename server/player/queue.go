@@ -76,7 +76,7 @@ func (q *MusicQueue) IsEmpty() bool {
 
 func (q *MusicQueue) Clear() {
 	for _, music := range q.queue {
-		music.Streamer.Close()
+		music.Streamer().Close()
 	}
 	q.queue = make([]Music, 0)
 	q.SetCurrentIndex(0)
@@ -88,7 +88,7 @@ func (q *MusicQueue) Remove(index int) {
 	}
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	q.queue[index].Streamer.Close()
+	q.queue[index].Streamer().Close()
 	q.queue = append(q.queue[:index], q.queue[index+1:]...)
 }
 
