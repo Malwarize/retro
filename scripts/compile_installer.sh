@@ -33,9 +33,38 @@ goplay_binary_data="$(base64 $goplay_binary)"
 goplayer_binary_data="$(base64 $goplayer_binary)"
 service_data="$(base64 $service_file)"
 
+install_yt-dlp() {
+    echo "Installing yt-dlp"
+    sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux -o /usr/local/bin/yt-dlp
+    sudo chmod a+rx /usr/local/bin/yt-dlp
+}
+
+install_ffmpeg() {
+    echo "Installing ffmpeg"
+    if command -v apt > /dev/null; then
+        sudo apt install -y ffmpeg
+    elif command -v dnf > /dev/null; then
+        sudo dnf install -y ffmpeg
+    elif command -v pacman > /dev/null
+    then
+        sudo pacman -S ffmpeg
+    else
+        echo "Could not install ffmpeg. Please install it manually."
+        exit 1
+    fi
+}
+
+check_dependencies() {
+    echo "Checking dependencies"
+    for dependency in yt-dlp ffmpeg; do
+        command -v $dependency > /dev/null || install_$dependency
+    done
+}
+
 # stopping services
 function cleanup {
     echo "Cleaning up"
+    systemctl --user unmask goplay
     systemctl --user stop goplay
     systemctl --user disable goplay
     systemctl --user daemon-reload
@@ -63,6 +92,7 @@ function install_goplayer {
 
 function start_services {
     echo "Starting goplay service"
+    systemctl --user unmask goplay
     systemctl --user daemon-reload
     systemctl --user enable goplay
     systemctl --user start goplay
@@ -75,13 +105,14 @@ function install_service {
 
 function main {
     trap cleanup SIGINT
-
     cleanup
+    check_dependencies
     install_goplay
     install_goplayer
     install_service
     start_services
 }
+
 main
 EOF
 
