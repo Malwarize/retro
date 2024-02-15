@@ -1,31 +1,31 @@
-#!/bin/bash
-# Filename: create_installer.sh
+    #!/bin/bash
+    # Filename: create_installer.sh
 
-# Parameters
-goplay_binary=./bin/goplay
-goplayer_binary=./bin/goplayer
-service_file=./etc/goplay.service
-install_path="~/.local/bin"
-systemd_user_path=/etc/systemd/user
-installer_path=./bin/install.sh
+    # Parameters
+    goplay_binary=./bin/goplay
+    goplayer_binary=./bin/goplayer
+    service_file=./etc/goplay.service
+    install_path="~/.local/bin"
+    systemd_user_path=/etc/systemd/user
+    installer_path=./bin/install.sh
 
-# Function to build binaries
-function build_binary {
-    local binary_name=$1
-    local binary_source=$2
-    go build -o $binary_name $binary_source
+    # Function to build binaries
+    function build_binary {
+        local binary_name=$1
+        local binary_source=$2
+        go build -o $binary_name $binary_source
 
-    if [ $? -eq 0 ]; then
-        echo "Built $binary_name successfully"
-    else
-        echo "Failed to build $binary_name"
-        exit 1
-    fi
-}
+        if [ $? -eq 0 ]; then
+            echo "Built $binary_name successfully"
+        else
+            echo "Failed to build $binary_name"
+            exit 1
+        fi
+    }
 
-# Function to generate installer
-function generate_installer {
-    cat <<EOF > $installer_path
+    # Function to generate installer
+    function generate_installer {
+        cat <<EOF > $installer_path
 #!/bin/bash
 # Path: install.sh
 
@@ -64,15 +64,23 @@ check_dependencies() {
 # stopping services
 function cleanup {
     echo "Cleaning up"
-    systemctl --user unmask goplay
-    systemctl --user stop goplay
-    systemctl --user disable goplay
-    systemctl --user daemon-reload
-    sudo rm -rf $systemd_user_path/goplay.service
+    echo "Disabling and stopping goplay service..."
+    # check if service exists
+    # check if service is running
+    if systemctl --user is-active --quiet goplay; then
+        systemctl --user stop goplay
+    fi
+    # check if service is enabled
+    if systemctl --user is-enabled --quiet goplay; then
+        systemctl --user disable goplay
+    fi
+    echo "Removing files..."
+    sudo rm -rf $systemd_user_path/goplay.service  # Remove the old service file
     sudo rm -rf $install_path/goplay
     sudo rm -rf /usr/local/bin/goplay
     sudo rm -rf $install_path/goplayer
     sudo rm -rf /usr/local/bin/goplayer
+    systemctl --user daemon-reload
 }
 
 
@@ -92,15 +100,16 @@ function install_goplayer {
 
 function start_services {
     echo "Starting goplay service"
-    systemctl --user unmask goplay
     systemctl --user daemon-reload
-    systemctl --user enable goplay
-    systemctl --user start goplay
+    systemctl --user is-enabled --quiet goplay || systemctl --user enable goplay > /dev/null
+    systemctl --user is-active --quiet goplay || systemctl --user start goplay > /dev/null
 }
 
 function install_service {
     echo "Installing goplay service"
-    echo "$service_data" | base64 -d | sudo tee /etc/systemd/user/goplay.service > /dev/null
+    mkdir -p $systemd_user_path
+    echo "\$service_data" | base64 -d | sudo tee $systemd_user_path/goplay.service > /dev/null
+    systemctl --user daemon-reload
 }
 
 function main {
@@ -120,7 +129,6 @@ EOF
     echo "Installer script created: $installer_path"
 }
 
-# Main function
 function main {
     echo "Building goplay and goplayer"
     build_binary "$goplay_binary" "client/main.go"
@@ -130,6 +138,4 @@ function main {
     generate_installer
 }
 
-# Execute the main function
 main
-

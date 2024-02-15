@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
 	"sync"
 	"time"
@@ -12,14 +13,63 @@ var cfg *Config // singleton instance
 var DEBUG = false // set to true for debug mode
 
 type Config struct {
-	GoPlayPath    string // used to store cache, playlists, etc
-	PlaylistPath  string // path to playlists
-	CacheDir      string // path to cache
-	Pathytldpl    string // path to yt-dlp
-	Pathffmpeg    string // path to ffmpeg
-	Pathffprobe   string // path to ffprobe
-	SearchTimeOut time.Duration
-	Separator     string // separator for cache files filename_#__#_id
+	GoPlayPath    string        `json:"goplay_path"`   // path to goplay
+	PlaylistPath  string        `json:"playlist_path"` // path to playlists
+	CacheDir      string        `json:"cache_dir"`     // path to cache
+	Pathytldpl    string        `json:"path_ytldpl"`   // path to yt-dlp
+	Pathffmpeg    string        `json:"path_ffmpeg"`   // path to ffmpeg
+	Pathffprobe   string        `json:"path_ffprobe"`  // path to ffprobe
+	SearchTimeOut time.Duration `json:"search_timeout"`
+	Separator     string        `json:"separator"` // separator for file names cache file
+	Theme         string        `json:"theme"`     // blue, purple, pink
+}
+
+var configPath = os.Getenv("HOME") + "/.config/goplay.json"
+
+func loadConfig() *Config {
+	// read config file
+	if _, err := os.Stat(configPath); err == nil {
+		jsonFile, err := os.ReadFile(configPath)
+		if err != nil {
+			return nil
+		}
+		var jsonConfig Config
+		err = json.Unmarshal(jsonFile, &jsonConfig)
+		if err != nil {
+			return nil
+		}
+		// default values
+		if jsonConfig.GoPlayPath == "" {
+			jsonConfig.GoPlayPath = os.Getenv("HOME") + "/.goplay/"
+		}
+		if jsonConfig.PlaylistPath == "" {
+			jsonConfig.PlaylistPath = os.Getenv("HOME") + "/.goplay/playlists/"
+		}
+		if jsonConfig.CacheDir == "" {
+			jsonConfig.CacheDir = os.Getenv("HOME") + "/.goplay/cache/"
+		}
+		if jsonConfig.Pathytldpl == "" {
+			jsonConfig.Pathytldpl = "yt-dlp"
+		}
+		if jsonConfig.Pathffmpeg == "" {
+			jsonConfig.Pathffmpeg = "ffmpeg"
+		}
+		if jsonConfig.Pathffprobe == "" {
+			jsonConfig.Pathffprobe = "ffprobe"
+		}
+		if jsonConfig.SearchTimeOut == 0 {
+			jsonConfig.SearchTimeOut = 60 * time.Second
+		}
+		if jsonConfig.Separator == "" {
+			jsonConfig.Separator = "_#__#_"
+		}
+		if jsonConfig.Theme == "" {
+			jsonConfig.Theme = "pink"
+		}
+
+		return &jsonConfig
+	}
+	return nil
 }
 
 func DebugConfig() *Config {
@@ -32,6 +82,7 @@ func DebugConfig() *Config {
 		Pathffprobe:   "ffprobe",
 		SearchTimeOut: 60 * time.Second,
 		Separator:     "_#__#_",
+		Theme:         "pink",
 	}
 }
 
@@ -46,6 +97,7 @@ func ReleaseConfig() *Config {
 		Pathffprobe:   "ffprobe",
 		SearchTimeOut: 60 * time.Second,
 		Separator:     "_#__#_",
+		Theme:         "pink",
 	}
 }
 
@@ -54,6 +106,9 @@ func GetConfig() *Config {
 		if DEBUG {
 			cfg = DebugConfig()
 		} else {
+			if cfg = loadConfig(); cfg != nil {
+				return
+			}
 			cfg = ReleaseConfig()
 		}
 	})

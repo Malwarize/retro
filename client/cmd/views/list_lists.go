@@ -13,7 +13,7 @@ func PlayListsDisplay(client *rpc.Client) {
 		fmt.Println("No playlists")
 		return
 	}
-	fmt.Println(playListNameStyle.Render("📼 Playlists:	"))
+	fmt.Println(GetTheme().ProgressStyle.Render("📼 Playlists:	"))
 	for _, playlist := range playlists {
 		fmt.Printf("\n   - %s\n", playlist)
 	}
@@ -26,7 +26,7 @@ func PlayListSongsDisplay(name string, client *rpc.Client) {
 		fmt.Println("No songs in playlist")
 		return
 	}
-	fmt.Println(playListNameStyle.Render("🎧 Playlist: ") + name)
+	fmt.Println(GetTheme().ProgressStyle.Render("🎧 Playlist: ") + name)
 	for index, song := range songs {
 		fmt.Printf(
 			"\n    %d : %s\n", index, parseName(song),

@@ -58,7 +58,7 @@ func (m model) Init() tea.Cmd {
 func NewModel(client *rpc.Client, query string) *model {
 	spin := spinner.New()
 	spin.Spinner = spinner.Points
-	spin.Style = spinnerStyle
+	spin.Style = GetTheme().SpinnerStyle
 	return &model{
 		client: client,
 		query:  query,
@@ -68,7 +68,7 @@ func NewModel(client *rpc.Client, query string) *model {
 }
 
 func NewList(items []list.Item) list.Model {
-	listModel := list.New(items, list.NewDefaultDelegate(), 50, 14)
+	listModel := list.New(items, GetTheme().ListDelegate, 50, 14)
 	listModel.Title = "Select a song 👇"
 	listModel.SetFilteringEnabled(false)
 	listModel.SetShowHelp(false)
