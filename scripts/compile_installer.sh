@@ -65,8 +65,6 @@ check_dependencies() {
 function cleanup {
     echo "Cleaning up"
     echo "Disabling and stopping goplay service..."
-    # check if service exists
-    # check if service is running
     if systemctl --user is-active --quiet goplay; then
         systemctl --user stop goplay
     fi
@@ -75,24 +73,47 @@ function cleanup {
         systemctl --user disable goplay
     fi
     echo "Removing files..."
-    sudo rm -rf $systemd_user_path/goplay.service  # Remove the old service file
-    sudo rm -rf $install_path/goplay
-    sudo rm -rf /usr/local/bin/goplay
-    sudo rm -rf $install_path/goplayer
-    sudo rm -rf /usr/local/bin/goplayer
-    systemctl --user daemon-reload
+    if [ -f $systemd_user_path/goplay.service ]; then
+        sudo rm -rf $systemd_user_path/goplay.service  # Remove the old service file
+    fi
+    if [ -f $install_path/goplay ]; then
+        sudo rm -rf $install_path/goplay > /dev/null
+    fi
+    if [ -f $install_path/goplayer ]; then
+        sudo rm -rf $install_path/goplayer > /dev/null
+    fi
+    # remove links 
+    if [ -L /usr/local/bin/goplay ]; then
+        sudo rm -rf /usr/local/bin/goplay
+    fi
+    if [ -L /usr/local/bin/goplayer ]; then
+        sudo rm -rf /usr/local/bin/goplayer
+    fi
+    systemctl --user daemon-reload 
+    echo "Cleanup done"
 }
 
 
 function install_goplay {
     echo "Installing goplay to $install_path/goplay"
+    mkdir -p $install_path
     echo "\$goplay_binary_data" | base64 -d > $install_path/goplay
     chmod +x $install_path/goplay
     sudo ln -s $install_path/goplay /usr/local/bin/goplay
+    if [ -f ~/.bashrc ]; then
+        echo "export PATH=\$PATH:$install_path" >> ~/.bashrc
+    elif [ -f ~/.zshrc ]; then
+        echo "export PATH=\$PATH:$install_path" >> ~/.zshrc
+    elif [ -f ~/.config/fish/config.fish ]; then
+        echo "set -x PATH \$PATH $install_path" >> ~/.config/fish/config.fish
+    else
+        echo "Could not find .bashrc, .zshrc or config.fish. Please add $install_path to your PATH manually."
+    fi
 }
 
 function install_goplayer {
     echo "Installing goplayer to $install_path/goplayer"
+    mkdir -p $install_path
     echo "\$goplayer_binary_data" | base64 -d > $install_path/goplayer
     chmod +x $install_path/goplayer
     sudo ln -s $install_path/goplayer /usr/local/bin/goplayer

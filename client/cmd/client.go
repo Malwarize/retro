@@ -120,7 +120,7 @@ var seekBackCmd = &cobra.Command{
 
 var volumeCmd = &cobra.Command{
 	Use:   "vol [percentage]",
-	Short: "set the volume",
+	Short: "set the volume to a percentage",
 	Long:  `set the volume`,
 	Run: func(_ *cobra.Command, args []string) {
 		client := controller.GetClient()
