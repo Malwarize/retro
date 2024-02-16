@@ -439,6 +439,17 @@ func (p *Player) DetectAndPlay(unknown string) []shared.SearchResult {
 	return []shared.SearchResult{}
 }
 
+func (p *Player) SetTheme(theme string) {
+	err := config.EditConfigField("theme", theme)
+	if err != nil {
+		log.Println("Failed to set theme", err)
+	}
+}
+
+func (p *Player) GetTheme() string {
+	return config.GetConfig().Theme
+}
+
 func (p *Player) GetPlayerStatus() shared.Status {
 	return shared.Status{
 		CurrentMusicIndex:    p.Queue.GetCurrentIndex(),

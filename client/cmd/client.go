@@ -257,3 +257,18 @@ var playlistPlayCmd = &cobra.Command{
 		}
 	},
 }
+
+var setThemeCmd = &cobra.Command{
+	Use:   "theme",
+	Short: "set the theme [purple|pink|blue]",
+	Long:  `set the theme`,
+	Run: func(_ *cobra.Command, args []string) {
+		client := controller.GetClient()
+		if len(args) > 0 {
+			theme := strings.TrimSpace(args[0])
+			controller.SetTheme(theme, client)
+		} else {
+			fmt.Println("no theme specified")
+		}
+	},
+}

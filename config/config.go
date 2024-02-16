@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"sync"
 	"time"
@@ -69,6 +70,44 @@ func loadConfig() *Config {
 
 		return &jsonConfig
 	}
+	return nil
+}
+
+func EditConfigField(field string, value string) error {
+	jsonConfig := GetConfig()
+	switch field {
+	case "goplay_path":
+		jsonConfig.GoPlayPath = value
+	case "playlist_path":
+		jsonConfig.PlaylistPath = value
+	case "cache_dir":
+		jsonConfig.CacheDir = value
+	case "path_ytldpl":
+		jsonConfig.Pathytldpl = value
+	case "path_ffmpeg":
+		jsonConfig.Pathffmpeg = value
+	case "path_ffprobe":
+		jsonConfig.Pathffprobe = value
+	case "search_timeout":
+		jsonConfig.SearchTimeOut, _ = time.ParseDuration(value)
+	case "separator":
+		jsonConfig.Separator = value
+	case "theme":
+		jsonConfig.Theme = value
+	default:
+		return errors.New("Unknown field : " + field)
+	}
+	// write config file
+	jsonData, err := json.MarshalIndent(jsonConfig, "", "  ")
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(configPath, jsonData, 0644)
+	if err != nil {
+		return err
+	}
+	// update the singleton instance
+	cfg = jsonConfig
 	return nil
 }
 

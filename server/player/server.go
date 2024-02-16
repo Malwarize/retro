@@ -175,6 +175,23 @@ func (p *Player) RPCPlayListPlayAll(name string, reply *int) error {
 	return nil
 }
 
+// Theme
+
+func (p *Player) RPCGetTheme(_ int, reply *string) error {
+	log.Println("RPCGetTheme called")
+	*reply = p.GetTheme()
+	log.Println("RPCGetTheme done with reply :", reply)
+	return nil
+}
+
+func (p *Player) RPCSetTheme(theme string, reply *int) error {
+	log.Println("RPCSetTheme called with theme :", theme)
+	p.SetTheme(theme)
+	*reply = 1
+	log.Println("RPCSetTheme done")
+	return nil
+}
+
 func StartIPCServer(port string) {
 	log.Println("Creating Player instance")
 	player := NewPlayer()

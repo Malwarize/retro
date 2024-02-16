@@ -164,6 +164,26 @@ func DetectAndPlay(query string, client *rpc.Client) []shared.SearchResult {
 	return reply
 }
 
+func GetTheme(client *rpc.Client) string {
+	var reply string
+	err := client.Call("Player.RPCGetTheme", 0, &reply)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	return reply
+}
+
+func SetTheme(theme string, client *rpc.Client) {
+	args := theme
+	var reply int
+	err := client.Call("Player.RPCSetTheme", args, &reply)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
 var client *rpc.Client
 
 func GetClient() *rpc.Client {

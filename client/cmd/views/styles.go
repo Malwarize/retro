@@ -1,7 +1,7 @@
 package views
 
 import (
-	"github.com/Malwarize/goplay/config"
+	"github.com/Malwarize/goplay/client/controller"
 	"github.com/Malwarize/goplay/shared"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/lipgloss"
@@ -206,12 +206,14 @@ func NewBlueTheme() Themes {
 }
 
 func GetTheme() Themes {
-	config := config.GetConfig()
-	if config.Theme == "pink" {
+	client := controller.GetClient()
+	theme := controller.GetTheme(client)
+	switch theme {
+	case "purple":
+		return NewPurpleTheme()
+	case "blue":
+		return NewBlueTheme()
+	default:
 		return NewPinkTheme()
 	}
-	if config.Theme == "blue" {
-		return NewBlueTheme()
-	}
-	return NewPurpleTheme()
 }

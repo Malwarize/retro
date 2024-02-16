@@ -36,6 +36,7 @@ func init() {
 	rootCmd.AddCommand(volumeCmd)
 	rootCmd.AddCommand(removeCmd)
 	rootCmd.AddCommand(statusCmd)
+	rootCmd.AddCommand(setThemeCmd)
 	rootCmd.AddCommand(playlistCmd)
 	playlistCmd.AddCommand(playlistCreateCmd)
 	playlistCmd.AddCommand(playlistRemoveCmd)
