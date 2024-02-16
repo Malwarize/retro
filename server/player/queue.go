@@ -60,6 +60,12 @@ func (q *MusicQueue) GetCurrentMusic() *Music {
 func (q *MusicQueue) Enqueue(music Music) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
+	// check if music is already in queue
+	for _, m := range q.queue {
+		if music.Path == m.Path {
+			return
+		}
+	}
 	q.queue = append(q.queue, music)
 }
 

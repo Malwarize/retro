@@ -25,6 +25,7 @@ func (i searchResultItem) Title() string {
 	}
 	return i.title
 }
+
 func (i searchResultItem) Description() string {
 	return emojiesType[i.ftype] + " " + i.ftype + " " + i.duration
 }
