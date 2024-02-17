@@ -98,6 +98,9 @@ func (plm *PlayListManager) AddMusic(name string, music Music) error {
 }
 
 func (plm *PlayListManager) RemoveMusic(name string, index int) error {
+	if index < 0 || index >= len(plm.PlayLists[name].Items) {
+		return os.ErrNotExist
+	}
 	music := plm.PlayLists[name].Items[index]
 	err := os.Remove(filepath.Join(plm.PlayListPath, name, music.Name()))
 	if err != nil {

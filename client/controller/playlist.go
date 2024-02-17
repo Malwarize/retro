@@ -8,7 +8,7 @@ import (
 	"github.com/Malwarize/goplay/shared"
 )
 
-func PlayListsNames(client *rpc.Client) []string {
+func GetPlayListsNames(client *rpc.Client) []string {
 	var reply []string
 	err := client.Call("Player.RPCPlayListsNames", 0, &reply)
 	if err != nil {

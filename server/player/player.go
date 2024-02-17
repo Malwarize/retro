@@ -364,7 +364,6 @@ func (p *Player) CheckWhatIsThis(unknown string) string {
 			return engine.Name()
 		}
 	}
-
 	return "unknown"
 }
 

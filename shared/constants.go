@@ -16,3 +16,9 @@ const (
 	Paused
 	Stopped
 )
+
+const (
+	PinkTheme   = "pink"
+	BlueTheme   = "blue"
+	PurpleTheme = "purple"
+)

@@ -9,7 +9,7 @@ import (
 )
 
 func PlayListsDisplay(client *rpc.Client) {
-	playlists := controller.PlayListsNames(client)
+	playlists := controller.GetPlayListsNames(client)
 	if len(playlists) == 0 {
 		fmt.Println("No playlists")
 		return

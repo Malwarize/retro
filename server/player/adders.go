@@ -15,8 +15,9 @@ func (p *Player) AddMusicFromFile(path string) {
 	music, err := NewMusic(path)
 	if err != nil {
 		log.Println(err)
+	} else {
+		p.Queue.Enqueue(music)
 	}
-	p.Queue.Enqueue(music)
 }
 
 // this function is used to play music from a file that is not mp3/ it will convert it to mp3 in temp and add it to the queue

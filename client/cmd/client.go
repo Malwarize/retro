@@ -15,15 +15,30 @@ import (
 var client = controller.GetClient()
 
 var playCmd = &cobra.Command{
-	Use:   "play",
-	Short: "play a song",
-	Long:  `play a song`,
+	Use:   "play [query]",
+	Short: "play a song <query>",
+	Long: `play a song <query>
+	play is smart enough to play the song from the query, you don't have to specify the type of the query
+	if you want to explicitly specify the type of query, use the flags (TODO: add explicit flags)
+		- if the query is a directory, it will play all the songs in the directory
+		- if the query is a playlist, it will play all the songs in the playlist
+		- if the query is a audio file, it will play the audio file
+		- if the query is a youtube link, it will play the audio from the link
+		- if the query is a search query, it will search and return the results to select from
+	`,
+	ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+		var options []string
+		list := controller.GetPlayListsNames(client)
+		for _, song := range list {
+			options = append(options, shared.ViewParseName(song)+":playlist 📁")
+		}
+		return options, cobra.ShellCompDirectiveDefault
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if dir, err := cmd.Flags().GetString("dir"); err == nil && dir != "" {
 			controller.PlayDir(dir, client)
 			os.Exit(0)
 		}
-
 		if len(args) > 0 {
 			song := strings.Join(args, " ")
 			views.SearchThenSelect(song, client)
@@ -37,7 +52,8 @@ var playCmd = &cobra.Command{
 var pauseCmd = &cobra.Command{
 	Use:   "pause",
 	Short: "pause the current song",
-	Long:  `pause the current song`,
+	Long: `this command will pause the current song if it's playing
+very easy to use, just type "pause" and hit enter`,
 	Run: func(_ *cobra.Command, _ []string) {
 		controller.Pause(client)
 	},
@@ -46,7 +62,8 @@ var pauseCmd = &cobra.Command{
 var resumeCmd = &cobra.Command{
 	Use:   "resume",
 	Short: "resume the current song",
-	Long:  `resume the current song`,
+	Long: `this command will resume the current song if it's paused
+very easy to use, just type "resume" and hit enter`,
 	Run: func(_ *cobra.Command, _ []string) {
 		controller.Resume(client)
 	},
@@ -55,7 +72,9 @@ var resumeCmd = &cobra.Command{
 var stopCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "stop the current song",
-	Long:  `stop the current song`,
+	Long: `this command will stop the current song 
+it will also clear the queue and reset the player and remove the tasks if any
+`,
 	Run: func(_ *cobra.Command, _ []string) {
 		controller.Stop(client)
 	},
@@ -63,7 +82,11 @@ var stopCmd = &cobra.Command{
 
 var nextCmd = &cobra.Command{
 	Use:   "next",
-	Short: "play the next song", Long: `play the next song`,
+	Short: "play the next song",
+	Long: `this command will play the next song in the queue
+if there is no next song, it will do nothing if the queue is empty 
+it will play the first song in the queue if the queue is not empty 
+`,
 	Run: func(_ *cobra.Command, _ []string) {
 		controller.Next(client)
 	},
@@ -72,7 +95,10 @@ var nextCmd = &cobra.Command{
 var prevCmd = &cobra.Command{
 	Use:   "prev",
 	Short: "play the previous song",
-	Long:  `play the previous song`,
+	Long: `play the previous song
+if there is no previous song, it will do nothing if the queue is empty
+it will play the last song in the queue if the queue is not empty
+`,
 	Run: func(_ *cobra.Command, _ []string) {
 		controller.Prev(client)
 	},
@@ -81,7 +107,21 @@ var prevCmd = &cobra.Command{
 var seekCmd = &cobra.Command{
 	Use:   "seek [seconds]",
 	Short: "seek to a position in the current song",
-	Long:  `seek to a position in the current song`,
+	Long: `seek to a position in the current song 
+if you are seeking forward, use positive seconds
+if you are seeking backward, use negative seconds with -- seconds
+	seek -- 10
+	seek 10
+you can use seekback to "seek" backward instead of using negative seconds
+
+it will seek 5 seconds toward the end of the song if no seconds provided
+	seek
+	seek 5
+	seekback
+	seekback 5
+if the seek seconds is greater than the song duration, it will play the next song in the queue
+if the seek seconds is less than the song duration, it will rewind to the beginning of the song
+`,
 	Run: func(_ *cobra.Command, args []string) {
 		var seekSeconds int
 		if len(args) > 0 {
@@ -98,7 +138,16 @@ var seekCmd = &cobra.Command{
 
 var seekBackCmd = &cobra.Command{
 	Use:   "seekback [seconds]",
-	Short: "seek back by a number of seconds", Long: `seek back by a number of seconds`,
+	Short: "seek back by a number of seconds",
+	Long: `seek back by a number of seconds 
+this command will seek back by a number of seconds
+it will seek 5 seconds back if no seconds provided
+	seekback
+	seekback 5
+if the seekback seconds is less than the song duration, it will rewind to the beginning of the song
+
+if you are seeking forward check "seek" command
+`,
 	Run: func(_ *cobra.Command, args []string) {
 		var seekSeconds int
 		if len(args) > 0 {
@@ -116,7 +165,10 @@ var seekBackCmd = &cobra.Command{
 var volumeCmd = &cobra.Command{
 	Use:   "vol [percentage]",
 	Short: "set the volume to a percentage",
-	Long:  `set the volume`,
+	Args:  cobra.MinimumNArgs(1),
+	Long: `set the volume to a percentage
+this command will set the volume to a percentage between 0 and 100
+`,
 	Run: func(_ *cobra.Command, args []string) {
 		if len(args) > 0 {
 			vol, err := strconv.Atoi(args[0])
@@ -132,11 +184,14 @@ var volumeCmd = &cobra.Command{
 }
 
 var removeCmd = &cobra.Command{
-	Use:   "remove",
-	Short: "remove a song from the queue",
-	Long:  `remove a song from the queue`,
-	ValidArgsFunction: func(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
-		client := controller.GetClient()
+	Use:   "remove <index> | <song name>",
+	Short: "remove a song from the queue by index or name",
+	Long: `remove a song from the queue
+	Args:  cobra.MaximumNArgs(1),
+this command will remove a song from the queue
+it accepts the index of the song in the queue or the name of the song
+`,
+	ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 		playerStatus := controller.GetPlayerStatus(client)
 
 		names := make([]string, 0, len(playerStatus.MusicQueue))
@@ -175,7 +230,11 @@ var removeCmd = &cobra.Command{
 var statusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "get the current status of the player queue",
-	Long:  `get the current status of the player queue`,
+	Long: `get the current status of the player queue
+this command will display the current status of the player queue
+including the current song, the queue, the current position, the tasks, volume, and the volume level
+you can change the theme of the status display using the "theme" command 
+`,
 	Run: func(_ *cobra.Command, _ []string) {
 		views.DisplayStatus(client)
 	},
@@ -183,11 +242,22 @@ var statusCmd = &cobra.Command{
 
 var playlistCmd = &cobra.Command{
 	Use:   "list",
-	Short: "list playlists",
-	Long:  `list playlists`,
+	Short: "list playlists | list songs in a playlist",
+	Long: `list playlists 
+this command will list all the playlists
+if no playlist name is provided, it will list all the playlists
+if a playlist name is provided, it will list all the songs in the playlist
+`,
+	ValidArgsFunction: func(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
+		if len(args) == 0 {
+			return controller.GetPlayListsNames(client), cobra.ShellCompDirectiveDefault
+		}
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	},
 	Run: func(_ *cobra.Command, args []string) {
 		if len(args) > 0 {
-			listname := strings.TrimSpace(args[0])
+			listname := strings.TrimSpace(strings.Join(args, " "))
+			listname = strings.TrimSpace(listname)
 			views.PlayListSongsDisplay(listname, client)
 			return
 		}
@@ -196,12 +266,23 @@ var playlistCmd = &cobra.Command{
 }
 
 var playlistCreateCmd = &cobra.Command{
-	Use:   "create",
+	Use:   "create <playlist name>",
 	Short: "create a new playlist",
-	Long:  `create a new playlist`,
+	Long: `create a new playlist
+this command will create a new playlist with the provided name
+playlist stores the songs in path provided in the config file
+default: $HOME/.goplay/playlists
+`,
 	Run: func(_ *cobra.Command, args []string) {
+		lists := controller.GetPlayListsNames(client)
 		if len(args) > 0 {
 			name := strings.Join(args, " ")
+			for _, list := range lists {
+				if list == name {
+					fmt.Println("playlist already exist")
+					return
+				}
+			}
 			controller.CreatePlayList(name, client)
 		} else {
 			fmt.Println("no playlist name specified")
@@ -212,30 +293,63 @@ var playlistCreateCmd = &cobra.Command{
 // remove
 var playlistRemoveCmd = &cobra.Command{
 	Use:   "remove <playlist> | <playlist> <song index>",
-	Short: "remove a playlist (and its songs)",
-	Long:  `remove a playlist (and its songs)`,
+	Short: "remove a playlist (and its songs) | remove a song from a playlist",
+	Long: `this command will remove a playlist (and its songs) | remove a song from a playlist
+if no song index is provided, it will remove the playlist and its songs
+if a song index is provided, it will remove the song from the playlist
+`,
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if len(args) == 0 {
+			return controller.GetPlayListsNames(client), cobra.ShellCompDirectiveDefault
+		}
+		if len(args) == 1 {
+			songs := controller.PlayListSongs(args[0], client)
+			parsedSongs := make([]string, 0, len(songs))
+			for _, song := range songs {
+				parsedSongs = append(parsedSongs, shared.ViewParseName(song))
+			}
+			return parsedSongs, cobra.ShellCompDirectiveDefault
+		}
+
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	},
 	Run: func(_ *cobra.Command, args []string) {
 		listname := strings.TrimSpace(args[0])
+		songs := controller.PlayListSongs(listname, client)
 		if len(args) == 1 {
 			controller.RemovePlayList(listname, client)
 		} else if len(args) == 2 {
+			// check if number provided is valid
 			songIndex, err := strconv.Atoi(strings.TrimSpace(args[1]))
-			if err != nil {
-				fmt.Println(err)
-				return
+			if err == nil && songIndex >= 0 && songIndex < len(songs) {
+				controller.RemoveSongFromPlayList(listname, songIndex, client)
+			} else {
+				// if not, check if the name is valid
+				songName := strings.TrimSpace(args[1])
+				// convert name to index
+				for i, song := range songs {
+					if shared.ViewParseName(song) == songName {
+						controller.RemoveSongFromPlayList(listname, i, client)
+						return
+					}
+				}
+				fmt.Println("song not exist")
 			}
-			controller.RemoveSongFromPlayList(listname, songIndex, client)
 		} else {
-			fmt.Println("playlist name required")
+			fmt.Println("playlist name required or playlist name and song index required")
 		}
 	},
 }
 
 //add song to a playlist
 var playlistAddCmd = &cobra.Command{
-	Use:   "add",
+	Use:   "add <listname> <query>",
 	Short: "add music(s) to a playlist",
-	Long:  `add music(s) to a playlist`,
+	Long: `add music(s) to a playlist
+this command is similar to the "play" command, but it will add the music to the playlist instead of adding it to the queue
+you can check the "list <playlist>" command to see the songs in the playlist
+and you can play it using the "list play" command
+`,
 	Run: func(_ *cobra.Command, args []string) {
 		if len(args) < 2 {
 			fmt.Println("playlist name and query required")
@@ -248,9 +362,17 @@ var playlistAddCmd = &cobra.Command{
 }
 
 var playlistPlayCmd = &cobra.Command{
-	Use:   "play",
-	Short: "play a playlist",
-	Long:  `play a playlist`,
+	Use:   "play <playlist> | <playlist> <song_name|index>",
+	Short: "play a playlist | play a song from a playlist",
+	Long: `play a playlist | play a song from a playlist
+this command will play a playlist | play a song from a playlist
+if no song name is provided, it will add the all the songs in the playlist to the queue
+if a song name is provided, it will add the song to the queue
+`,
+	ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+		playlists := controller.GetPlayListsNames(client)
+		return playlists, cobra.ShellCompDirectiveDefault
+	},
 	Run: func(_ *cobra.Command, args []string) {
 		if len(args) == 2 {
 			lisname := args[0]
@@ -271,7 +393,13 @@ var playlistPlayCmd = &cobra.Command{
 var setThemeCmd = &cobra.Command{
 	Use:   "theme",
 	Short: "set the theme [purple|pink|blue]",
-	Long:  `set the theme`,
+	Long: `set the theme [purple|pink|blue]
+this command will set the theme of the goplay client
+the theme is stored in the config file 
+`,
+	ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+		return []string{"purple", "pink", "blue"}, cobra.ShellCompDirectiveNoFileComp
+	},
 	Run: func(_ *cobra.Command, args []string) {
 		if len(args) > 0 {
 			theme := strings.TrimSpace(args[0])
