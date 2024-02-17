@@ -1,33 +1,32 @@
-    #!/bin/bash
-    # Filename: create_installer.sh
+#!/bin/bash
+# Filename: create_installer.sh
 
-    # Parameters
-    goplay_binary=./bin/goplay
-    goplayer_binary=./bin/goplayer
-    service_file=./etc/goplay.service
-    install_path="~/.local/bin"
-    systemd_user_path=/etc/systemd/user
-    installer_path=./bin/install.sh
+# Parameters
+goplay_binary=./bin/goplay
+goplayer_binary=./bin/goplayer
+service_file=./etc/goplay.service
+install_path="~/.local/bin"
+systemd_user_path=/etc/systemd/user
+installer_path=./bin/install.sh
 
-    # Function to build binaries
-    function build_binary {
-        local binary_name=$1
-        local binary_source=$2
-        go build -o $binary_name $binary_source
+# Function to build binaries
+function build_binary {
+    local binary_name=$1
+    local binary_source=$2
+    go build -o $binary_name $binary_source
 
-        if [ $? -eq 0 ]; then
-            echo "Built $binary_name successfully"
-        else
-            echo "Failed to build $binary_name"
-            exit 1
-        fi
-    }
+    if [ $? -eq 0 ]; then
+        echo "Built $binary_name successfully"
+    else
+        echo "Failed to build $binary_name"
+        exit 1
+    fi
+}
 
-    # Function to generate installer
-    function generate_installer {
+# Function to generate installer
+function generate_installer {
         cat <<EOF > $installer_path
 #!/bin/bash
-# Path: install.sh
 
 goplay_binary_data="$(base64 $goplay_binary)"
 goplayer_binary_data="$(base64 $goplayer_binary)"
@@ -133,6 +132,33 @@ function install_service {
     systemctl --user daemon-reload
 }
 
+function generate_completion {
+    echo "Generating completion script"
+
+    # check if zsh is installed
+    if command -v zsh > /dev/null; then
+        echo "Generating zsh completion"
+        completion_path=~/.zsh_completion.d
+        mkdir -p \$completion_path
+        $install_path/goplay completion zsh > \$completion_path/_goplay
+        #check if its already in the fpath
+        grep -q "FPATH+=\$HOME/.zsh_completion.d" ~/.zshrc ||echo "FPATH=\$HOME/.zsh_completion.d:\$FPATH" >> ~/.zsh
+
+        # load the completion
+        grep -q "source \$HOME/.zsh_completion.d/_goplay" ~/.zshrc || echo "source \$HOME/.zsh_completion.d/_goplay" >> ~/.zshrc
+        exec zsh
+    fi
+
+    # check if bash is installed
+    if command -v bash > /dev/null; then
+        echo "Generating bash completion"
+        completion_path=~/.bash_completion.d
+        mkdir -p \$completion_path
+        $install_path/goplay completion bash > \$completion_path/goplay
+        grep -q "source \$HOME/.bash_completion.d/goplay" ~/.bashrc || echo "source \$HOME/.bash_completion.d/goplay" >> ~/.bashrc
+    fi
+}
+
 function main {
     trap cleanup SIGINT
     cleanup
@@ -141,6 +167,8 @@ function main {
     install_goplayer
     install_service
     start_services
+    generate_completion
+    echo "Installation complete, use goplay --help to get started"
 }
 
 main
