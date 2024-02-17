@@ -21,7 +21,7 @@ type searchResultItem struct {
 
 func (i searchResultItem) Title() string {
 	if i.ftype == "cache" {
-		return parseName(i.title)
+		return shared.ViewParseName(i.title)
 	}
 	return i.title
 }

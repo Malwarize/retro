@@ -5,6 +5,7 @@ import (
 	"net/rpc"
 
 	"github.com/Malwarize/goplay/client/controller"
+	"github.com/Malwarize/goplay/shared"
 )
 
 func PlayListsDisplay(client *rpc.Client) {
@@ -29,7 +30,7 @@ func PlayListSongsDisplay(name string, client *rpc.Client) {
 	fmt.Println(GetTheme().ProgressStyle.Render("🎧 Playlist: ") + name)
 	for index, song := range songs {
 		fmt.Printf(
-			"\n    %d : %s\n", index, parseName(song),
+			"\n    %d : %s\n", index, shared.ViewParseName(song),
 		)
 	}
 }

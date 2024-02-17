@@ -89,6 +89,9 @@ func (p *Player) Play() {
 		return
 	}
 	music := p.Queue.GetCurrentMusic()
+	if music == nil {
+		return
+	}
 	if !p.initialised {
 		speaker.Init(music.Format.SampleRate, music.Format.SampleRate.N(time.Second/10))
 		p.initialised = true
@@ -127,7 +130,11 @@ func (p *Player) Next() {
 	if p.getPlayerState() == Paused {
 		p.Resume()
 	}
-	p.Queue.GetCurrentMusic().Streamer().Seek(0)
+	currentMusic := p.Queue.GetCurrentMusic()
+	if currentMusic != nil {
+		return
+	}
+	currentMusic.Streamer().Seek(0)
 	p.Queue.QueueNext()
 	p.Play()
 }
@@ -141,6 +148,9 @@ func (p *Player) Prev() {
 		p.Resume()
 	}
 	currentMusic := p.Queue.GetCurrentMusic()
+	if currentMusic != nil {
+		return
+	}
 	currentMusic.Streamer().Seek(0)
 	p.Queue.QueuePrev()
 	p.Play()
@@ -185,8 +195,15 @@ func (p *Player) Seek(d time.Duration) {
 	speaker.Lock()
 	defer speaker.Unlock()
 	currentMusic := p.Queue.GetCurrentMusic()
+	if currentMusic == nil {
+		return
+	}
 	currentSamplePos := currentMusic.Streamer().Position()
 	curretnTimePos := currentMusic.Format.SampleRate.D(currentSamplePos)
+	lenght := p.GetCurrentMusicLength()
+	if lenght == 0 {
+		return
+	}
 	newTimePos := (curretnTimePos + d) % p.GetCurrentMusicLength()
 	newSamplePos := currentMusic.Format.SampleRate.N(newTimePos)
 	// check if seek is out of bounds
@@ -206,6 +223,9 @@ func (p *Player) Volume(vp int /*volume percentage*/) {
 	}
 	p.Vol = vp
 	currentMusic := p.Queue.GetCurrentMusic()
+	if currentMusic == nil {
+		return
+	}
 	speaker.Lock()
 	currentMusic.SetVolume(vp)
 	speaker.Unlock()
@@ -272,8 +292,14 @@ func (p *Player) GetCurrentMusicPosition() time.Duration {
 		return 0
 	}
 	currentMusic := p.Queue.GetCurrentMusic()
+	if currentMusic == nil {
+		return 0
+	}
+	fmt.Println("Current music", currentMusic)
+	speaker.Lock()
 	currentSamplePos := currentMusic.Streamer().Position()
 	curretnTimePos := currentMusic.Format.SampleRate.D(currentSamplePos)
+	speaker.Unlock()
 	return curretnTimePos
 }
 
@@ -282,6 +308,9 @@ func (p *Player) GetCurrentMusicLength() time.Duration {
 		return 0
 	}
 	music := p.Queue.GetCurrentMusic()
+	if music == nil {
+		return 0
+	}
 	return music.Format.SampleRate.D(music.Streamer().Len())
 }
 

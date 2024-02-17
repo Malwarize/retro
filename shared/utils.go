@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -138,4 +139,12 @@ func StringToDuration(s string) (time.Duration, error) {
 func DurationToString(d time.Duration) string {
 	// to format 00:00:00
 	return fmt.Sprintf("%02d:%02d:%02d", int(d.Hours()), int(d.Minutes())%60, int(d.Seconds())%60)
+}
+
+func ViewParseName(name string) string {
+	name = filepath.Base(name)
+	if strings.Contains(name, config.GetConfig().Separator) {
+		name = strings.Split(name, config.GetConfig().Separator)[0]
+	}
+	return name
 }

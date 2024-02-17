@@ -8,15 +8,17 @@ import (
 
 	"github.com/Malwarize/goplay/client/cmd/views"
 	"github.com/Malwarize/goplay/client/controller"
+	"github.com/Malwarize/goplay/shared"
 	"github.com/spf13/cobra"
 )
+
+var client = controller.GetClient()
 
 var playCmd = &cobra.Command{
 	Use:   "play",
 	Short: "play a song",
 	Long:  `play a song`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := controller.GetClient()
 		if dir, err := cmd.Flags().GetString("dir"); err == nil && dir != "" {
 			controller.PlayDir(dir, client)
 			os.Exit(0)
@@ -37,7 +39,6 @@ var pauseCmd = &cobra.Command{
 	Short: "pause the current song",
 	Long:  `pause the current song`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client := controller.GetClient()
 		controller.Pause(client)
 	},
 }
@@ -47,7 +48,6 @@ var resumeCmd = &cobra.Command{
 	Short: "resume the current song",
 	Long:  `resume the current song`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client := controller.GetClient()
 		controller.Resume(client)
 	},
 }
@@ -57,7 +57,6 @@ var stopCmd = &cobra.Command{
 	Short: "stop the current song",
 	Long:  `stop the current song`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client := controller.GetClient()
 		controller.Stop(client)
 	},
 }
@@ -66,7 +65,6 @@ var nextCmd = &cobra.Command{
 	Use:   "next",
 	Short: "play the next song", Long: `play the next song`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client := controller.GetClient()
 		controller.Next(client)
 	},
 }
@@ -76,7 +74,6 @@ var prevCmd = &cobra.Command{
 	Short: "play the previous song",
 	Long:  `play the previous song`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client := controller.GetClient()
 		controller.Prev(client)
 	},
 }
@@ -86,7 +83,6 @@ var seekCmd = &cobra.Command{
 	Short: "seek to a position in the current song",
 	Long:  `seek to a position in the current song`,
 	Run: func(_ *cobra.Command, args []string) {
-		client := controller.GetClient()
 		var seekSeconds int
 		if len(args) > 0 {
 			var err error
@@ -104,7 +100,6 @@ var seekBackCmd = &cobra.Command{
 	Use:   "seekback [seconds]",
 	Short: "seek back by a number of seconds", Long: `seek back by a number of seconds`,
 	Run: func(_ *cobra.Command, args []string) {
-		client := controller.GetClient()
 		var seekSeconds int
 		if len(args) > 0 {
 			var err error
@@ -123,7 +118,6 @@ var volumeCmd = &cobra.Command{
 	Short: "set the volume to a percentage",
 	Long:  `set the volume`,
 	Run: func(_ *cobra.Command, args []string) {
-		client := controller.GetClient()
 		if len(args) > 0 {
 			vol, err := strconv.Atoi(args[0])
 			if err != nil {
@@ -141,15 +135,37 @@ var removeCmd = &cobra.Command{
 	Use:   "remove",
 	Short: "remove a song from the queue",
 	Long:  `remove a song from the queue`,
-	Run: func(_ *cobra.Command, args []string) {
+	ValidArgsFunction: func(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
 		client := controller.GetClient()
+		playerStatus := controller.GetPlayerStatus(client)
+
+		names := make([]string, 0, len(playerStatus.MusicQueue))
+		for _, name := range playerStatus.MusicQueue {
+			names = append(names, shared.ViewParseName(name))
+		}
+		return names, cobra.ShellCompDirectiveNoFileComp
+	},
+	Run: func(_ *cobra.Command, args []string) {
 		if len(args) > 0 {
-			index, err := strconv.Atoi(args[0])
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+			musicQueue := controller.GetPlayerStatus(client).MusicQueue
+			if v, err := strconv.Atoi(args[0]); err == nil {
+				if v < 0 || v >= len(musicQueue) {
+					fmt.Println("invalid index")
+					return
+				}
+				controller.Remove(v, client)
+				return
+			} else {
+				// if user provide a name -> convert it to index
+				name := strings.Join(args, " ")
+				for i, song := range musicQueue {
+					if shared.ViewParseName(song) == name {
+						controller.Remove(i, client)
+						return
+					}
+				}
+				fmt.Println("song not found")
 			}
-			controller.Remove(index, client)
 		} else {
 			fmt.Println("no song specified")
 		}
@@ -161,7 +177,6 @@ var statusCmd = &cobra.Command{
 	Short: "get the current status of the player queue",
 	Long:  `get the current status of the player queue`,
 	Run: func(_ *cobra.Command, _ []string) {
-		client := controller.GetClient()
 		views.DisplayStatus(client)
 	},
 }
@@ -171,7 +186,6 @@ var playlistCmd = &cobra.Command{
 	Short: "list playlists",
 	Long:  `list playlists`,
 	Run: func(_ *cobra.Command, args []string) {
-		client := controller.GetClient()
 		if len(args) > 0 {
 			listname := strings.TrimSpace(args[0])
 			views.PlayListSongsDisplay(listname, client)
@@ -186,7 +200,6 @@ var playlistCreateCmd = &cobra.Command{
 	Short: "create a new playlist",
 	Long:  `create a new playlist`,
 	Run: func(_ *cobra.Command, args []string) {
-		client := controller.GetClient()
 		if len(args) > 0 {
 			name := strings.Join(args, " ")
 			controller.CreatePlayList(name, client)
@@ -202,7 +215,6 @@ var playlistRemoveCmd = &cobra.Command{
 	Short: "remove a playlist (and its songs)",
 	Long:  `remove a playlist (and its songs)`,
 	Run: func(_ *cobra.Command, args []string) {
-		client := controller.GetClient()
 		listname := strings.TrimSpace(args[0])
 		if len(args) == 1 {
 			controller.RemovePlayList(listname, client)
@@ -225,7 +237,6 @@ var playlistAddCmd = &cobra.Command{
 	Short: "add music(s) to a playlist",
 	Long:  `add music(s) to a playlist`,
 	Run: func(_ *cobra.Command, args []string) {
-		client := controller.GetClient()
 		if len(args) < 2 {
 			fmt.Println("playlist name and query required")
 			return
@@ -241,7 +252,6 @@ var playlistPlayCmd = &cobra.Command{
 	Short: "play a playlist",
 	Long:  `play a playlist`,
 	Run: func(_ *cobra.Command, args []string) {
-		client := controller.GetClient()
 		if len(args) == 2 {
 			lisname := args[0]
 			songIndex, err := strconv.Atoi(args[1])
@@ -263,7 +273,6 @@ var setThemeCmd = &cobra.Command{
 	Short: "set the theme [purple|pink|blue]",
 	Long:  `set the theme`,
 	Run: func(_ *cobra.Command, args []string) {
-		client := controller.GetClient()
 		if len(args) > 0 {
 			theme := strings.TrimSpace(args[0])
 			controller.SetTheme(theme, client)

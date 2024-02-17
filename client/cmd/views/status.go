@@ -4,13 +4,10 @@ import (
 	"fmt"
 	"math/rand"
 	"net/rpc"
-	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/Malwarize/goplay/client/controller"
-	"github.com/Malwarize/goplay/config"
 	"github.com/Malwarize/goplay/shared"
 	"github.com/charmbracelet/bubbles/progress"
 )
@@ -19,13 +16,6 @@ func reformatDuration(duration time.Duration) string {
 	return fmt.Sprintf("%02d:%02d", int(duration.Minutes()), int(duration.Seconds())%60)
 }
 
-func parseName(name string) string {
-	name = filepath.Base(name)
-	if strings.Contains(name, config.GetConfig().Separator) {
-		name = strings.Split(name, config.GetConfig().Separator)[0]
-	}
-	return name
-}
 func convertVolumeToEmojie(volume int) string {
 	if volume == 0 {
 		return volumeLevels[0]
@@ -48,7 +38,7 @@ func DisplayStatus(client *rpc.Client) {
 
 		currentMusicName := queue[status.CurrentMusicIndex]
 
-		currentMusicName = parseName(currentMusicName)
+		currentMusicName = shared.ViewParseName(currentMusicName)
 		currentPosition := status.CurrentMusicPosition
 		currentPositionStr := reformatDuration(currentPosition)
 
@@ -71,9 +61,9 @@ func DisplayStatus(client *rpc.Client) {
 		// display queue
 		for i, music := range queue {
 			if i == status.CurrentMusicIndex {
-				fmt.Println(GetTheme().SelectMusicStyle.Render("->", strconv.Itoa(i), ":", parseName(music)))
+				fmt.Println(GetTheme().SelectMusicStyle.Render("->", strconv.Itoa(i), ":", shared.ViewParseName(music)))
 			} else {
-				fmt.Println("  ", i, ":", parseName(music))
+				fmt.Println("  ", i, ":", shared.ViewParseName(music))
 			}
 		}
 	}
