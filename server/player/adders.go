@@ -100,7 +100,7 @@ func (p *Player) AddMusicFromOnline(unique string, engineName string) {
 		p.errorifyTask(unique, fmt.Errorf("failed to download music: %s", unique))
 		return
 	}
-	// p.PlayListManager.AddToPlayListFromFile()
+	p.AddMusicFromFile(path)
 	p.removeTask(unique)
 }
 

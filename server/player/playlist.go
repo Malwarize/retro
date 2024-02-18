@@ -169,35 +169,6 @@ func (plm *PlayListManager) AddToPlayListFromFile(name string, file string) erro
 	return nil
 }
 
-// func (p *Player) AddMusicFromOnline(unique string, engineName string) {
-// 	p.addTask(unique, shared.Downloading)
-// 	path, err := p.Director.Download(engineName, unique)
-// 	if err != nil {
-// 		log.Println(err)
-// 		p.errorifyTask(unique, err)
-// 		return
-// 	}
-
-// 	err = p.Converter.ConvertToMP3(path)
-// 	if err != nil {
-// 		log.Println(err)
-// 		p.errorifyTask(unique, err)
-// 		return
-// 	}
-
-// 	if err != nil {
-// 		log.Println(err)
-// 		p.errorifyTask(unique, err)
-// 		return
-// 	}
-// 	if path == "" {
-// 		p.errorifyTask(unique, fmt.Errorf("failed to download music: %s", unique))
-// 		return
-// 	}
-// 	p.AddMusicFromFile(path)
-// 	p.removeTask(unique)
-// }
-
 func (plm *PlayListManager) AddToPlayListFromOnline(name string, query string, engineName string, p *Player) {
 
 	p.addTask(query, shared.Downloading)

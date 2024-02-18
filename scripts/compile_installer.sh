@@ -56,7 +56,7 @@ install_ffmpeg() {
 check_dependencies() {
     echo "Checking dependencies"
     for dependency in yt-dlp ffmpeg; do
-        command -v $dependency > /dev/null || install_$dependency
+        command -v \$dependency > /dev/null || install_\$dependency
     done
 }
 
