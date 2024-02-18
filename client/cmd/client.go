@@ -26,11 +26,12 @@ var playCmd = &cobra.Command{
 		- if the query is a youtube link, it will play the audio from the link
 		- if the query is a search query, it will search and return the results to select from
 	`,
-	ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+	ValidArgsFunction: func(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
+		// TODO: add history suggestion
 		var options []string
 		list := controller.GetPlayListsNames(client)
 		for _, song := range list {
-			options = append(options, shared.ViewParseName(song)+":playlist 📁")
+			options = append(options, shared.ViewParseName(song))
 		}
 		return options, cobra.ShellCompDirectiveDefault
 	},
