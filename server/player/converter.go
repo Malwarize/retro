@@ -58,6 +58,7 @@ func (c *Converter) ConvertToMP3(inputFile string) error {
 	if err != nil {
 		return fmt.Errorf("error converting to MP3: %v", err)
 	}
+
 	return nil
 }
 

@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var client = controller.GetClient()
+var client, err = controller.GetClient()
 
 var playCmd = &cobra.Command{
 	Use:   "play [query]",
@@ -27,6 +27,9 @@ var playCmd = &cobra.Command{
 		- if the query is a search query, it will search and return the results to select from
 	`,
 	ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+		if client == nil {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
 		var options []string
 		list := controller.GetPlayListsNames(client)
 		for _, song := range list {
@@ -207,6 +210,9 @@ this command will remove a song from the queue
 it accepts the index of the song in the queue or the name of the song
 `,
 	ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+		if client == nil {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
 		playerStatus := controller.GetPlayerStatus(client)
 
 		names := make([]string, 0, len(playerStatus.MusicQueue))
@@ -264,6 +270,9 @@ if no playlist name is provided, it will list all the playlists
 if a playlist name is provided, it will list all the songs in the playlist
 `,
 	ValidArgsFunction: func(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
+		if client == nil {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
 		if len(args) == 0 {
 			return controller.GetPlayListsNames(client), cobra.ShellCompDirectiveDefault
 		}
@@ -314,6 +323,9 @@ if no song index is provided, it will remove the playlist and its songs
 if a song index is provided, it will remove the song from the playlist
 `,
 	ValidArgsFunction: func(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
+		if client == nil {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
 		if len(args) == 0 {
 			return controller.GetPlayListsNames(client), cobra.ShellCompDirectiveDefault
 		}
@@ -366,6 +378,9 @@ you can check the "list <playlist>" command to see the songs in the playlist
 and you can play it using the "list play" command
 `,
 	ValidArgsFunction: func(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
+		if client == nil {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
 		if len(args) == 0 {
 			return controller.GetPlayListsNames(client), cobra.ShellCompDirectiveDefault
 		}
@@ -416,6 +431,9 @@ if no song name is provided, it will add the all the songs in the playlist to th
 if a song name is provided, it will add the song to the queue
 `,
 	ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+		if client == nil {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
 		playlists := controller.GetPlayListsNames(client)
 		return playlists, cobra.ShellCompDirectiveDefault
 	},

@@ -186,14 +186,12 @@ func SetTheme(theme string, client *rpc.Client) {
 
 var client *rpc.Client
 
-func GetClient() *rpc.Client {
+func GetClient() (client *rpc.Client, err error) {
 	if client == nil {
-		var err error
 		client, err = rpc.Dial("tcp", "localhost:3131")
 		if err != nil {
-			fmt.Println("the player " + "localhost:3131" + " not running")
-			os.Exit(1)
+			return nil, err
 		}
 	}
-	return client
+	return client, err
 }

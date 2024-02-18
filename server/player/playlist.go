@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/Malwarize/goplay/config"
-	"github.com/Malwarize/goplay/server/player/online"
 	"github.com/Malwarize/goplay/shared"
 )
 
@@ -170,20 +169,53 @@ func (plm *PlayListManager) AddToPlayListFromFile(name string, file string) erro
 	return nil
 }
 
-func (p *Player) AddToPlayListFromOnline(name string, query string, engineName string, director *online.OnlineDirector, converter *Converter) {
+// func (p *Player) AddMusicFromOnline(unique string, engineName string) {
+// 	p.addTask(unique, shared.Downloading)
+// 	path, err := p.Director.Download(engineName, unique)
+// 	if err != nil {
+// 		log.Println(err)
+// 		p.errorifyTask(unique, err)
+// 		return
+// 	}
+
+// 	err = p.Converter.ConvertToMP3(path)
+// 	if err != nil {
+// 		log.Println(err)
+// 		p.errorifyTask(unique, err)
+// 		return
+// 	}
+
+// 	if err != nil {
+// 		log.Println(err)
+// 		p.errorifyTask(unique, err)
+// 		return
+// 	}
+// 	if path == "" {
+// 		p.errorifyTask(unique, fmt.Errorf("failed to download music: %s", unique))
+// 		return
+// 	}
+// 	p.AddMusicFromFile(path)
+// 	p.removeTask(unique)
+// }
+
+func (plm *PlayListManager) AddToPlayListFromOnline(name string, query string, engineName string, p *Player) {
+
 	p.addTask(query, shared.Downloading)
-	path, err := director.Download(engineName, query)
+	path, err := p.Director.Download(engineName, query)
 	if err != nil {
+		log.Println(err)
 		p.errorifyTask(query, err)
 		return
 	}
-	err = p.PlayListManager.AddMusic(name, Music{Path: path})
+	err = p.Converter.ConvertToMP3(path)
 	if err != nil {
+		log.Println(err)
 		p.errorifyTask(query, err)
 		return
 	}
-	err = converter.ConvertToMP3(path)
+	err = plm.AddMusic(name, Music{Path: path})
 	if err != nil {
+		log.Println(err)
 		p.errorifyTask(query, err)
 		return
 	}

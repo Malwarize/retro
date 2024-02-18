@@ -417,7 +417,7 @@ func (p *Player) DetectAndAddToPlayList(name string, query string) []shared.Sear
 		return p.GetAvailableMusicOptions(query)
 	default:
 		log.Println("Detected Engine", whatIsThis)
-		go p.AddToPlayListFromOnline(name, query, whatIsThis, p.Director, p.Converter)
+		go p.PlayListManager.AddToPlayListFromOnline(name, query, whatIsThis, p)
 	}
 	return []shared.SearchResult{}
 }

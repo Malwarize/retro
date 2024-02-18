@@ -206,7 +206,10 @@ func NewBlueTheme() Themes {
 }
 
 func GetTheme() Themes {
-	client := controller.GetClient()
+	client, err := controller.GetClient()
+	if client == nil || err != nil {
+		return NewPinkTheme()
+	}
 	theme := controller.GetTheme(client)
 	switch theme {
 	case "purple":

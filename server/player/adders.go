@@ -11,16 +11,6 @@ import (
 	"github.com/Malwarize/goplay/shared"
 )
 
-func (p *Player) AddMusicFromFile(path string) {
-	music, err := NewMusic(path)
-	if err != nil {
-		log.Println(err)
-	} else {
-		p.Queue.Enqueue(music)
-	}
-}
-
-// this function is used to play music from a file that is not mp3/ it will convert it to mp3 in temp and add it to the queue
 func (p *Player) addConvertedMp3InTemp(path string) bool {
 	f, err := os.CreateTemp("", "goplay")
 	defer os.Remove(f.Name())
@@ -46,6 +36,16 @@ func (p *Player) addConvertedMp3InTemp(path string) bool {
 	return true
 }
 
+func (p *Player) AddMusicFromFile(path string) {
+	music, err := NewMusic(path)
+	if err != nil {
+		log.Println(err)
+	} else {
+		p.Queue.Enqueue(music)
+	}
+}
+
+// this function is used to play music from a file that is not mp3/ it will convert it to mp3 in temp and add it to the queue
 func (p *Player) AddMusicsFromDir(dirPath string) {
 	dir, err := os.Open(dirPath)
 	if err != nil {
@@ -83,6 +83,7 @@ func (p *Player) AddMusicFromOnline(unique string, engineName string) {
 		p.errorifyTask(unique, err)
 		return
 	}
+
 	err = p.Converter.ConvertToMP3(path)
 	if err != nil {
 		log.Println(err)
@@ -99,13 +100,8 @@ func (p *Player) AddMusicFromOnline(unique string, engineName string) {
 		p.errorifyTask(unique, fmt.Errorf("failed to download music: %s", unique))
 		return
 	}
-	p.AddMusicFromFile(path)
+	// p.PlayListManager.AddToPlayListFromFile()
 	p.removeTask(unique)
-}
-
-func (p *Player) AddMusicFromPlaylistByName(playlistName string, musicName string) {
-	playlistPath := filepath.Join(config.GetConfig().PlaylistPath, playlistName, musicName)
-	p.AddMusicFromFile(playlistPath)
 }
 
 func (p *Player) AddMusicFromPlaylistByIndex(playlistName string, index int) {
@@ -139,6 +135,7 @@ func (p *Player) AddMusicsFromPlaylist(playlistName string) {
 	}
 	for _, entry := range entries {
 		if !entry.IsDir() {
+
 			p.AddMusicFromFile(filepath.Join(playlistPath, entry.Name()))
 		}
 	}
