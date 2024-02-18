@@ -26,8 +26,7 @@ var playCmd = &cobra.Command{
 		- if the query is a youtube link, it will play the audio from the link
 		- if the query is a search query, it will search and return the results to select from
 	`,
-	ValidArgsFunction: func(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
-		// TODO: add history suggestion
+	ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 		var options []string
 		list := controller.GetPlayListsNames(client)
 		for _, song := range list {
@@ -144,6 +143,8 @@ if the seek seconds is less than the song duration, it will rewind to the beginn
 				fmt.Println(err)
 				os.Exit(1)
 			}
+		} else {
+			seekSeconds = 5
 		}
 		controller.Seek(seekSeconds, client)
 	},
@@ -158,7 +159,6 @@ it will seek 5 seconds back if no seconds provided
 	seekback
 	seekback 5
 if the seekback seconds is less than the song duration, it will rewind to the beginning of the song
-
 if you are seeking forward check "seek" command
 `,
 	Run: func(_ *cobra.Command, args []string) {
@@ -170,6 +170,8 @@ if you are seeking forward check "seek" command
 				fmt.Println(err)
 				os.Exit(1)
 			}
+		} else {
+			seekSeconds = 5
 		}
 		controller.Seek(-seekSeconds, client)
 	},
@@ -311,7 +313,7 @@ var playlistRemoveCmd = &cobra.Command{
 if no song index is provided, it will remove the playlist and its songs
 if a song index is provided, it will remove the song from the playlist
 `,
-	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	ValidArgsFunction: func(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
 		if len(args) == 0 {
 			return controller.GetPlayListsNames(client), cobra.ShellCompDirectiveDefault
 		}
