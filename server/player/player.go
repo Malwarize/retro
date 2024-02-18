@@ -131,7 +131,7 @@ func (p *Player) Next() {
 		p.Resume()
 	}
 	currentMusic := p.Queue.GetCurrentMusic()
-	if currentMusic != nil {
+	if currentMusic == nil {
 		return
 	}
 	currentMusic.Streamer().Seek(0)
@@ -148,7 +148,7 @@ func (p *Player) Prev() {
 		p.Resume()
 	}
 	currentMusic := p.Queue.GetCurrentMusic()
-	if currentMusic != nil {
+	if currentMusic == nil {
 		return
 	}
 	currentMusic.Streamer().Seek(0)
@@ -296,10 +296,8 @@ func (p *Player) GetCurrentMusicPosition() time.Duration {
 		return 0
 	}
 	fmt.Println("Current music", currentMusic)
-	speaker.Lock()
 	currentSamplePos := currentMusic.Streamer().Position()
 	curretnTimePos := currentMusic.Format.SampleRate.D(currentSamplePos)
-	speaker.Unlock()
 	return curretnTimePos
 }
 

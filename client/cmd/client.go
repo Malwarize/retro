@@ -33,12 +33,24 @@ var playCmd = &cobra.Command{
 		for _, song := range list {
 			options = append(options, shared.ViewParseName(song))
 		}
+		// songs in the queue
+		for _, song := range controller.GetPlayerStatus(client).MusicQueue {
+			options = append(options, shared.ViewParseName(song))
+		}
+
 		return options, cobra.ShellCompDirectiveDefault
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if dir, err := cmd.Flags().GetString("dir"); err == nil && dir != "" {
 			controller.PlayDir(dir, client)
 			os.Exit(0)
+		}
+		// convert song name to index if it's in the queue
+		for i, song := range controller.GetPlayerStatus(client).MusicQueue {
+			if shared.ViewParseName(song) == strings.Join(args, " ") {
+				controller.DetectAndPlay(strconv.Itoa(i), client)
+				return
+			}
 		}
 		if len(args) > 0 {
 			song := strings.Join(args, " ")
@@ -351,14 +363,45 @@ this command is similar to the "play" command, but it will add the music to the 
 you can check the "list <playlist>" command to see the songs in the playlist
 and you can play it using the "list play" command
 `,
+	ValidArgsFunction: func(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
+		if len(args) == 0 {
+			return controller.GetPlayListsNames(client), cobra.ShellCompDirectiveDefault
+		}
+		if len(args) == 1 {
+			// get music in queue
+			musics := controller.GetPlayerStatus(client).MusicQueue
+			parsedMusics := make([]string, 0, len(musics))
+			for _, music := range musics {
+				parsedMusics = append(parsedMusics, shared.ViewParseName(music))
+			}
+
+			return parsedMusics, cobra.ShellCompDirectiveDefault
+		}
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	},
 	Run: func(_ *cobra.Command, args []string) {
 		if len(args) < 2 {
 			fmt.Println("playlist name and query required")
 			return
 		}
-		name := strings.TrimSpace(args[0])
+		// check if the playlist exist
+		lists := controller.GetPlayListsNames(client)
+		listname := strings.TrimSpace(args[0])
 		query := strings.Join(args[1:], " ")
-		views.SearchThenAddToPlayList(name, query, client)
+		queue := controller.GetPlayerStatus(client).MusicQueue
+		for _, list := range lists {
+			if list == listname {
+				// if its from the queue convert the name to index
+				for i, song := range queue {
+					if shared.ViewParseName(song) == query {
+						views.SearchThenAddToPlayList(listname, strconv.Itoa(i), client)
+						return
+					}
+				}
+			}
+		}
+		views.SearchThenAddToPlayList(listname, query, client)
+
 	},
 }
 
