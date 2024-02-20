@@ -9,8 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Malwarize/goplay/config"
 	"github.com/gopxl/beep/mp3"
+
+	"github.com/Malwarize/goplay/config"
 )
 
 type Task struct {
@@ -19,20 +20,20 @@ type Task struct {
 }
 
 type Status struct {
-	CurrentMusicIndex    int
-	CurrentMusicPosition time.Duration
-	CurrentMusicLength   time.Duration
-	PlayerState          int
-	MusicQueue           []string
-	Volume               int
-	Tasks                map[string]Task // key: target, value: task
+	CurrMusicIndex    int
+	CurrMusicPosition time.Duration
+	CurrMusicDuration time.Duration
+	PlayerState       int
+	MusicQueue        []string
+	Volume            int
+	Tasks             map[string]Task // key: target, value: task
 }
 
 func (s Status) String() string {
 	var str string
-	str += "CurrentMusicIndex: " + fmt.Sprintf("%d", s.CurrentMusicIndex) + "\n"
-	str += "CurrentMusicPosition: " + s.CurrentMusicPosition.String() + "\n"
-	str += "CurrentMusicLength: " + s.CurrentMusicLength.String() + "\n"
+	str += "CurrMusicIndex: " + fmt.Sprintf("%d", s.CurrMusicIndex) + "\n"
+	str += "CurrMusicPosition: " + s.CurrMusicPosition.String() + "\n"
+	str += "CurrMusicLength: " + s.CurrMusicDuration.String() + "\n"
 	switch s.PlayerState {
 	case Playing:
 		str += "PlayerState: Playing\n"

@@ -27,6 +27,11 @@ const (
 	Stopped
 )
 
+type lmeta struct {
+	_lcurrentPos time.Duration
+	_lcurrentDur time.Duration
+}
+
 type Player struct {
 	Queue           *MusicQueue
 	playerState     int
@@ -37,6 +42,7 @@ type Player struct {
 	Tasks           map[string]shared.Task
 	PlayListManager *PlayListManager
 	Vol             int
+	_lmeta          lmeta
 	mu              sync.Mutex
 }
 
@@ -78,6 +84,18 @@ func NewPlayer() *Player {
 	}
 }
 
+func (p *Player) _setlMeta(m lmeta) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p._lmeta = m
+}
+
+func (p *Player) _getlMeta() lmeta {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p._lmeta
+}
+
 // singleton player
 func GetPlayer() *Player {
 	once.Do(func() {
@@ -90,7 +108,7 @@ func (p *Player) Play() {
 	if p.Queue.IsEmpty() {
 		return
 	}
-	music := p.Queue.GetCurrentMusic()
+	music := p.Queue.GetCurrMusic()
 	if music == nil {
 		return
 	}
@@ -132,11 +150,13 @@ func (p *Player) Next() {
 	if p.getPlayerState() == Paused {
 		p.Resume()
 	}
-	currentMusic := p.Queue.GetCurrentMusic()
+	currentMusic := p.Queue.GetCurrMusic()
 	if currentMusic == nil {
 		return
 	}
-	currentMusic.Streamer().Seek(0)
+	if err := currentMusic.Seek(0); err != nil {
+		log.Println("Error when seeking")
+	}
 	p.Queue.QueueNext()
 	p.Play()
 }
@@ -149,11 +169,13 @@ func (p *Player) Prev() {
 	if state == Paused {
 		p.Resume()
 	}
-	currentMusic := p.Queue.GetCurrentMusic()
+	currentMusic := p.Queue.GetCurrMusic()
 	if currentMusic == nil {
 		return
 	}
-	currentMusic.Streamer().Seek(0)
+	if err := currentMusic.Seek(0); err != nil {
+		log.Println("Error when seeking")
+	}
 	p.Queue.QueuePrev()
 	p.Play()
 }
@@ -178,6 +200,10 @@ func (p *Player) Pause() {
 	if state == Paused || state == Stopped {
 		return
 	}
+	p._setlMeta(lmeta{
+		_lcurrentDur: p.GetCurrMusicDuration(),
+		_lcurrentPos: p.GetCurrMusicPosition(),
+	})
 	p.setPlayerState(Paused)
 	speaker.Lock()
 }
@@ -192,32 +218,21 @@ func (p *Player) Resume() {
 }
 
 func (p *Player) Seek(d time.Duration) {
-	if p.getPlayerState() == Stopped {
+	state := p.getPlayerState()
+	if state == Stopped {
 		return
 	}
-	speaker.Lock()
-	defer speaker.Unlock()
-	currentMusic := p.Queue.GetCurrentMusic()
+	currentMusic := p.Queue.GetCurrMusic()
 	if currentMusic == nil {
 		return
 	}
-	currentSamplePos := currentMusic.Streamer().Position()
-	curretnTimePos := currentMusic.Format.SampleRate.D(currentSamplePos)
-	lenght := p.GetCurrentMusicLength()
-	if lenght == 0 {
-		return
+	fmt.Println("seek 1")
+	if state == Paused {
+		p.Resume()
+		defer p.Pause()
 	}
-	newTimePos := (curretnTimePos + d) % p.GetCurrentMusicLength()
-	newSamplePos := currentMusic.Format.SampleRate.N(newTimePos)
-	// check if seek is out of bounds
-	if newTimePos < 0 {
-		newSamplePos = 0
-	}
-	if newTimePos > p.GetCurrentMusicLength() {
-		newSamplePos = currentMusic.Streamer().Len()
-	}
-	if err := currentMusic.Streamer().Seek(newSamplePos); err != nil {
-		fmt.Println(err)
+	if err := currentMusic.Seek(d); err != nil {
+		log.Println("Error in seek", err)
 	}
 }
 
@@ -226,7 +241,7 @@ func (p *Player) Volume(vp int /*volume percentage*/) {
 		return
 	}
 	p.Vol = vp
-	currentMusic := p.Queue.GetCurrentMusic()
+	currentMusic := p.Queue.GetCurrMusic()
 	if currentMusic == nil {
 		return
 	}
@@ -241,7 +256,7 @@ func (p *Player) Remove(index int) {
 	}
 	if p.Queue.Size() == 1 {
 		p.Stop()
-	} else if index == p.Queue.GetCurrentIndex() {
+	} else if index == p.Queue.GetCurrIndex() {
 		p.Next()
 	}
 	p.Queue.Remove(index)
@@ -296,29 +311,34 @@ func (p *Player) PlayListPlayAll(name string) {
 	}
 }
 
-func (p *Player) GetCurrentMusicPosition() time.Duration {
+func (p *Player) GetCurrMusicPosition() time.Duration {
+	state := p.getPlayerState()
 	if p.getPlayerState() == Stopped {
 		return 0
 	}
-	currentMusic := p.Queue.GetCurrentMusic()
+	if state == Paused {
+		return p._getlMeta()._lcurrentPos
+	}
+	currentMusic := p.Queue.GetCurrMusic()
 	if currentMusic == nil {
 		return 0
 	}
-	fmt.Println("Current music", currentMusic)
-	currentSamplePos := currentMusic.Streamer().Position()
-	curretnTimePos := currentMusic.Format.SampleRate.D(currentSamplePos)
-	return curretnTimePos
+	fmt.Println("Curr music", currentMusic)
+	return currentMusic.PositionD()
 }
 
-func (p *Player) GetCurrentMusicLength() time.Duration {
+func (p *Player) GetCurrMusicDuration() time.Duration {
 	if p.Queue.IsEmpty() {
 		return 0
 	}
-	music := p.Queue.GetCurrentMusic()
+	music := p.Queue.GetCurrMusic()
 	if music == nil {
 		return 0
 	}
-	return music.Format.SampleRate.D(music.Streamer().Len())
+	if p.getPlayerState() == Paused {
+		return p._getlMeta()._lcurrentDur
+	}
+	return music.DurationD()
 }
 
 func (p *Player) CheckWhatIsThis(unknown string) string {
@@ -452,7 +472,7 @@ func (p *Player) DetectAndPlay(unknown string) []shared.SearchResult {
 		log.Println("Detected queue")
 		index, _ := strconv.Atoi(unknown)
 		go func() {
-			p.Queue.SetCurrentIndex(index)
+			p.Queue.SetCurrIndex(index)
 			p.Play()
 		}()
 	case "playlist":
@@ -487,12 +507,12 @@ func (p *Player) GetTheme() string {
 
 func (p *Player) GetPlayerStatus() shared.Status {
 	return shared.Status{
-		CurrentMusicIndex:    p.Queue.GetCurrentIndex(),
-		CurrentMusicPosition: p.GetCurrentMusicPosition(),
-		CurrentMusicLength:   p.GetCurrentMusicLength(),
-		PlayerState:          p.getPlayerState(),
-		MusicQueue:           p.Queue.GetTitles(),
-		Volume:               p.Vol,
-		Tasks:                p.Tasks,
+		CurrMusicIndex:    p.Queue.GetCurrIndex(),
+		CurrMusicPosition: p.GetCurrMusicPosition(),
+		CurrMusicDuration: p.GetCurrMusicDuration(),
+		PlayerState:       p.getPlayerState(),
+		MusicQueue:        p.Queue.GetTitles(),
+		Volume:            p.Vol,
+		Tasks:             p.Tasks,
 	}
 }

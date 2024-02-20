@@ -28,13 +28,13 @@ func (q *MusicQueue) GetTitles() []string {
 	return titles
 }
 
-func (q *MusicQueue) GetCurrentIndex() int {
+func (q *MusicQueue) GetCurrIndex() int {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	return q.current
 }
 
-func (q *MusicQueue) SetCurrentIndex(index int) {
+func (q *MusicQueue) SetCurrIndex(index int) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	q.current = index
@@ -49,11 +49,11 @@ func (q *MusicQueue) GetMusicByIndex(index int) *Music {
 	return &q.queue[index]
 }
 
-func (q *MusicQueue) GetCurrentMusic() *Music {
+func (q *MusicQueue) GetCurrMusic() *Music {
 	if q.IsEmpty() {
 		return nil
 	}
-	mu := q.GetMusicByIndex(q.GetCurrentIndex())
+	mu := q.GetMusicByIndex(q.GetCurrIndex())
 	return mu
 }
 
@@ -85,7 +85,7 @@ func (q *MusicQueue) Clear() {
 		music.Streamer().Close()
 	}
 	q.queue = make([]Music, 0)
-	q.SetCurrentIndex(0)
+	q.SetCurrIndex(0)
 }
 
 func (q *MusicQueue) Remove(index int) {
@@ -99,17 +99,17 @@ func (q *MusicQueue) Remove(index int) {
 }
 
 func (q *MusicQueue) QueueNext() {
-	index := q.GetCurrentIndex() + 1
+	index := q.GetCurrIndex() + 1
 	if index > q.Size()-1 {
 		index = 0
 	}
-	q.SetCurrentIndex(index)
+	q.SetCurrIndex(index)
 }
 
 func (q *MusicQueue) QueuePrev() {
-	index := q.GetCurrentIndex() - 1
+	index := q.GetCurrIndex() - 1
 	if index < 0 {
 		index = q.Size() - 1
 	}
-	q.SetCurrentIndex(index)
+	q.SetCurrIndex(index)
 }

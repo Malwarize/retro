@@ -7,9 +7,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/charmbracelet/bubbles/progress"
+
 	"github.com/Malwarize/goplay/client/controller"
 	"github.com/Malwarize/goplay/shared"
-	"github.com/charmbracelet/bubbles/progress"
 )
 
 func reformatDuration(duration time.Duration) string {
@@ -42,12 +43,12 @@ func DisplayStatus(client *rpc.Client) {
 		currentPosition := status.CurrentMusicPosition
 		currentPositionStr := reformatDuration(currentPosition)
 
-		totalDurationStr := reformatDuration(status.CurrentMusicLength)
+		totalDurationStr := reformatDuration(status.CurrMusicDuration)
 
 		prog := progress.New(progress.WithSolidFill(GetTheme().MainColor), progress.WithWidth(40))
 		prog.SetPercent(0.5)
 		prog.ShowPercentage = false
-		fmt.Println(GetTheme().ProgressStyle.Render(prog.ViewAs(currentPosition.Seconds() / status.CurrentMusicLength.Seconds())))
+		fmt.Println(GetTheme().ProgressStyle.Render(prog.ViewAs(currentPosition.Seconds() / status.CurrMusicDuration.Seconds())))
 
 		fmt.Println("   "+playingEmojies[rand.Intn(len(playingEmojies))], currentMusicName)
 		fmt.Println(GetTheme().PositionStyle.Render(currentPositionStr + " / " + totalDurationStr))
