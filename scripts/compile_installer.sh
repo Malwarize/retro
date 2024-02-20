@@ -1,5 +1,4 @@
 #!/bin/bash
-# Filename: create_installer.sh
 
 # Parameters
 goplay_binary=./bin/goplay

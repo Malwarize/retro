@@ -9,14 +9,16 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gopxl/beep"
+	"github.com/gopxl/beep/speaker"
+
 	"github.com/Malwarize/goplay/config"
 	"github.com/Malwarize/goplay/server/player/online"
 	"github.com/Malwarize/goplay/shared"
-	"github.com/gopxl/beep"
-	"github.com/gopxl/beep/speaker"
 )
 
 var PlayerInstance *Player
+
 var once sync.Once
 
 const (
@@ -76,7 +78,7 @@ func NewPlayer() *Player {
 	}
 }
 
-//singleton player
+// singleton player
 func GetPlayer() *Player {
 	once.Do(func() {
 		PlayerInstance = NewPlayer()
@@ -188,6 +190,7 @@ func (p *Player) Resume() {
 	p.setPlayerState(Playing)
 	speaker.Unlock()
 }
+
 func (p *Player) Seek(d time.Duration) {
 	if p.getPlayerState() == Stopped {
 		return
@@ -217,6 +220,7 @@ func (p *Player) Seek(d time.Duration) {
 		fmt.Println(err)
 	}
 }
+
 func (p *Player) Volume(vp int /*volume percentage*/) {
 	if p.getPlayerState() == Stopped {
 		return
@@ -248,7 +252,7 @@ func (p *Player) CreatePlayList(name string) {
 	p.PlayListManager.Create(name)
 }
 
-//delete playlist
+// delete playlist
 func (p *Player) RemovePlayList(name string) {
 	p.PlayListManager.Remove(name)
 }
@@ -261,7 +265,11 @@ func (p *Player) PlayListsNames() []string {
 func (p *Player) RemoveSongFromPlayList(name string, index int) {
 	// check if the exists in the queue and remove it
 	for i, music := range p.Queue.queue {
-		if music.Path == filepath.Join(p.PlayListManager.PlayListPath, name, p.PlayListManager.PlayListSongs(name)[index]) {
+		if music.Path == filepath.Join(
+			p.PlayListManager.PlayListPath,
+			name,
+			p.PlayListManager.PlayListSongs(name)[index],
+		) {
 			p.Queue.Remove(i)
 		}
 	}
@@ -287,6 +295,7 @@ func (p *Player) PlayListPlayAll(name string) {
 		p.Play()
 	}
 }
+
 func (p *Player) GetCurrentMusicPosition() time.Duration {
 	if p.getPlayerState() == Stopped {
 		return 0
@@ -422,7 +431,7 @@ func (p *Player) DetectAndAddToPlayList(name string, query string) []shared.Sear
 	return []shared.SearchResult{}
 }
 
-//if result is empty, it means it detects and plays the music if succeed other wise it returns the search results
+// if result is empty, it means it detects and plays the music if succeed other wise it returns the search results
 func (p *Player) DetectAndPlay(unknown string) []shared.SearchResult {
 	log.Println("Checking what is this", unknown)
 	whatIsThis := p.CheckWhatIsThis(unknown)

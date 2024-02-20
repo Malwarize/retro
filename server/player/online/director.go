@@ -47,7 +47,10 @@ func (od *OnlineDirector) Register(name string, engine OnlineEngine) {
 
 var times = 0
 
-func (od *OnlineDirector) Search(engineName, query string, maxResults int) ([]shared.SearchResult, error) {
+func (od *OnlineDirector) Search(
+	engineName, query string,
+	maxResults int,
+) ([]shared.SearchResult, error) {
 	engine, ok := od.engines[engineName]
 	if !ok {
 		return nil, errors.New("engine not found")

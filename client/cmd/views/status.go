@@ -72,17 +72,43 @@ func DisplayStatus(client *rpc.Client) {
 		if task.Error != "" {
 			switch task.Type {
 			case shared.Downloading:
-				fmt.Println(GetTheme().FailStyle.Render(failedEmojie, "Failed to download ", target, ":", task.Error))
+				fmt.Println(
+					GetTheme().FailStyle.Render(
+						failedEmojie,
+						"Failed to download ",
+						target,
+						":",
+						task.Error,
+					),
+				)
 			case shared.Searching:
-				fmt.Println(GetTheme().FailStyle.Render(failedEmojie, "Failed to search ", target, ":", task.Error))
+				fmt.Println(
+					GetTheme().FailStyle.Render(
+						failedEmojie,
+						"Failed to search ",
+						target,
+						":",
+						task.Error,
+					),
+				)
 			default:
-				fmt.Println(GetTheme().FailStyle.Render(failedEmojie, "Failed to ", target, ":", task.Error))
+				fmt.Println(
+					GetTheme().FailStyle.Render(
+						failedEmojie,
+						"Failed to ",
+						target,
+						":",
+						task.Error,
+					),
+				)
 			}
 			continue
 		}
 		switch task.Type {
 		case shared.Downloading:
-			fmt.Println(GetTheme().TaskStyle.Render(tasksEmojies[task.Type], "Downloading ", target))
+			fmt.Println(
+				GetTheme().TaskStyle.Render(tasksEmojies[task.Type], "Downloading ", target),
+			)
 		case shared.Searching:
 			fmt.Println(GetTheme().TaskStyle.Render(tasksEmojies[task.Type], "Searching ", target))
 		}

@@ -137,8 +137,16 @@ func (p *Player) RPCRemovePlayList(name string, reply *int) error {
 	return nil
 }
 
-func (p *Player) RPCDetectAndAddToPlayList(args shared.AddToPlayListArgs, reply *[]shared.SearchResult) error {
-	log.Println("RPCDetectAndAddToPlayList called with query :", args.Query, " and playlist name :", args.PlayListName)
+func (p *Player) RPCDetectAndAddToPlayList(
+	args shared.AddToPlayListArgs,
+	reply *[]shared.SearchResult,
+) error {
+	log.Println(
+		"RPCDetectAndAddToPlayList called with query :",
+		args.Query,
+		" and playlist name :",
+		args.PlayListName,
+	)
 	*reply = p.DetectAndAddToPlayList(args.PlayListName, args.Query)
 	log.Println("RPCDetectAndAddToPlayList done")
 	return nil
@@ -151,8 +159,16 @@ func (p *Player) RPCPlayListSongs(name string, reply *[]string) error {
 	return nil
 }
 
-func (p *Player) RPCRemoveSongFromPlayList(args shared.RemoveSongFromPlayListArgs, reply *int) error {
-	log.Println("RPCRemoveSongFromPlayList called with name :", args.PlayListName, "and index :", args.Index)
+func (p *Player) RPCRemoveSongFromPlayList(
+	args shared.RemoveSongFromPlayListArgs,
+	reply *int,
+) error {
+	log.Println(
+		"RPCRemoveSongFromPlayList called with name :",
+		args.PlayListName,
+		"and index :",
+		args.Index,
+	)
 	p.RemoveSongFromPlayList(args.PlayListName, args.Index)
 	*reply = 1
 	log.Println("RPCRemoveSongFromPlayList done")
@@ -160,7 +176,12 @@ func (p *Player) RPCRemoveSongFromPlayList(args shared.RemoveSongFromPlayListArg
 }
 
 func (p *Player) RPCPlayListPlaySong(args shared.PlayListPlaySongArgs, reply *int) error {
-	log.Println("RPCPlayListPlaySong called with name :", args.PlayListName, " and index :", args.Index)
+	log.Println(
+		"RPCPlayListPlaySong called with name :",
+		args.PlayListName,
+		" and index :",
+		args.Index,
+	)
 	p.PlayListPlaySong(args.PlayListName, args.Index)
 	*reply = 1
 	log.Println("RPCPlayListPlaySong done")

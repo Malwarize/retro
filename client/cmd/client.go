@@ -368,7 +368,7 @@ if a song index is provided, it will remove the song from the playlist
 	},
 }
 
-//add song to a playlist
+// add song to a playlist
 var playlistAddCmd = &cobra.Command{
 	Use:   "add <listname> <query>",
 	Short: "add music(s) to a playlist",

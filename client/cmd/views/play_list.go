@@ -11,11 +11,17 @@ import (
 
 func addToPlayListCallback(m model) {
 	i := m.selectList.Index()
-	controller.DetectAndAddToPlayList(m.args[0].(string), m.selectList.Items()[i].(searchResultItem).desc, m.client)
+	controller.DetectAndAddToPlayList(
+		m.args[0].(string),
+		m.selectList.Items()[i].(searchResultItem).desc,
+		m.client,
+	)
 }
 
 func AddToPlayListQuitMessage(m model) string {
-	return quitTextStyle.Render("🔋 Adding music " + m.selectList.Items()[m.selectList.Index()].(searchResultItem).title + " to playlist " + m.args[0].(string))
+	return quitTextStyle.Render(
+		"🔋 Adding music " + m.selectList.Items()[m.selectList.Index()].(searchResultItem).title + " to playlist " + m.args[0].(string),
+	)
 }
 
 func (m model) AddSearch() tea.Msg {

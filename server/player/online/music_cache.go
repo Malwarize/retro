@@ -97,7 +97,11 @@ func (cf *CachedFiles) GetFileByKey(key string, ftype string) (string, error) {
 	for _, file := range cf.Files {
 		if file.Key == sanitizeName(key) && file.Ftype == ftype {
 			log.Println("File found in cache: ", key)
-			return filepath.Join(cf.BaseDir, ftype, shared.CombineNameWithKey(file.Name, file.Key)), nil
+			return filepath.Join(
+				cf.BaseDir,
+				ftype,
+				shared.CombineNameWithKey(file.Name, file.Key),
+			), nil
 		}
 	}
 	return "", errors.New("file not found")
@@ -107,7 +111,11 @@ func (cf *CachedFiles) GetFileByName(name string, ftype string) (string, error) 
 	for _, file := range cf.Files {
 		if file.Name == name && file.Ftype == ftype {
 			log.Println("File found in cache: ", name)
-			return filepath.Join(cf.BaseDir, ftype, shared.CombineNameWithKey(file.Name, file.Key)), nil
+			return filepath.Join(
+				cf.BaseDir,
+				ftype,
+				shared.CombineNameWithKey(file.Name, file.Key),
+			), nil
 		}
 	}
 	return "", errors.New("file not found")
@@ -117,12 +125,22 @@ func (cf *CachedFiles) Search(query string) []shared.SearchResult {
 	var results []shared.SearchResult
 	for _, file := range cf.Files {
 		if strings.Contains(strings.ToLower(file.Name), strings.ToLower(sanitizeName(query))) {
-			dur, _ := shared.GetMp3Duration(filepath.Join(cf.BaseDir, file.Ftype, shared.CombineNameWithKey(file.Name, file.Key)))
+			dur, _ := shared.GetMp3Duration(
+				filepath.Join(
+					cf.BaseDir,
+					file.Ftype,
+					shared.CombineNameWithKey(file.Name, file.Key),
+				),
+			)
 			results = append(results, shared.SearchResult{
-				Title:       file.Name,
-				Type:        "cache",
-				Destination: filepath.Join(cf.BaseDir, file.Ftype, shared.CombineNameWithKey(file.Name, file.Key)),
-				Duration:    dur,
+				Title: file.Name,
+				Type:  "cache",
+				Destination: filepath.Join(
+					cf.BaseDir,
+					file.Ftype,
+					shared.CombineNameWithKey(file.Name, file.Key),
+				),
+				Duration: dur,
 			})
 		}
 	}
@@ -143,7 +161,10 @@ func (cf *CachedFiles) AddFile(filedata []byte, name string, ftype string, key s
 		log.Println(dirPath, "not found, creating it")
 	}
 
-	filePath := filepath.Join(dirPath, shared.CombineNameWithKey(sanitizeName(name), sanitizeName(key)))
+	filePath := filepath.Join(
+		dirPath,
+		shared.CombineNameWithKey(sanitizeName(name), sanitizeName(key)),
+	)
 	log.Println("Writing file to: ", filePath)
 	f, err := os.Create(filePath)
 	if err != nil {

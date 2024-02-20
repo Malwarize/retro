@@ -157,9 +157,17 @@ func newYoutubeEngine() (*youtubeEngine, error) {
 	}, nil
 }
 
-//why I used ytdlp instead of youtube lib : because ytdlp doesn't need API key to search
+// why I used ytdlp instead of youtube lib : because ytdlp doesn't need API key to search
 func (yt *youtubeEngine) Search(query string, maxResults int) ([]shared.SearchResult, error) {
-	cmd := exec.Command(yt.ytdlpPath, "--get-id", "--get-title", "--skip-download", "--get-duration", "--flat-playlist", "ytsearch"+strconv.Itoa(maxResults)+":"+query)
+	cmd := exec.Command(
+		yt.ytdlpPath,
+		"--get-id",
+		"--get-title",
+		"--skip-download",
+		"--get-duration",
+		"--flat-playlist",
+		"ytsearch"+strconv.Itoa(maxResults)+":"+query,
+	)
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err

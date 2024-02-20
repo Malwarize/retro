@@ -152,56 +152,86 @@ func ListBlueDelegate() list.DefaultDelegate {
 func NewPurpleTheme() Themes {
 	purple := lipgloss.AdaptiveColor{Light: "#D8BFD8", Dark: "#800080"}
 	return Themes{
-		DocStyle:         lipgloss.NewStyle().Margin(1, 2),
-		QuitTextStyle:    lipgloss.NewStyle().Margin(1, 0, 2, 4),
-		SpinnerStyle:     lipgloss.NewStyle().Foreground(purple),
-		ProgressStyle:    lipgloss.NewStyle().Foreground(purple).Margin(1, 0, 0, 3),
-		RunningStyle:     lipgloss.NewStyle().Foreground(lipgloss.Color("#00FF00")).Margin(1, 0, 2, 3),
-		StoppedStyle:     lipgloss.NewStyle().Foreground(lipgloss.Color("#FF0000")).Margin(1, 0, 2, 3),
-		PausedStyle:      lipgloss.NewStyle().Foreground(lipgloss.Color("#0000FF")).Margin(1, 0, 2, 3),
+		DocStyle:      lipgloss.NewStyle().Margin(1, 2),
+		QuitTextStyle: lipgloss.NewStyle().Margin(1, 0, 2, 4),
+		SpinnerStyle:  lipgloss.NewStyle().Foreground(purple),
+		ProgressStyle: lipgloss.NewStyle().Foreground(purple).Margin(1, 0, 0, 3),
+		RunningStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#00FF00")).
+			Margin(1, 0, 2, 3),
+		StoppedStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#FF0000")).
+			Margin(1, 0, 2, 3),
+		PausedStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#0000FF")).
+			Margin(1, 0, 2, 3),
 		PositionStyle:    lipgloss.NewStyle().Foreground(purple).Margin(1, 0, 0, 3),
 		SelectMusicStyle: lipgloss.NewStyle().Foreground(purple).Margin(0, 0, 0, 1),
-		FailStyle:        lipgloss.NewStyle().Foreground(lipgloss.Color("#FFA500")).Margin(1, 0, 0, 3),
-		TaskStyle:        lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFFF")).Margin(1, 0, 0, 3),
-		MainColor:        "#A020F0",
-		ListDelegate:     ListPurpleDelegate(),
+		FailStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#FFA500")).
+			Margin(1, 0, 0, 3),
+		TaskStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#00FFFF")).
+			Margin(1, 0, 0, 3),
+		MainColor:    "#A020F0",
+		ListDelegate: ListPurpleDelegate(),
 	}
 }
 
 func NewPinkTheme() Themes {
 	return Themes{
-		DocStyle:         lipgloss.NewStyle().Margin(1, 2),
-		QuitTextStyle:    lipgloss.NewStyle().Margin(1, 0, 2, 4),
-		SpinnerStyle:     lipgloss.NewStyle().Foreground(lipgloss.Color("205")),
-		ProgressStyle:    lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3),
-		RunningStyle:     lipgloss.NewStyle().Foreground(lipgloss.Color("#FFFF00")).Margin(1, 0, 2, 3),
-		StoppedStyle:     lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000")).Margin(1, 0, 2, 3),
-		PausedStyle:      lipgloss.NewStyle().Foreground(lipgloss.Color("#0000FF")).Margin(1, 0, 2, 3),
+		DocStyle:      lipgloss.NewStyle().Margin(1, 2),
+		QuitTextStyle: lipgloss.NewStyle().Margin(1, 0, 2, 4),
+		SpinnerStyle:  lipgloss.NewStyle().Foreground(lipgloss.Color("205")),
+		ProgressStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3),
+		RunningStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#FFFF00")).
+			Margin(1, 0, 2, 3),
+		StoppedStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#ff0000")).
+			Margin(1, 0, 2, 3),
+		PausedStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#0000FF")).
+			Margin(1, 0, 2, 3),
 		PositionStyle:    lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3),
 		SelectMusicStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(0, 0, 0, 1),
-		FailStyle:        lipgloss.NewStyle().Foreground(lipgloss.Color("#FFA500")).Margin(1, 0, 0, 3),
-		TaskStyle:        lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFFF")).Margin(1, 0, 0, 3),
-		MainColor:        "205",
-		ListDelegate:     list.NewDefaultDelegate(),
+		FailStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#FFA500")).
+			Margin(1, 0, 0, 3),
+		TaskStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#00FFFF")).
+			Margin(1, 0, 0, 3),
+		MainColor:    "205",
+		ListDelegate: list.NewDefaultDelegate(),
 	}
 }
 
 func NewBlueTheme() Themes {
 	blue := lipgloss.AdaptiveColor{Light: "#ADD8E6", Dark: "#0000FF"}
 	return Themes{
-		DocStyle:         lipgloss.NewStyle().Margin(1, 2),
-		QuitTextStyle:    lipgloss.NewStyle().Margin(1, 0, 2, 4),
-		SpinnerStyle:     lipgloss.NewStyle().Foreground(blue),
-		ProgressStyle:    lipgloss.NewStyle().Foreground(blue).Margin(1, 0, 0, 3),
-		RunningStyle:     lipgloss.NewStyle().Foreground(lipgloss.Color("#00FF00")).Margin(1, 0, 2, 3),
-		StoppedStyle:     lipgloss.NewStyle().Foreground(lipgloss.Color("#FF0000")).Margin(1, 0, 2, 3),
-		PausedStyle:      lipgloss.NewStyle().Foreground(lipgloss.Color("#0000FF")).Margin(1, 0, 2, 3),
+		DocStyle:      lipgloss.NewStyle().Margin(1, 2),
+		QuitTextStyle: lipgloss.NewStyle().Margin(1, 0, 2, 4),
+		SpinnerStyle:  lipgloss.NewStyle().Foreground(blue),
+		ProgressStyle: lipgloss.NewStyle().Foreground(blue).Margin(1, 0, 0, 3),
+		RunningStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#00FF00")).
+			Margin(1, 0, 2, 3),
+		StoppedStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#FF0000")).
+			Margin(1, 0, 2, 3),
+		PausedStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#0000FF")).
+			Margin(1, 0, 2, 3),
 		PositionStyle:    lipgloss.NewStyle().Foreground(blue).Margin(1, 0, 0, 3),
 		SelectMusicStyle: lipgloss.NewStyle().Foreground(blue).Margin(0, 0, 0, 1),
-		FailStyle:        lipgloss.NewStyle().Foreground(lipgloss.Color("#FFA500")).Margin(1, 0, 0, 3),
-		TaskStyle:        lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFFF")).Margin(1, 0, 0, 3),
-		MainColor:        "#0000FF",
-		ListDelegate:     ListBlueDelegate(),
+		FailStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#FFA500")).
+			Margin(1, 0, 0, 3),
+		TaskStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#00FFFF")).
+			Margin(1, 0, 0, 3),
+		MainColor:    "#0000FF",
+		ListDelegate: ListBlueDelegate(),
 	}
 }
 

@@ -42,7 +42,19 @@ func (c *Converter) ConvertToMP3(inputFile string) error {
 	outputFile := tmpFile.Name() + ".mp3"
 	defer os.Remove(outputFile)
 
-	cmd := exec.Command(c.ffmpegPath, "-i", inputFile, "-vn", "-ar", "44100", "-ac", "2", "-b:a", "192k", outputFile)
+	cmd := exec.Command(
+		c.ffmpegPath,
+		"-i",
+		inputFile,
+		"-vn",
+		"-ar",
+		"44100",
+		"-ac",
+		"2",
+		"-b:a",
+		"192k",
+		outputFile,
+	)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Println("error converting to MP3:", string(out))
@@ -63,7 +75,16 @@ func (c *Converter) ConvertToMP3(inputFile string) error {
 }
 
 func (c *Converter) IsMp3(file string) (bool, error) {
-	cmd := exec.Command("ffprobe", "-v", "error", "-show_entries", "format=format_name", "-of", "default=noprint_wrappers=1:nokey=1", file)
+	cmd := exec.Command(
+		"ffprobe",
+		"-v",
+		"error",
+		"-show_entries",
+		"format=format_name",
+		"-of",
+		"default=noprint_wrappers=1:nokey=1",
+		file,
+	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Println("Error checking file format:", string(output))

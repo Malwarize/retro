@@ -49,7 +49,10 @@ func (plm *PlayListManager) Fetch() error {
 			if song.IsDir() {
 				continue
 			}
-			pl.Items = append(pl.Items, Music{Path: filepath.Join(plm.PlayListPath, file.Name(), song.Name())})
+			pl.Items = append(
+				pl.Items,
+				Music{Path: filepath.Join(plm.PlayListPath, file.Name(), song.Name())},
+			)
 		}
 
 		plm.PlayLists[file.Name()] = pl
@@ -134,7 +137,11 @@ func (plm *PlayListManager) PlayListSongs(name string) []string {
 	return songs
 }
 
-func (plm *PlayListManager) AddToPlayListFromDir(name string, dir string, converter *Converter) error {
+func (plm *PlayListManager) AddToPlayListFromDir(
+	name string,
+	dir string,
+	converter *Converter,
+) error {
 	files, err := os.ReadDir(dir)
 	if err != nil {
 		return err
@@ -169,7 +176,12 @@ func (plm *PlayListManager) AddToPlayListFromFile(name string, file string) erro
 	return nil
 }
 
-func (plm *PlayListManager) AddToPlayListFromOnline(name string, query string, engineName string, p *Player) {
+func (plm *PlayListManager) AddToPlayListFromOnline(
+	name string,
+	query string,
+	engineName string,
+	p *Player,
+) {
 
 	p.addTask(query, shared.Downloading)
 	path, err := p.Director.Download(engineName, query)

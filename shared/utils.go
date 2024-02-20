@@ -102,7 +102,7 @@ type PlayListPlaySongArgs struct {
 	Index        int
 }
 
-//helper function to get mp3 duration
+// helper function to get mp3 duration
 func GetMp3Duration(path string) (time.Duration, error) {
 	f, err := os.Open(path)
 	if err != nil {

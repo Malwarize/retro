@@ -17,7 +17,9 @@ func playCallback(m model) {
 
 func PlayQuitMessage(m model) string {
 	randEmoji := playingEmojies[rand.Intn(len(playingEmojies))]
-	return quitTextStyle.Render(randEmoji + " Playing song " + m.selectList.Items()[m.selectList.Index()].(searchResultItem).title + ", this may take a while if download needed")
+	return quitTextStyle.Render(
+		randEmoji + " Playing song " + m.selectList.Items()[m.selectList.Index()].(searchResultItem).title + ", this may take a while if download needed",
+	)
 }
 
 func (m model) PlaySearch() tea.Msg {
