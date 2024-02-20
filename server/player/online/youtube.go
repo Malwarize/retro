@@ -174,17 +174,38 @@ func (yt *youtubeEngine) Search(query string, maxResults int) ([]shared.SearchRe
 	}
 	log.Println("yt-dlp output:\n", string(out))
 	lines := strings.Split(string(out), "\n")
+
 	var results []shared.SearchResult
-	// convert string to duration
-	for i := 0; i < len(lines)-1; i += 3 {
-		dur, _ := shared.StringToDuration(lines[i+2])
-		results = append(results, shared.SearchResult{
-			Title:       lines[i],
-			Destination: "https://www.youtube.com/watch?v=" + lines[i+1],
-			Type:        "youtube",
-			Duration:    dur,
-		})
+	var currentResult shared.SearchResult
+
+	for _, line := range lines {
+		// Check if the line is an ID (YouTube IDs are 11 characters long)
+		if len(line) == 11 {
+			if currentResult.Destination != "" {
+				// If we already have a destination, it means we are moving to the next video
+				// So, we append the current result and start a new one
+				results = append(results, currentResult)
+				currentResult = shared.SearchResult{}
+			}
+			currentResult.Destination = "https://www.youtube.com/watch?v=" + line
+			currentResult.Type = "youtube"
+		} else if strings.Contains(line, " ") || len(line) == 0 {
+			// Assuming that a title will contain spaces (a simplistic check)
+			currentResult.Title = line
+		} else {
+			// If it's not an ID or a title, it's likely a duration or an empty line indicating a missing duration
+			if line != "" {
+				dur, _ := shared.StringToDuration(line)
+				currentResult.Duration = dur
+			}
+		}
 	}
+
+	// Append the last result if it hasn't been appended yet
+	if currentResult.Destination != "" {
+		results = append(results, currentResult)
+	}
+
 	return results, nil
 }
 
