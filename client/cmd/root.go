@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"github.com/Malwarize/goplay/client/controller"
 )
 
 var rootCmd = &cobra.Command{
@@ -29,6 +31,11 @@ func Execute() {
 }
 
 func init() {
+	_, err := controller.GetClient()
+	if err != nil {
+		fmt.Println("Error", err)
+		os.Exit(1)
+	}
 	rootCmd.AddCommand(playCmd)
 	rootCmd.AddCommand(pauseCmd)
 	rootCmd.AddCommand(resumeCmd)

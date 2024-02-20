@@ -37,10 +37,10 @@ func DisplayStatus(client *rpc.Client) {
 		fmt.Println(GetTheme().StoppedStyle.Render(emojiesStatus[shared.Stopped], " Stopped"))
 	} else {
 
-		currentMusicName := queue[status.CurrentMusicIndex]
+		currentMusicName := queue[status.CurrMusicIndex]
 
 		currentMusicName = shared.ViewParseName(currentMusicName)
-		currentPosition := status.CurrentMusicPosition
+		currentPosition := status.CurrMusicPosition
 		currentPositionStr := reformatDuration(currentPosition)
 
 		totalDurationStr := reformatDuration(status.CurrMusicDuration)
@@ -61,7 +61,7 @@ func DisplayStatus(client *rpc.Client) {
 		}
 		// display queue
 		for i, music := range queue {
-			if i == status.CurrentMusicIndex {
+			if i == status.CurrMusicIndex {
 				fmt.Println(GetTheme().SelectMusicStyle.Render("->", strconv.Itoa(i), ":", shared.ViewParseName(music)))
 			} else {
 				fmt.Println("  ", i, ":", shared.ViewParseName(music))
