@@ -120,6 +120,9 @@ func GetMp3Duration(path string) (time.Duration, error) {
 // function converts 00:00:00 to time.Duration
 func StringToDuration(s string) (time.Duration, error) {
 	sp := strings.Split(s, ":")
+	if len(sp) < 2 {
+		return 0, fmt.Errorf("invalid duration: %s", s)
+	}
 	l := len(sp)
 	sec := "0"
 	min := "0"
