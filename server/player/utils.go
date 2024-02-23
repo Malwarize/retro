@@ -13,6 +13,7 @@ func MusicDecode(path string) (beep.StreamSeekCloser, beep.Format, error) {
 	if err != nil {
 		return nil, beep.Format{}, err
 	}
+
 	return mp3.Decode(f)
 }
 

@@ -21,7 +21,7 @@ type PlayListManager struct {
 
 func NewPlayListManager() (*PlayListManager, error) {
 	path := config.GetConfig().PlaylistPath
-	err := os.MkdirAll(path, 0755)
+	err := os.MkdirAll(path, 0o755)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (plm *PlayListManager) Fetch() error {
 
 // Create a new playlist
 func (plm *PlayListManager) Create(name string) error {
-	err := os.Mkdir(filepath.Join(plm.PlayListPath, name), 0755)
+	err := os.Mkdir(filepath.Join(plm.PlayListPath, name), 0o755)
 	if err != nil {
 		return err
 	}
@@ -182,7 +182,6 @@ func (plm *PlayListManager) AddToPlayListFromOnline(
 	engineName string,
 	p *Player,
 ) {
-
 	p.addTask(query, shared.Downloading)
 	path, err := p.Director.Download(engineName, query)
 	if err != nil {

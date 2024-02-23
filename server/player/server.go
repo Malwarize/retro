@@ -11,92 +11,74 @@ import (
 )
 
 func (p *Player) RPCPlay(_ int, reply *int) error {
-	go func() {
-		log.Println("RPCPlay called")
-		p.Play()
-		*reply = 1
-		log.Println("RPCPlay done")
-	}()
+	log.Println("RPCPlay called")
+	p.Play()
+	*reply = 1
+	log.Println("RPCPlay done")
 	return nil
 }
 
 func (p *Player) RPCNext(_ int, reply *int) error {
-	go func() {
-		log.Println("RPCNext called")
-		p.Next()
-		*reply = 1
-		log.Println("RPCNext done")
-	}()
+	log.Println("RPCNext called")
+	p.Next()
+	*reply = 1
+	log.Println("RPCNext done")
 	return nil
 }
 
 func (p *Player) RPCPrev(_ int, reply *int) error {
-	go func() {
-		log.Println("RPCPrev called")
-		p.Prev()
-		*reply = 1
-		log.Println("RPCPrev done")
-	}()
+	log.Println("RPCPrev called")
+	p.Prev()
+	*reply = 1
+	log.Println("RPCPrev done")
 	return nil
 }
 
 func (p *Player) RPCPause(_ int, reply *int) error {
-	go func() {
-		log.Println("RPCPause called")
-		p.Pause()
-		*reply = 1
-		log.Println("RPCPause done")
-	}()
+	log.Println("RPCPause called")
+	p.Pause()
+	*reply = 1
+	log.Println("RPCPause done")
 	return nil
 }
 
 func (p *Player) RPCStop(_ int, reply *int) error {
-	go func() {
-		log.Println("RPCStop called")
-		p.Stop()
-		*reply = 1
-		log.Println("RPCStop done")
-	}()
+	log.Println("RPCStop called")
+	p.Stop()
+	*reply = 1
+	log.Println("RPCStop done")
 	return nil
 }
 
 func (p *Player) RPCSeek(d time.Duration, reply *int) error {
-	go func() {
-		log.Println("RPCSeek called with duration in seconds :", d*time.Second)
-		p.Seek(d * time.Second)
-		*reply = 0
-		log.Println("RPCSeek done")
-	}()
+	log.Println("RPCSeek called with duration in seconds :", d*time.Second)
+	p.Seek(d * time.Second)
+	*reply = 0
+	log.Println("RPCSeek done")
 	return nil
 }
 
 func (p *Player) RPCVolume(vp int /*volume percentage*/, reply *int) error {
-	go func() {
-		log.Println("RPCVolume called with volume percentage :", vp)
-		p.Volume(vp)
-		*reply = 0
-		log.Println("RPCVolume done")
-	}()
+	log.Println("RPCVolume called with volume percentage :", vp)
+	p.Volume(vp)
+	*reply = 0
+	log.Println("RPCVolume done")
 	return nil
 }
 
 func (p *Player) RPCResume(_ int, reply *int) error {
-	go func() {
-		log.Println("RPCResume called")
-		p.Resume()
-		*reply = 1
-		log.Println("RPCResume done")
-	}()
+	log.Println("RPCResume called")
+	p.Resume()
+	*reply = 1
+	log.Println("RPCResume done")
 	return nil
 }
 
 func (p *Player) RPCRemoveMusic(index int, reply *int) error {
-	go func() {
-		log.Println("RPCRemoveMusic called with index :", index)
-		p.Remove(index)
-		*reply = 1
-		log.Println("RPCRemoveMusic done")
-	}()
+	log.Println("RPCRemoveMusic called with index :", index)
+	p.Remove(index)
+	*reply = 1
+	log.Println("RPCRemoveMusic done")
 	return nil
 }
 

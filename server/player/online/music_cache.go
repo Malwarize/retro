@@ -27,7 +27,7 @@ type CachedFiles struct {
 func NewCachedFiles() *CachedFiles {
 	if _, err := os.Stat(config.GetConfig().CacheDir); os.IsNotExist(err) {
 		log.Println("Cache dir not found, creating it")
-		err = os.Mkdir(config.GetConfig().CacheDir, 0755)
+		err = os.Mkdir(config.GetConfig().CacheDir, 0o755)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -59,7 +59,7 @@ func (cf *CachedFiles) Fetch() error {
 		var fs *os.File
 		_, err := os.Open(dirPath)
 		if os.IsNotExist(err) {
-			err = os.Mkdir(dirPath, 0755)
+			err = os.Mkdir(dirPath, 0o755)
 			if err != nil {
 				return err
 			}
@@ -67,7 +67,6 @@ func (cf *CachedFiles) Fetch() error {
 		}
 
 		fs, err = os.Open(dirPath)
-
 		if err != nil {
 			return err
 		}
@@ -153,7 +152,7 @@ func (cf *CachedFiles) AddFile(filedata []byte, name string, ftype string, key s
 	// cehck if dir exists if not create it
 	_, err := os.Open(dirPath)
 	if os.IsNotExist(err) {
-		err = os.Mkdir(dirPath, 0755)
+		err = os.Mkdir(dirPath, 0o755)
 		if err != nil {
 			log.Printf("Error creating dir: %v", err)
 			return ""

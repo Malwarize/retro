@@ -18,7 +18,6 @@ func PlayListsDisplay(client *rpc.Client) {
 	for _, playlist := range playlists {
 		fmt.Printf("\n   - %s\n", playlist)
 	}
-
 }
 
 func PlayListSongsDisplay(name string, client *rpc.Client) {

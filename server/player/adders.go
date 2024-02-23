@@ -135,7 +135,6 @@ func (p *Player) AddMusicsFromPlaylist(playlistName string) {
 	}
 	for _, entry := range entries {
 		if !entry.IsDir() {
-
 			p.AddMusicFromFile(filepath.Join(playlistPath, entry.Name()))
 		}
 	}

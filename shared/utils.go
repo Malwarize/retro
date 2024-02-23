@@ -69,7 +69,7 @@ type SearchResult struct {
 func EscapeSpecialDirChars(path string) string {
 	// escape special chars
 	path = url.PathEscape(path)
-	//first 40 chars
+	// first 40 chars
 	path = path[:40]
 	return path
 }

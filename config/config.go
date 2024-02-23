@@ -8,8 +8,10 @@ import (
 	"time"
 )
 
-var once sync.Once
-var cfg *Config // singleton instance
+var (
+	once sync.Once
+	cfg  *Config // singleton instance
+)
 
 var DEBUG = false // set to true for debug mode
 
@@ -102,7 +104,7 @@ func EditConfigField(field string, value string) error {
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(configPath, jsonData, 0644)
+	err = os.WriteFile(configPath, jsonData, 0o644)
 	if err != nil {
 		return err
 	}

@@ -1,6 +1,7 @@
 package player
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -154,7 +155,7 @@ func (p *Player) Next() {
 	if currentMusic == nil {
 		return
 	}
-	if err := currentMusic.Seek(0); err != nil {
+	if err := currentMusic.SetPositionD(0); err != nil {
 		log.Println("Error when seeking")
 	}
 	p.Queue.QueueNext()
@@ -226,7 +227,6 @@ func (p *Player) Seek(d time.Duration) {
 	if currentMusic == nil {
 		return
 	}
-	fmt.Println("seek 1")
 	if state == Paused {
 		p.Resume()
 		defer p.Pause()
@@ -257,9 +257,9 @@ func (p *Player) Remove(index int) {
 	if p.Queue.Size() == 1 {
 		p.Stop()
 	} else if index == p.Queue.GetCurrIndex() {
+		p.Queue.Remove(index)
 		p.Next()
 	}
-	p.Queue.Remove(index)
 }
 
 // player playlist command
@@ -383,7 +383,6 @@ func (p *Player) CheckWhatIsThis(unknown string) string {
 	if index, err := strconv.Atoi(unknown); err == nil && index >= 0 && index < p.Queue.Size() {
 		return "queue"
 	}
-
 	engines := p.Director.GetEngines()
 	for _, engine := range engines {
 		ok, _ := engine.Exists(unknown)
@@ -394,33 +393,75 @@ func (p *Player) CheckWhatIsThis(unknown string) string {
 	return "unknown"
 }
 
+func (p *Player) searchWorker(
+	ctx context.Context,
+	engine string,
+	query string,
+	musicChan chan shared.SearchResult,
+	wg *sync.WaitGroup,
+) {
+	defer func() {
+		log.Println("Search worker done for", engine, query)
+		wg.Done()
+	}()
+
+	searchRes, err := p.Director.Search(engine, query, 5)
+	if err != nil {
+		log.Println("Failed to search for", query, ":", err)
+	}
+
+	for _, music := range searchRes {
+		musicChan <- music
+	}
+}
+
 func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
 	// add task : this task displayed in the status: if the task is done, it will be removed
 	p.addTask(query, shared.Searching)
+	wg := &sync.WaitGroup{}
+	musicChan := make(
+		chan shared.SearchResult,
+	)
 	var musics []shared.SearchResult
-	for engineName := range p.Director.GetEngines() {
-		searchDone := make(chan bool)
-		go func() {
-			defer close(searchDone)
-			searchRes, err := p.Director.Search(engineName, query, 5)
-			searchDone <- true
-			if err != nil {
-				p.errorifyTask(query, err)
-				log.Println("Failed to search for", query, ":", err)
-			}
-			musics = append(musics, searchRes...)
-		}()
+	ctx, cancel := context.WithTimeout(context.Background(), config.GetConfig().SearchTimeOut)
+	defer cancel()
+	for name := range p.Director.GetEngines() {
+		wg.Add(1)
+		go p.searchWorker(ctx, name, query, musicChan, wg)
+	}
 
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		cacheMusic := p.Director.Cached.Search(query)
+		fmt.Println("Cached files", cacheMusic)
+		for _, music := range cacheMusic {
+			musicChan <- music
+		}
+	}()
+
+	go func() {
+		wg.Wait()
+		close(musicChan)
+	}()
+
+	// for music := range musicChan {
+	// 	musics = append(musics, music)
+	// }
+
+	for {
 		select {
-		case <-time.After(config.GetConfig().SearchTimeOut):
-			log.Println("Timeout searching for", query)
-			p.errorifyTask(query, fmt.Errorf("timeout searching for %s", query))
-		case <-searchDone:
+		case music, ok := <-musicChan:
+			if !ok {
+				return musics
+			}
+			musics = append(musics, music)
+			p.removeTask(query)
+		case <-ctx.Done():
+			log.Println("Search timed out")
+			return musics
 		}
 	}
-	files := p.Director.Cached.Search(query)
-	fmt.Println("Cached files", files)
-	musics = append(musics, files...)
 	p.removeTask(query)
 	return musics
 }

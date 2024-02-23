@@ -107,6 +107,7 @@ func purpleItemStyle() (s list.DefaultItemStyles) {
 	s.FilterMatch = lipgloss.NewStyle().Underline(true)
 	return s
 }
+
 func ListPurpleDelegate() list.DefaultDelegate {
 	def := list.NewDefaultDelegate()
 	def.Styles = purpleItemStyle()
@@ -143,6 +144,7 @@ func blueItemStyle() (s list.DefaultItemStyles) {
 
 	return s
 }
+
 func ListBlueDelegate() list.DefaultDelegate {
 	def := list.NewDefaultDelegate()
 	def.Styles = blueItemStyle()

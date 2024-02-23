@@ -418,7 +418,6 @@ and you can play it using the "list play" command
 			}
 		}
 		views.SearchThenAddToPlayList(listname, query, client)
-
 	},
 }
 
