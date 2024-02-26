@@ -4,19 +4,22 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/Malwarize/goplay/config"
+	"github.com/Malwarize/goplay/logger"
 	"github.com/Malwarize/goplay/shared"
 )
 
 type PlayList struct {
 	Name  string
-	Items []Music
+	Items []*Music
 }
 
 type PlayListManager struct {
 	PlayListPath string
-	PlayLists    map[string]PlayList // map playlistname to playlist
+	PlayLists    map[string]*PlayList // map playlistname to playlist
+	mu           *sync.Mutex
 }
 
 func NewPlayListManager() (*PlayListManager, error) {
@@ -25,7 +28,11 @@ func NewPlayListManager() (*PlayListManager, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &PlayListManager{PlayLists: make(map[string]PlayList), PlayListPath: path}, nil
+	return &PlayListManager{
+		PlayLists:    make(map[string]*PlayList),
+		PlayListPath: path,
+		mu:           &sync.Mutex{},
+	}, nil
 }
 
 func (plm *PlayListManager) Fetch() error {
@@ -39,8 +46,8 @@ func (plm *PlayListManager) Fetch() error {
 		if !file.IsDir() {
 			continue
 		}
-		pl := PlayList{Name: file.Name()}
-		pl.Items = make([]Music, 0)
+		pl := &PlayList{Name: file.Name()}
+		pl.Items = make([]*Music, 0)
 		songs, err := os.ReadDir(filepath.Join(plm.PlayListPath, file.Name()))
 		if err != nil {
 			return err
@@ -51,73 +58,116 @@ func (plm *PlayListManager) Fetch() error {
 			}
 			pl.Items = append(
 				pl.Items,
-				Music{Path: filepath.Join(plm.PlayListPath, file.Name(), song.Name())},
+				&Music{
+					Path: filepath.Join(plm.PlayListPath,
+						file.Name(),
+						song.Name(),
+					),
+				},
 			)
 		}
 
 		plm.PlayLists[file.Name()] = pl
 	}
-
 	return nil
 }
 
 // Create a new playlist
-func (plm *PlayListManager) Create(name string) error {
+func (plm *PlayListManager) CreatePlayList(name string) error {
 	err := os.Mkdir(filepath.Join(plm.PlayListPath, name), 0o755)
 	if err != nil {
 		return err
 	}
-	pl := PlayList{Name: name}
+	pl := &PlayList{Name: name}
+	// check if playlist already exists
+	_, ok := plm.PlayLists[name]
+	if ok {
+		return os.ErrExist
+	}
+	plm.mu.Lock()
+	defer plm.mu.Unlock()
 	plm.PlayLists[name] = pl
 	return nil
 }
 
-// remove a playlist
-func (plm *PlayListManager) Remove(name string) error {
-	err := os.RemoveAll(filepath.Join(plm.PlayListPath, name))
+func (plm *PlayListManager) Remove(pl *PlayList) error {
+	err := os.RemoveAll(filepath.Join(plm.PlayListPath, pl.Name))
 	if err != nil {
 		return err
 	}
-	delete(plm.PlayLists, name)
+	plm.mu.Lock()
+	defer plm.mu.Unlock()
+	delete(plm.PlayLists, pl.Name)
 	return nil
 }
 
-// add music to a playlist
-func (plm *PlayListManager) AddMusic(name string, music Music) error {
-	err := copyFile(music.Path, filepath.Join(plm.PlayListPath, name, music.Name()))
+func (plm *PlayListManager) AddMusic(pl *PlayList, music *Music) error {
+	err := copyFile(music.Path, filepath.Join(plm.PlayListPath, pl.Name, music.Name()))
 	if err != nil {
 		return err
 	}
-	pl, ok := plm.PlayLists[name]
-	if !ok {
-		return os.ErrNotExist
-	}
+	plm.mu.Lock()
+	defer plm.mu.Unlock()
 	pl.Items = append(pl.Items, music)
-
-	plm.PlayLists[name] = pl
-
+	plm.PlayLists[pl.Name] = pl
 	return nil
 }
 
-func (plm *PlayListManager) RemoveMusic(name string, index int) error {
-	if index < 0 || index >= len(plm.PlayLists[name].Items) {
-		return os.ErrNotExist
-	}
-	music := plm.PlayLists[name].Items[index]
-	err := os.Remove(filepath.Join(plm.PlayListPath, name, music.Name()))
+func (plm *PlayListManager) RemoveMusic(pl *PlayList, music *Music) error {
+	plm.mu.Lock()
+	defer plm.mu.Unlock()
+
+	err := os.Remove(music.Path)
 	if err != nil {
 		return err
 	}
-	pl, ok := plm.PlayLists[name]
-	if !ok {
-		return os.ErrNotExist
+	for i, m := range pl.Items {
+		if m.Path == music.Path {
+			pl.Items = append(pl.Items[:i], pl.Items[i+1:]...)
+		}
 	}
-	pl.Items = append(pl.Items[:index], pl.Items[index+1:]...)
-	plm.PlayLists[name] = pl
+	plm.PlayLists[pl.Name] = pl
 	return nil
+}
+
+func (plm *PlayListManager) GetPlayListByName(name string) (*PlayList, error) {
+	plm.mu.Lock()
+	defer plm.mu.Unlock()
+	if _, ok := plm.PlayLists[name]; !ok {
+		return nil, os.ErrNotExist
+	}
+	return plm.PlayLists[name], nil
+}
+
+func (plm *PlayListManager) GetPlayListSongByName(pl *PlayList, name string) (*Music, error) {
+	plm.mu.Lock()
+	defer plm.mu.Unlock()
+	for _, song := range pl.Items {
+		if song.Name() == name {
+			return song, nil
+		}
+	}
+	return nil, os.ErrNotExist
+}
+
+func (plm *PlayListManager) plSize(pl *PlayList) int {
+	plm.mu.Lock()
+	defer plm.mu.Unlock()
+	return len(pl.Items)
+}
+
+func (plm *PlayListManager) GetPlayListSongByIndex(pl *PlayList, index int) (*Music, error) {
+	plm.mu.Lock()
+	defer plm.mu.Unlock()
+	if index < 0 || index >= plm.plSize(pl) {
+		return nil, os.ErrNotExist
+	}
+	return pl.Items[index], nil
 }
 
 func (plm *PlayListManager) PlayListsNames() []string {
+	plm.mu.Lock()
+	defer plm.mu.Unlock()
 	var names []string
 	for name := range plm.PlayLists {
 		names = append(names, name)
@@ -125,20 +175,14 @@ func (plm *PlayListManager) PlayListsNames() []string {
 	return names
 }
 
-func (plm *PlayListManager) PlayListSongs(name string) []string {
-	pl, ok := plm.PlayLists[name]
-	if !ok {
-		return nil
-	}
-	var songs []string
-	for _, song := range pl.Items {
-		songs = append(songs, song.Name())
-	}
-	return songs
+func (plm *PlayListManager) GetPlayListSongs(pl *PlayList) []*Music {
+	plm.mu.Lock()
+	defer plm.mu.Unlock()
+	return pl.Items
 }
 
 func (plm *PlayListManager) AddToPlayListFromDir(
-	name string,
+	pl *PlayList,
 	dir string,
 	converter *Converter,
 ) error {
@@ -158,9 +202,17 @@ func (plm *PlayListManager) AddToPlayListFromDir(
 			return err
 		}
 		if !isMp3 {
+			logger.LogWarn(
+				"Skipping file", file.Name(),
+				"in directory", dir,
+				"because it is not an mp3 file",
+			)
 			continue
 		}
-		err = plm.AddMusic(name, Music{Path: path})
+		err = plm.AddMusic(
+			pl,
+			&Music{Path: path},
+		)
 		if err != nil {
 			return err
 		}
@@ -168,8 +220,11 @@ func (plm *PlayListManager) AddToPlayListFromDir(
 	return nil
 }
 
-func (plm *PlayListManager) AddToPlayListFromFile(name string, file string) error {
-	err := plm.AddMusic(name, Music{Path: file})
+func (plm *PlayListManager) AddToPlayListFromFile(pl *PlayList, file string) error {
+	err := plm.AddMusic(
+		pl,
+		&Music{Path: file},
+	)
 	if err != nil {
 		return err
 	}
@@ -177,7 +232,7 @@ func (plm *PlayListManager) AddToPlayListFromFile(name string, file string) erro
 }
 
 func (plm *PlayListManager) AddToPlayListFromOnline(
-	name string,
+	pl *PlayList,
 	query string,
 	engineName string,
 	p *Player,
@@ -185,26 +240,37 @@ func (plm *PlayListManager) AddToPlayListFromOnline(
 	p.addTask(query, shared.Downloading)
 	path, err := p.Director.Download(engineName, query)
 	if err != nil {
-		log.Println(err)
+		logger.LogWarn(
+			"Error downloading music from", engineName,
+			"with query", query,
+		)
 		p.errorifyTask(query, err)
 		return
 	}
 	err = p.Converter.ConvertToMP3(path)
 	if err != nil {
-		log.Println(err)
+		logger.ERRORLogger.Println(
+			"Error converting music from", engineName,
+			"with query", query,
+			"path", path,
+		)
 		p.errorifyTask(query, err)
 		return
 	}
-	err = plm.AddMusic(name, Music{Path: path})
+	err = plm.AddMusic(pl, &Music{Path: path})
 	if err != nil {
-		log.Println(err)
+		logger.ERRORLogger.Println(
+			"Error adding music to playlist", pl.Name,
+			"with query", query,
+			"path", path,
+		)
 		p.errorifyTask(query, err)
 		return
 	}
 	p.removeTask(query)
 }
 
-func (plm *PlayListManager) Exists(name string) bool {
-	_, ok := plm.PlayLists[name]
+func (plm *PlayListManager) Exists(plname string) bool {
+	_, ok := plm.PlayLists[plname]
 	return ok
 }

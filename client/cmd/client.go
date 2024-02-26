@@ -6,10 +6,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/spf13/cobra"
+
 	"github.com/Malwarize/goplay/client/cmd/views"
 	"github.com/Malwarize/goplay/client/controller"
 	"github.com/Malwarize/goplay/shared"
-	"github.com/spf13/cobra"
 )
 
 var client, err = controller.GetClient()
@@ -205,7 +206,6 @@ var removeCmd = &cobra.Command{
 	Use:   "remove <index> | <song name>",
 	Short: "remove a song from the queue by index or name",
 	Long: `remove a song from the queue
-	Args:  cobra.MaximumNArgs(1),
 this command will remove a song from the queue
 it accepts the index of the song in the queue or the name of the song
 `,
@@ -223,24 +223,22 @@ it accepts the index of the song in the queue or the name of the song
 	},
 	Run: func(_ *cobra.Command, args []string) {
 		if len(args) > 0 {
-			musicQueue := controller.GetPlayerStatus(client).MusicQueue
 			if v, err := strconv.Atoi(args[0]); err == nil {
-				if v < 0 || v >= len(musicQueue) {
-					fmt.Println("invalid index")
-					return
-				}
-				controller.Remove(v, client)
-				return
+				controller.Remove(
+					shared.IntOrString{
+						IntVal: v,
+						IsInt:  true,
+					},
+					client,
+				)
 			} else {
-				// if user provide a name -> convert it to index
-				name := strings.Join(args, " ")
-				for i, song := range musicQueue {
-					if shared.ViewParseName(song) == name {
-						controller.Remove(i, client)
-						return
-					}
-				}
-				fmt.Println("song not found")
+				controller.Remove(
+					shared.IntOrString{
+						StrVal: strings.Join(args, " "),
+						IsInt:  false,
+					},
+					client,
+				)
 			}
 		} else {
 			fmt.Println("no song specified")
@@ -349,18 +347,23 @@ if a song index is provided, it will remove the song from the playlist
 			// check if number provided is valid
 			songIndex, err := strconv.Atoi(strings.TrimSpace(args[1]))
 			if err == nil && songIndex >= 0 && songIndex < len(songs) {
-				controller.RemoveSongFromPlayList(listname, songIndex, client)
+				controller.RemoveSongFromPlayList(
+					listname,
+					shared.IntOrString{
+						IntVal: songIndex,
+						IsInt:  true,
+					},
+					client,
+				)
 			} else {
-				// if not, check if the name is valid
 				songName := strings.TrimSpace(args[1])
-				// convert name to index
-				for i, song := range songs {
-					if shared.ViewParseName(song) == songName {
-						controller.RemoveSongFromPlayList(listname, i, client)
-						return
-					}
-				}
-				fmt.Println("song not exist")
+				controller.RemoveSongFromPlayList(
+					listname,
+					shared.IntOrString{
+						StrVal: songName,
+					},
+					client,
+				)
 			}
 		} else {
 			fmt.Println("playlist name required or playlist name and song index required")
@@ -429,26 +432,46 @@ this command will play a playlist | play a song from a playlist
 if no song name is provided, it will add the all the songs in the playlist to the queue
 if a song name is provided, it will add the song to the queue
 `,
-	ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+	ValidArgsFunction: func(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
 		if client == nil {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
-		playlists := controller.GetPlayListsNames(client)
-		return playlists, cobra.ShellCompDirectiveDefault
+		if len(args) == 0 {
+			playlists := controller.GetPlayListsNames(client)
+			return playlists, cobra.ShellCompDirectiveDefault
+		}
+		if len(args) == 1 {
+			songs := controller.PlayListSongs(args[0], client)
+			return songs, cobra.ShellCompDirectiveDefault
+		}
+		return nil, cobra.ShellCompDirectiveNoFileComp
 	},
 	Run: func(_ *cobra.Command, args []string) {
 		if len(args) == 2 {
 			lisname := args[0]
 			songIndex, err := strconv.Atoi(args[1])
 			if err != nil {
-				fmt.Println(err)
-				return
+				controller.PlayListPlaySong(
+					lisname,
+					shared.IntOrString{
+						StrVal: args[1],
+					},
+					client,
+				)
+			} else {
+				controller.PlayListPlaySong(
+					lisname,
+					shared.IntOrString{
+						IntVal: songIndex,
+						IsInt:  true,
+					},
+					client,
+				)
 			}
-			controller.PlayListPlaySong(lisname, songIndex, client)
 		} else if len(args) == 1 {
 			controller.PlayListPlayAll(args[0], client)
 		} else {
-			fmt.Println("playlist name and index required")
+			fmt.Println("playlist name and music required")
 		}
 	},
 }

@@ -2,7 +2,6 @@ package shared
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -78,7 +77,6 @@ func ParseCachedFileName(filename string) (string, string) {
 	// split filename by __
 	split := strings.Split(filename, config.GetConfig().Separator)
 	if len(split) != 2 {
-		log.Println("Invalid cached file name: ", filename)
 		return "", ""
 	}
 	return split[0], split[1]
@@ -95,12 +93,12 @@ type AddToPlayListArgs struct {
 
 type RemoveSongFromPlayListArgs struct {
 	PlayListName string
-	Index        int
+	IndexOrName  IntOrString
 }
 
 type PlayListPlaySongArgs struct {
 	PlayListName string
-	Index        int
+	IndexOrName  IntOrString
 }
 
 // helper function to get mp3 duration
@@ -151,4 +149,10 @@ func ViewParseName(name string) string {
 		name = strings.Split(name, config.GetConfig().Separator)[0]
 	}
 	return name
+}
+
+type IntOrString struct {
+	IntVal int
+	StrVal string
+	IsInt  bool
 }

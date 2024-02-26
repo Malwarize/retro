@@ -7,6 +7,8 @@ import (
 	"github.com/gopxl/beep"
 	"github.com/gopxl/beep/effects"
 	"github.com/gopxl/beep/speaker"
+
+	"github.com/Malwarize/goplay/shared"
 )
 
 type Music struct {
@@ -31,19 +33,20 @@ func NewMusic(path string) (Music, error) {
 	}, nil
 }
 
-func (m Music) String() string {
+func (m *Music) String() string {
 	return m.Path
 }
 
-func (m Music) Name() string {
-	return filepath.Base(m.Path)
+func (m *Music) Name() string {
+	name := filepath.Base(m.Path)
+	return shared.ViewParseName(name)
 }
 
-func (m Music) Streamer() beep.StreamSeekCloser {
+func (m *Music) Streamer() beep.StreamSeekCloser {
 	return m.Volume.Streamer.(beep.StreamSeekCloser)
 }
 
-func (m Music) SetVolume(vp int) {
+func (m *Music) SetVolume(vp int) {
 	if vp == 0 {
 		m.Volume.Silent = true
 	} else {
@@ -53,33 +56,33 @@ func (m Music) SetVolume(vp int) {
 	}
 }
 
-func (m Music) DurationN() int {
+func (m *Music) DurationN() int {
 	speaker.Lock()
 	defer speaker.Unlock()
 	return m.Streamer().Len()
 }
 
-func (m Music) DurationD() time.Duration {
+func (m *Music) DurationD() time.Duration {
 	return m.Format.SampleRate.D(m.DurationN())
 }
 
-func (m Music) PositionN() int {
+func (m *Music) PositionN() int {
 	speaker.Lock()
 	defer speaker.Unlock()
 	return m.Streamer().Position()
 }
 
-func (m Music) PositionD() time.Duration {
+func (m *Music) PositionD() time.Duration {
 	return m.Format.SampleRate.D(m.PositionN())
 }
 
-func (m Music) SetPositionN(p int) error { // this indicates where the music play is (samples)
+func (m *Music) SetPositionN(p int) error { // this indicates where the music play is (samples)
 	speaker.Lock()
 	defer speaker.Unlock()
 	return m.Streamer().Seek(p)
 }
 
-func (m Music) SetPositionD(d time.Duration) error {
+func (m *Music) SetPositionD(d time.Duration) error {
 	dur := m.DurationN()
 	new := m.Format.SampleRate.N(d)
 	if new < 0 {
@@ -91,6 +94,6 @@ func (m Music) SetPositionD(d time.Duration) error {
 	return m.SetPositionN(new)
 }
 
-func (m Music) Seek(d time.Duration) error {
+func (m *Music) Seek(d time.Duration) error {
 	return m.SetPositionD(d + m.PositionD())
 }

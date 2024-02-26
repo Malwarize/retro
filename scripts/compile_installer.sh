@@ -10,21 +10,21 @@ installer_path=./bin/install.sh
 
 # Function to build binaries
 function build_binary {
-    local binary_name=$1
-    local binary_source=$2
-    go build -o $binary_name $binary_source
+	local binary_name=$1
+	local binary_source=$2
+	go build -o $binary_name $binary_source
 
-    if [ $? -eq 0 ]; then
-        echo "Built $binary_name successfully"
-    else
-        echo "Failed to build $binary_name"
-        exit 1
-    fi
+	if [ $? -eq 0 ]; then
+		echo "Built $binary_name successfully"
+	else
+		echo "Failed to build $binary_name"
+		exit 1
+	fi
 }
 
 # Function to generate installer
 function generate_installer {
-        cat <<EOF > $installer_path
+	cat <<EOF >$installer_path
 #!/bin/bash
 
 goplay_binary_data="$(base64 $goplay_binary)"
@@ -141,7 +141,7 @@ function generate_completion {
         mkdir -p \$completion_path
         $install_path/goplay completion zsh > \$completion_path/_goplay
         #check if its already in the fpath
-        grep -q "FPATH+=\$HOME/.zsh_completion.d" ~/.zshrc ||echo "FPATH=\$HOME/.zsh_completion.d:\$FPATH" >> ~/.zsh
+        # grep -q "FPATH+=\$HOME/.zsh_completion.d" ~/.zshrc ||echo "FPATH=\$HOME/.zsh_completion.d:\$FPATH" >> ~/.zshrc
 
         # load the completion
         grep -q "source \$HOME/.zsh_completion.d/_goplay" ~/.zshrc || echo "source \$HOME/.zsh_completion.d/_goplay" >> ~/.zshrc
@@ -173,17 +173,17 @@ function main {
 main
 EOF
 
-    chmod +x $installer_path
-    echo "Installer script created: $installer_path"
+	chmod +x $installer_path
+	echo "Installer script created: $installer_path"
 }
 
 function main {
-    echo "Building goplay and goplayer"
-    build_binary "$goplay_binary" "client/main.go"
-    build_binary "$goplayer_binary" "server/main.go"
+	echo "Building goplay and goplayer"
+	build_binary "$goplay_binary" "client/main.go"
+	build_binary "$goplayer_binary" "server/main.go"
 
-    echo "Generating installer"
-    generate_installer
+	echo "Generating installer"
+	generate_installer
 }
 
 main

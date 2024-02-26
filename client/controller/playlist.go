@@ -60,8 +60,11 @@ func PlayListSongs(name string, client *rpc.Client) []string {
 	return reply
 }
 
-func RemoveSongFromPlayList(name string, index int, client *rpc.Client) {
-	args := shared.RemoveSongFromPlayListArgs{PlayListName: name, Index: index}
+func RemoveSongFromPlayList(name string, indexOrName shared.IntOrString, client *rpc.Client) {
+	args := shared.RemoveSongFromPlayListArgs{
+		PlayListName: name,
+		IndexOrName:  indexOrName,
+	}
 	var reply int
 	err := client.Call("Player.RPCRemoveSongFromPlayList", args, &reply)
 	if err != nil {
@@ -70,8 +73,11 @@ func RemoveSongFromPlayList(name string, index int, client *rpc.Client) {
 	}
 }
 
-func PlayListPlaySong(lname string, index int, client *rpc.Client) {
-	args := shared.PlayListPlaySongArgs{PlayListName: lname, Index: index}
+func PlayListPlaySong(lname string, indexOrName shared.IntOrString, client *rpc.Client) {
+	args := shared.PlayListPlaySongArgs{
+		PlayListName: lname,
+		IndexOrName:  indexOrName,
+	}
 	var reply int
 	err := client.Call("Player.RPCPlayListPlaySong", args, &reply)
 	if err != nil {

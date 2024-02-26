@@ -123,7 +123,7 @@ func Volume(vp int, client *rpc.Client) {
 	}
 }
 
-func Remove(index int, client *rpc.Client) {
+func Remove(index interface{}, client *rpc.Client) {
 	args := index
 	var reply int
 	err := client.Call("Player.RPCRemoveMusic", args, &reply)

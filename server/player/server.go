@@ -2,214 +2,224 @@ package player
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"net/rpc"
 	"time"
 
+	"github.com/Malwarize/goplay/logger"
 	"github.com/Malwarize/goplay/shared"
 )
 
 func (p *Player) RPCPlay(_ int, reply *int) error {
-	log.Println("RPCPlay called")
-	p.Play()
-	*reply = 1
-	log.Println("RPCPlay done")
-	return nil
+	logger.LogInfo("RPCPlay called")
+	err := p.Play()
+	logger.LogInfo("RPCPlay done")
+	return err
 }
 
 func (p *Player) RPCNext(_ int, reply *int) error {
-	log.Println("RPCNext called")
-	p.Next()
+	logger.LogInfo("RPCNext called")
+	err := p.Next()
 	*reply = 1
-	log.Println("RPCNext done")
-	return nil
+	logger.LogInfo("RPCNext done")
+	return err
 }
 
 func (p *Player) RPCPrev(_ int, reply *int) error {
-	log.Println("RPCPrev called")
-	p.Prev()
+	logger.LogInfo("RPCPrev called")
+	err := p.Prev()
 	*reply = 1
-	log.Println("RPCPrev done")
-	return nil
+	logger.LogInfo("RPCPrev done")
+	return err
 }
 
 func (p *Player) RPCPause(_ int, reply *int) error {
-	log.Println("RPCPause called")
-	p.Pause()
+	logger.LogInfo("RPCPause called")
+	err := p.Pause()
 	*reply = 1
-	log.Println("RPCPause done")
-	return nil
+	logger.LogInfo("RPCPause done")
+	return err
 }
 
 func (p *Player) RPCStop(_ int, reply *int) error {
-	log.Println("RPCStop called")
-	p.Stop()
+	logger.LogInfo("RPCStop called")
+	err := p.Stop()
 	*reply = 1
-	log.Println("RPCStop done")
-	return nil
+	logger.LogInfo("RPCStop done")
+	return err
 }
 
-func (p *Player) RPCSeek(d time.Duration, reply *int) error {
-	log.Println("RPCSeek called with duration in seconds :", d*time.Second)
-	p.Seek(d * time.Second)
-	*reply = 0
-	log.Println("RPCSeek done")
-	return nil
+func (p *Player) RPCSeek(d time.Duration, _ *int) error {
+	logger.LogInfo("RPCSeek called with duration in seconds :", d*time.Second)
+	err := p.Seek(d * time.Second)
+	logger.LogInfo("RPCSeek done")
+	return err
 }
 
 func (p *Player) RPCVolume(vp int /*volume percentage*/, reply *int) error {
-	log.Println("RPCVolume called with volume percentage :", vp)
-	p.Volume(vp)
+	logger.LogInfo("RPCVolume called with volume percentage :", vp)
+	err := p.Volume(vp)
 	*reply = 0
-	log.Println("RPCVolume done")
-	return nil
+	logger.LogInfo("RPCVolume done")
+	return err
 }
 
 func (p *Player) RPCResume(_ int, reply *int) error {
-	log.Println("RPCResume called")
-	p.Resume()
+	logger.LogInfo("RPCResume called")
+	err := p.Resume()
 	*reply = 1
-	log.Println("RPCResume done")
-	return nil
+	logger.LogInfo("RPCResume done")
+	return err
 }
 
-func (p *Player) RPCRemoveMusic(index int, reply *int) error {
-	log.Println("RPCRemoveMusic called with index :", index)
-	p.Remove(index)
+func (p *Player) RPCRemoveMusic(music shared.IntOrString, reply *int) error {
+	logger.LogInfo("RPCRemoveMusic called with :", music)
+	err := p.Remove(music)
 	*reply = 1
-	log.Println("RPCRemoveMusic done")
-	return nil
+	logger.LogInfo("RPCRemoveMusic done")
+	return err
 }
 
 func (p *Player) RPCGetPlayerStatus(_ int, reply *shared.Status) error {
-	log.Println("RPCGetPlayerStatus called")
+	logger.LogInfo("RPCGetPlayerStatus called")
 	*reply = p.GetPlayerStatus()
-	log.Println("RPCGetPlayerStatus done with reply :", reply)
+	logger.LogInfo("RPCGetPlayerStatus done with reply :", reply)
 	return nil
 }
 
 func (p *Player) RPCDetectAndPlay(query string, reply *[]shared.SearchResult) error {
-	log.Println("RPCDetectAndPlay called with query :", query)
+	logger.LogInfo("RPCDetectAndPlay called with query :", query)
 	*reply = p.DetectAndPlay(query)
-	log.Println("RPCDetectAndPlay done with reply :", reply)
+	logger.LogInfo("RPCDetectAndPlay done with reply :", reply)
 	return nil
 }
 
 func (p *Player) RPCPlayListsNames(_ int, reply *[]string) error {
-	log.Println("RPCPlayLists called")
+	logger.LogInfo("RPCPlayLists called")
 	*reply = p.PlayListsNames()
-	log.Println("RPCPlayLists done with reply :", reply)
+	logger.LogInfo("RPCPlayLists done with reply :", reply)
 	return nil
 }
 
 func (p *Player) RPCCreatePlayList(name string, reply *int) error {
-	log.Println("RPCCreatePlaylist called with name :", name)
-	p.CreatePlayList(name)
+	logger.LogInfo("RPCCreatePlaylist called with name :", name)
+	err := p.CreatePlayList(name)
 	*reply = 1
-	log.Println("RPCCreatePlaylist done")
-	return nil
+	logger.LogInfo("RPCCreatePlaylist done")
+	return err
 }
 
 func (p *Player) RPCRemovePlayList(name string, reply *int) error {
-	log.Println("RPCRemovePlaylist called with name :", name)
-	p.RemovePlayList(name)
+	logger.LogInfo("RPCRemovePlaylist called with name :", name)
+	err := p.RemovePlayList(name)
 	*reply = 1
-	log.Println("RPCRemovePlaylist done")
-	return nil
+	logger.LogInfo("RPCRemovePlaylist done")
+	return err
 }
 
 func (p *Player) RPCDetectAndAddToPlayList(
 	args shared.AddToPlayListArgs,
 	reply *[]shared.SearchResult,
 ) error {
-	log.Println(
+	logger.LogInfo(
 		"RPCDetectAndAddToPlayList called with query :",
 		args.Query,
 		" and playlist name :",
 		args.PlayListName,
 	)
-	*reply = p.DetectAndAddToPlayList(args.PlayListName, args.Query)
-	log.Println("RPCDetectAndAddToPlayList done")
-	return nil
+	var err error
+	*reply, err = p.DetectAndAddToPlayList(args.PlayListName, args.Query)
+	logger.LogInfo("RPCDetectAndAddToPlayList done")
+	return err
 }
 
-func (p *Player) RPCPlayListSongs(name string, reply *[]string) error {
-	log.Println("RPCPlayListSongs called with name :", name)
-	*reply = p.PlayListSongs(name)
-	log.Println("RPCPlayListSongs done with reply :", reply)
-	return nil
+func (p *Player) RPCPlayListSongs(
+	plname string,
+	reply *[]string,
+) error {
+	logger.LogInfo("RPCPlayListSongs called with name :", plname)
+	var err error
+	*reply, err = p.GetPlayListSongNames(plname)
+	logger.LogInfo("RPCPlayListSongs done with reply :", reply)
+	return err
 }
 
 func (p *Player) RPCRemoveSongFromPlayList(
 	args shared.RemoveSongFromPlayListArgs,
 	reply *int,
 ) error {
-	log.Println(
+	logger.LogInfo(
 		"RPCRemoveSongFromPlayList called with name :",
 		args.PlayListName,
-		"and index :",
-		args.Index,
+		"target",
+		args.IndexOrName,
 	)
-	p.RemoveSongFromPlayList(args.PlayListName, args.Index)
-	*reply = 1
-	log.Println("RPCRemoveSongFromPlayList done")
-	return nil
+	err := p.RemoveSongFromPlayList(
+		args.PlayListName,
+		args.IndexOrName,
+	)
+	logger.LogInfo(
+		"RPCRemoveSongFromPlayList done",
+	)
+	return err
 }
 
 func (p *Player) RPCPlayListPlaySong(args shared.PlayListPlaySongArgs, reply *int) error {
-	log.Println(
+	logger.LogInfo(
 		"RPCPlayListPlaySong called with name :",
 		args.PlayListName,
-		" and index :",
-		args.Index,
+		"target",
+		args.IndexOrName,
 	)
-	p.PlayListPlaySong(args.PlayListName, args.Index)
+	err := p.PlayListPlaySong(args.PlayListName, args.IndexOrName)
 	*reply = 1
-	log.Println("RPCPlayListPlaySong done")
-	return nil
+	logger.LogInfo("RPCPlayListPlaySong done")
+	return err
 }
 
 func (p *Player) RPCPlayListPlayAll(name string, reply *int) error {
-	log.Println("RPCPlayListPlayAll called with name :", name)
+	logger.LogInfo("RPCPlayListPlayAll called with name :", name)
 	p.PlayListPlayAll(name)
 	*reply = 1
-	log.Println("RPCPlayListPlayAll done")
+	logger.LogInfo("RPCPlayListPlayAll done")
 	return nil
 }
 
-// Theme
-
 func (p *Player) RPCGetTheme(_ int, reply *string) error {
-	log.Println("RPCGetTheme called")
+	logger.LogInfo("RPCGetTheme called")
 	*reply = p.GetTheme()
-	log.Println("RPCGetTheme done with reply :", reply)
+	logger.LogInfo("RPCGetTheme done with reply :", reply)
 	return nil
 }
 
 func (p *Player) RPCSetTheme(theme string, reply *int) error {
-	log.Println("RPCSetTheme called with theme :", theme)
+	logger.LogInfo("RPCSetTheme called with theme :", theme)
 	p.SetTheme(theme)
 	*reply = 1
-	log.Println("RPCSetTheme done")
+	logger.LogInfo("RPCSetTheme done")
 	return nil
 }
 
 func StartIPCServer(port string) {
-	log.Println("Creating Player instance")
+	logger.LogInfo("Creating Player instance")
 	player := NewPlayer()
 	rpc.Register(player)
-	log.Println("Player instance created and registered to RPC")
+	logger.LogInfo("Player instance created and registered to RPC")
 	lis, err := net.Listen("tcp", ":"+port)
 
-	log.Println("Starting IPC server on ", lis.Addr().String())
+	logger.LogInfo("Starting IPC server on ", lis.Addr().String())
 	if err != nil {
 		fmt.Println(err)
 	}
 	for {
 		conn, err := lis.Accept()
 		if err != nil {
-			log.Println(err)
+			logger.LogError(
+				logger.GError(
+					"Failed to accept connection",
+					err,
+				),
+			)
 		}
 		go rpc.ServeConn(conn)
 	}

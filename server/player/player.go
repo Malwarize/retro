@@ -1,11 +1,9 @@
 package player
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"strconv"
 	"sync"
 	"time"
@@ -14,6 +12,7 @@ import (
 	"github.com/gopxl/beep/speaker"
 
 	"github.com/Malwarize/goplay/config"
+	"github.com/Malwarize/goplay/logger"
 	"github.com/Malwarize/goplay/server/player/online"
 	"github.com/Malwarize/goplay/shared"
 )
@@ -50,7 +49,7 @@ type Player struct {
 func NewPlayer() *Player {
 	if _, err := os.Stat(config.GetConfig().GoPlayPath); os.IsNotExist(err) {
 		log.Println("goplay dir not found, creating it")
-		err = os.Mkdir(config.GetConfig().GoPlayPath, 0755)
+		err = os.Mkdir(config.GetConfig().GoPlayPath, 0o755)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -85,6 +84,8 @@ func NewPlayer() *Player {
 	}
 }
 
+// meta field is to save the current position and duration of
+// the music when paused because when paused the speaker is blocking
 func (p *Player) _setlMeta(m lmeta) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -97,7 +98,6 @@ func (p *Player) _getlMeta() lmeta {
 	return p._lmeta
 }
 
-// singleton player
 func GetPlayer() *Player {
 	once.Do(func() {
 		PlayerInstance = NewPlayer()
@@ -105,16 +105,31 @@ func GetPlayer() *Player {
 	return PlayerInstance
 }
 
-func (p *Player) Play() {
+// ############################
+// # Core Player methods      #
+// ############################
+func (p *Player) Play() error {
 	if p.Queue.IsEmpty() {
-		return
+		return logger.LogError(
+			logger.GError(
+				"Queue is empty",
+			),
+		)
 	}
 	music := p.Queue.GetCurrMusic()
 	if music == nil {
-		return
+		return logger.LogError(
+			logger.GError(
+				"Failed to get current music",
+			),
+		)
 	}
+
 	if !p.initialised {
-		speaker.Init(music.Format.SampleRate, music.Format.SampleRate.N(time.Second/10))
+		speaker.Init(
+			music.Format.SampleRate,
+			music.Format.SampleRate.N(time.Second/10),
+		)
 		p.initialised = true
 	} else {
 		speaker.Clear()
@@ -130,6 +145,7 @@ func (p *Player) Play() {
 		<-done
 		p.Next()
 	}()
+	return nil
 }
 
 func (p *Player) getPlayerState() int {
@@ -144,49 +160,97 @@ func (p *Player) setPlayerState(state int) {
 	p.playerState = state
 }
 
-func (p *Player) Next() {
-	if p.Queue.IsEmpty() || p.getPlayerState() == Stopped {
-		return
+func (p *Player) Next() error {
+	if p.Queue.IsEmpty() {
+		return logger.LogError(
+			logger.GError(
+				"Queue is empty",
+			),
+		)
+	}
+	if p.getPlayerState() == Stopped {
+		return logger.LogError(
+			logger.GError(
+				"Player is stopped",
+			),
+		)
 	}
 	if p.getPlayerState() == Paused {
 		p.Resume()
 	}
 	currentMusic := p.Queue.GetCurrMusic()
 	if currentMusic == nil {
-		return
+		return logger.LogError(
+			logger.GError(
+				"Failed to get current music",
+			),
+		)
 	}
 	if err := currentMusic.SetPositionD(0); err != nil {
-		log.Println("Error when seeking")
+		return logger.LogError(
+			logger.GError(
+				"Failed to set position",
+				err,
+			),
+		)
 	}
 	p.Queue.QueueNext()
-	p.Play()
+	err := p.Play()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (p *Player) Prev() {
+func (p *Player) Prev() error {
 	state := p.getPlayerState()
-	if p.Queue.IsEmpty() || state == Stopped {
-		return
+	if p.Queue.IsEmpty() {
+		return logger.LogError(
+			logger.GError(
+				"Queue is empty",
+			),
+		)
+	}
+	if state == Stopped {
+		return logger.LogError(
+			logger.GError(
+				"Player is stopped",
+			),
+		)
 	}
 	if state == Paused {
 		p.Resume()
 	}
 	currentMusic := p.Queue.GetCurrMusic()
 	if currentMusic == nil {
-		return
+		return logger.LogError(
+			logger.GError(
+				"Failed to get current music",
+			),
+		)
 	}
-	if err := currentMusic.Seek(0); err != nil {
-		log.Println("Error when seeking")
+	if err := currentMusic.SetPositionD(0); err != nil {
+		logger.LogError(
+			logger.GError(
+				"Failed to seek",
+				err,
+			),
+		)
 	}
 	p.Queue.QueuePrev()
-	p.Play()
+	err := p.Play()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (p *Player) Stop() {
+func (p *Player) Stop() error {
 	clear(p.Tasks)
 
 	state := p.getPlayerState()
 	if state == Stopped {
-		return
+		return nil
 	}
 	if state == Paused {
 		p.Resume()
@@ -194,12 +258,13 @@ func (p *Player) Stop() {
 	speaker.Clear()
 	p.Queue.Clear()
 	p.setPlayerState(Stopped)
+	return nil
 }
 
-func (p *Player) Pause() {
+func (p *Player) Pause() error {
 	state := p.getPlayerState()
 	if state == Paused || state == Stopped {
-		return
+		return nil
 	}
 	p._setlMeta(lmeta{
 		_lcurrentDur: p.GetCurrMusicDuration(),
@@ -207,108 +272,346 @@ func (p *Player) Pause() {
 	})
 	p.setPlayerState(Paused)
 	speaker.Lock()
+	return nil
 }
 
-func (p *Player) Resume() {
+func (p *Player) Resume() error {
 	state := p.getPlayerState()
 	if state == Playing || state == Stopped {
-		return
+		return nil
 	}
 	p.setPlayerState(Playing)
 	speaker.Unlock()
+	return nil
 }
 
-func (p *Player) Seek(d time.Duration) {
+func (p *Player) Seek(d time.Duration) error {
 	state := p.getPlayerState()
 	if state == Stopped {
-		return
+		return logger.LogError(
+			logger.GError(
+				"player is not running",
+			),
+		)
+	}
+	if p.Queue.IsEmpty() {
+		return logger.LogError(
+			logger.GError(
+				"Queue is empty",
+			),
+		)
 	}
 	currentMusic := p.Queue.GetCurrMusic()
 	if currentMusic == nil {
-		return
+		return logger.LogError(
+			logger.GError(
+				"Failed to get current music",
+			),
+		)
 	}
 	if state == Paused {
 		p.Resume()
 		defer p.Pause()
 	}
 	if err := currentMusic.Seek(d); err != nil {
-		log.Println("Error in seek", err)
+		logger.ERRORLogger.Println(err)
+		return logger.LogError(
+			logger.GError(
+				"Failed to seek",
+			),
+		)
 	}
+	return nil
 }
 
-func (p *Player) Volume(vp int /*volume percentage*/) {
+func (p *Player) Volume(vp int /*volume percentage*/) error {
 	if p.getPlayerState() == Stopped {
-		return
+		return nil
 	}
 	p.Vol = vp
 	currentMusic := p.Queue.GetCurrMusic()
 	if currentMusic == nil {
-		return
+		return nil
 	}
 	speaker.Lock()
 	currentMusic.SetVolume(vp)
 	speaker.Unlock()
+	return nil
 }
 
-func (p *Player) Remove(index int) {
+func (p *Player) Remove(music shared.IntOrString) error {
 	if p.Queue.IsEmpty() {
-		return
+		return logger.LogError(
+			logger.GError(
+				"Queue is empty",
+			),
+		)
 	}
 	if p.Queue.Size() == 1 {
 		p.Stop()
-	} else if index == p.Queue.GetCurrIndex() {
-		p.Queue.Remove(index)
-		p.Next()
+		return nil
+	} else {
+		var m *Music
+		if music.IsInt {
+			musicIndex := music.IntVal
+			logger.LogInfo(
+				"Removing music by index",
+				strconv.Itoa(
+					musicIndex,
+				),
+			)
+			m = p.Queue.GetMusicByIndex(
+				musicIndex,
+			)
+		} else {
+			musicName := music.StrVal
+			fmt.Println(musicName)
+			m = p.Queue.GetMusicByName(
+				musicName,
+			)
+			logger.LogInfo(
+				"Removing music by name",
+				musicName,
+			)
+		}
+		if m == nil {
+			return logger.LogError(
+				logger.GError(
+					"Music not found",
+				),
+			)
+		}
+
+		if m.Name() == p.Queue.GetCurrMusic().Name() {
+			p.Queue.Remove(
+				m,
+			)
+			return p.Next()
+		}
+
+		p.Queue.Remove(
+			m,
+		)
 	}
+	return nil
 }
 
-// player playlist command
-func (p *Player) CreatePlayList(name string) {
-	p.PlayListManager.Create(name)
+// ####################
+// # Playlist methods #
+// ####################
+
+func (p *Player) CreatePlayList(plname string) error {
+	// check if exists
+	if p.PlayListManager.Exists(plname) {
+		return logger.LogError(
+			logger.GError(
+				"Playlist already exists",
+			),
+		)
+	}
+	err := p.PlayListManager.CreatePlayList(
+		plname,
+	)
+	if err != nil {
+		logger.ERRORLogger.Println(err)
+		return logger.LogError(
+			logger.GError(
+				"Failed to create playlist",
+			),
+		)
+	}
+	return nil
 }
 
-// delete playlist
-func (p *Player) RemovePlayList(name string) {
-	p.PlayListManager.Remove(name)
+func (p *Player) RemovePlayList(plname string) error {
+	if !p.PlayListManager.Exists(plname) {
+		return logger.LogError(
+			logger.GError(
+				"Playlist does not exist",
+			),
+		)
+	}
+	pl, err := p.PlayListManager.GetPlayListByName(
+		plname,
+	)
+	if err != nil {
+		return logger.LogError(
+			logger.GError(
+				"Failed to get playlist",
+				err,
+			),
+		)
+	}
+	err = p.PlayListManager.Remove(pl)
+	if err != nil {
+		logger.ERRORLogger.Println(err)
+		return logger.LogError(
+			logger.GError(
+				"Failed to remove playlist",
+				err,
+			),
+		)
+	}
+	return nil
 }
 
-// list play list names
 func (p *Player) PlayListsNames() []string {
 	return p.PlayListManager.PlayListsNames()
 }
 
-func (p *Player) RemoveSongFromPlayList(name string, index int) {
-	// check if the exists in the queue and remove it
-	for i, music := range p.Queue.queue {
-		if music.Path == filepath.Join(
-			p.PlayListManager.PlayListPath,
+func (p *Player) RemoveSongFromPlayList(plname string, music shared.IntOrString) error {
+	pl, err := p.PlayListManager.GetPlayListByName(plname)
+	if err != nil {
+		return logger.LogError(
+			logger.GError(
+				"Failed to get playlist",
+				err,
+			),
+		)
+	}
+	var m *Music
+	if music.IsInt {
+		index := music.IntVal
+		m, err = p.PlayListManager.GetPlayListSongByIndex(
+			pl,
+			index,
+		)
+	} else {
+		name := music.StrVal
+		m, err = p.PlayListManager.GetPlayListSongByName(
+			pl,
 			name,
-			p.PlayListManager.PlayListSongs(name)[index],
-		) {
-			p.Queue.Remove(i)
+		)
+	}
+
+	if err != nil {
+		return logger.LogError(
+			logger.GError(
+				"Failed to get song from playlist",
+				err,
+			),
+		)
+	}
+
+	// check if the exists in the queue and remove it
+	for _, music := range p.Queue.queue {
+		if music.Path == m.Path {
+			p.Queue.Remove(
+				&music,
+			)
 		}
 	}
-	p.PlayListManager.RemoveMusic(name, index)
-}
-
-// list play list songs
-func (p *Player) PlayListSongs(name string) []string {
-	return p.PlayListManager.PlayListSongs(name)
-}
-
-func (p *Player) PlayListPlaySong(name string, index int) {
-	p.AddMusicFromPlaylistByIndex(name, index)
-	p.Play()
-	if p.getPlayerState() == Stopped {
-		p.Play()
+	err = p.PlayListManager.RemoveMusic(
+		pl,
+		m,
+	)
+	if err != nil {
+		logger.ERRORLogger.Println(err)
+		return logger.LogError(
+			logger.GError(
+				"Failed to remove song from playlist",
+				err,
+			),
+		)
 	}
+	return nil
 }
 
-func (p *Player) PlayListPlayAll(name string) {
-	p.AddMusicsFromPlaylist(name)
-	if p.getPlayerState() == Stopped {
-		p.Play()
+func (p *Player) GetPlayListSongNames(plname string) ([]string, error) {
+	pl, err := p.PlayListManager.GetPlayListByName(plname)
+	if err != nil {
+		return nil, logger.LogError(
+			logger.GError(
+				"Failed to get playlist",
+				err,
+			),
+		)
 	}
+	songs := p.PlayListManager.GetPlayListSongs(pl)
+	var names []string
+	logger.LogInfo(
+		"Playlist name :",
+		pl.Name,
+	)
+	for _, song := range songs {
+		logger.LogInfo(
+			"Song name :",
+			song.Name(),
+		)
+		names = append(names, song.Name())
+	}
+	return names, nil
+}
+
+func (p *Player) PlayListPlaySong(plname string, indexOrName shared.IntOrString) error {
+	pl, err := p.PlayListManager.GetPlayListByName(plname)
+	if err != nil {
+		return logger.LogError(
+			logger.GError(
+				"Failed to get playlist",
+				err,
+			),
+		)
+	}
+
+	if indexOrName.IsInt {
+		err = p.addMusicFromPlaylistByIndex(
+			pl,
+			indexOrName.IntVal,
+		)
+	} else {
+		err = p.addMusicFromPlaylistByName(
+			pl,
+			indexOrName.StrVal,
+		)
+	}
+	if err != nil {
+		return logger.LogError(
+			logger.GError(
+				"Error adding song to play list",
+				err,
+			),
+		)
+	}
+	err = p.Play()
+	if err != nil {
+		return err
+	}
+	if p.getPlayerState() == Stopped {
+		err := p.Play()
+		return err
+	}
+	return nil
+}
+
+func (p *Player) PlayListPlayAll(
+	plname string,
+) error {
+	pl, err := p.PlayListManager.GetPlayListByName(plname)
+	if err != nil {
+		return logger.LogError(
+			logger.GError(
+				"Failed to get playlist",
+				err,
+			),
+		)
+	}
+	err = p.addMusicsFromPlaylist(pl)
+	if err != nil {
+		return logger.LogError(
+			logger.GError(
+				"Failed to add musics from playlist",
+				err,
+			),
+		)
+	}
+	if p.getPlayerState() == Stopped {
+		err := p.Play()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (p *Player) GetCurrMusicPosition() time.Duration {
@@ -323,7 +626,6 @@ func (p *Player) GetCurrMusicPosition() time.Duration {
 	if currentMusic == nil {
 		return 0
 	}
-	fmt.Println("Curr music", currentMusic)
 	return currentMusic.PositionD()
 }
 
@@ -341,209 +643,27 @@ func (p *Player) GetCurrMusicDuration() time.Duration {
 	return music.DurationD()
 }
 
-func (p *Player) CheckWhatIsThis(unknown string) string {
-	// check if its a dir or file
-	if fi, err := os.Stat(unknown); err == nil {
-		if err == nil {
-			if fi.IsDir() {
-				// check if there is music files in the dir
-				files, err := os.Open(unknown)
-				if err != nil {
-					return "unknown"
-				}
-
-				entries, err := files.Readdir(0)
-				if err != nil {
-					return "unknown"
-				}
-
-				for _, entry := range entries {
-					if !entry.IsDir() {
-						isMp3, _ := p.Converter.IsMp3(filepath.Join(unknown, entry.Name()))
-						if isMp3 {
-							return "dir"
-						}
-					}
-				}
-				return "unknown"
-			} else {
-				isMp3, _ := p.Converter.IsMp3(unknown)
-				if isMp3 {
-					return "file"
-				}
-			}
-		}
-	}
-	// check if its play list name
-	if p.PlayListManager.Exists(unknown) {
-		return "playlist"
-	}
-
-	// check if its queue index
-	if index, err := strconv.Atoi(unknown); err == nil && index >= 0 && index < p.Queue.Size() {
-		return "queue"
-	}
-	engines := p.Director.GetEngines()
-	for _, engine := range engines {
-		ok, _ := engine.Exists(unknown)
-		if ok {
-			return engine.Name()
-		}
-	}
-	return "unknown"
-}
-
-func (p *Player) searchWorker(
-	ctx context.Context,
-	engine string,
-	query string,
-	musicChan chan shared.SearchResult,
-	wg *sync.WaitGroup,
-) {
-	defer func() {
-		log.Println("Search worker done for", engine, query)
-		wg.Done()
-	}()
-
-	searchRes, err := p.Director.Search(engine, query, 5)
-	if err != nil {
-		log.Println("Failed to search for", query, ":", err)
-	}
-
-	for _, music := range searchRes {
-		musicChan <- music
-	}
-}
-
-func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
-	// add task : this task displayed in the status: if the task is done, it will be removed
-	p.addTask(query, shared.Searching)
-	wg := &sync.WaitGroup{}
-	musicChan := make(
-		chan shared.SearchResult,
-	)
-	var musics []shared.SearchResult
-	ctx, cancel := context.WithTimeout(context.Background(), config.GetConfig().SearchTimeOut)
-	defer cancel()
-	for name := range p.Director.GetEngines() {
-		wg.Add(1)
-		go p.searchWorker(ctx, name, query, musicChan, wg)
-	}
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		cacheMusic := p.Director.Cached.Search(query)
-		fmt.Println("Cached files", cacheMusic)
-		for _, music := range cacheMusic {
-			musicChan <- music
-		}
-	}()
-
-	go func() {
-		wg.Wait()
-		close(musicChan)
-	}()
-
-	// for music := range musicChan {
-	// 	musics = append(musics, music)
-	// }
-
-	for {
-		select {
-		case music, ok := <-musicChan:
-			if !ok {
-				return musics
-			}
-			musics = append(musics, music)
-			p.removeTask(query)
-		case <-ctx.Done():
-			log.Println("Search timed out")
-			return musics
-		}
-	}
-	p.removeTask(query)
-	return musics
-}
-
-func (p *Player) DetectAndAddToPlayList(name string, query string) []shared.SearchResult {
-	whatIsThis := p.CheckWhatIsThis(query)
-	switch whatIsThis {
-	case "dir":
-		log.Println("Detected dir")
-		err := p.PlayListManager.AddToPlayListFromDir(name, query, p.Converter)
-		if err != nil {
-			log.Println("Failed to add dir to playlist", err)
-		}
-	case "file":
-		log.Println("Detected file")
-		go p.PlayListManager.AddToPlayListFromFile(name, query)
-	case "queue":
-		index, _ := strconv.Atoi(query)
-		music := p.Queue.GetMusicByIndex(index)
-		go p.PlayListManager.AddToPlayListFromFile(name, music.Path)
-	case "unknown":
-		log.Println("Detected unknown, searching for", query)
-		return p.GetAvailableMusicOptions(query)
-	default:
-		log.Println("Detected Engine", whatIsThis)
-		go p.PlayListManager.AddToPlayListFromOnline(name, query, whatIsThis, p)
-	}
-	return []shared.SearchResult{}
-}
-
-// if result is empty, it means it detects and plays the music if succeed other wise it returns the search results
-func (p *Player) DetectAndPlay(unknown string) []shared.SearchResult {
-	log.Println("Checking what is this", unknown)
-	whatIsThis := p.CheckWhatIsThis(unknown)
-	switch whatIsThis {
-	case "dir":
-		log.Println("Detected dir")
-		go func() {
-			p.AddMusicsFromDir(unknown)
-			p.Play()
-		}()
-	case "file":
-		log.Println("Detected file")
-		go func() {
-			p.AddMusicFromFile(unknown)
-			p.Play()
-		}()
-	case "queue":
-		log.Println("Detected queue")
-		index, _ := strconv.Atoi(unknown)
-		go func() {
-			p.Queue.SetCurrIndex(index)
-			p.Play()
-		}()
-	case "playlist":
-		log.Println("Detected playlist")
-		go func() {
-			p.AddMusicsFromPlaylist(unknown)
-			p.Play()
-		}()
-	case "unknown":
-		log.Println("Detected unknown, searching for", unknown)
-		return p.GetAvailableMusicOptions(unknown)
-	default:
-		log.Println("Detected Engine", whatIsThis)
-		go func() {
-			p.AddMusicFromOnline(unknown, whatIsThis)
-			p.Play()
-		}()
-	}
-	return []shared.SearchResult{}
-}
-
-func (p *Player) SetTheme(theme string) {
-	err := config.EditConfigField("theme", theme)
-	if err != nil {
-		log.Println("Failed to set theme", err)
-	}
-}
-
+// ####################
+// # Player Info      #
+// ####################
 func (p *Player) GetTheme() string {
 	return config.GetConfig().Theme
+}
+
+func (p *Player) SetTheme(theme string) error {
+	err := config.EditConfigField(
+		"theme",
+		theme,
+	)
+	if err != nil {
+		return logger.LogError(
+			logger.GError(
+				"Failed to set theme",
+				err,
+			),
+		)
+	}
+	return nil
 }
 
 func (p *Player) GetPlayerStatus() shared.Status {

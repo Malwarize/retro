@@ -49,6 +49,17 @@ func (q *MusicQueue) GetMusicByIndex(index int) *Music {
 	return &q.queue[index]
 }
 
+func (q *MusicQueue) GetMusicByName(name string) *Music {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	for _, music := range q.queue {
+		if music.Name() == name {
+			return &music
+		}
+	}
+	return nil
+}
+
 func (q *MusicQueue) GetCurrMusic() *Music {
 	if q.IsEmpty() {
 		return nil
@@ -88,7 +99,14 @@ func (q *MusicQueue) Clear() {
 	q.SetCurrIndex(0)
 }
 
-func (q *MusicQueue) Remove(index int) {
+func (q *MusicQueue) Remove(music *Music) {
+	// get index of music
+	index := -1
+	for i, m := range q.queue {
+		if m.Path == music.Path {
+			index = i
+		}
+	}
 	if index < 0 || index >= q.Size() {
 		return
 	}

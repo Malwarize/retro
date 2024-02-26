@@ -1,10 +1,11 @@
 package views
 
 import (
-	"github.com/Malwarize/goplay/client/controller"
-	"github.com/Malwarize/goplay/shared"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/lipgloss"
+
+	"github.com/Malwarize/goplay/client/controller"
+	"github.com/Malwarize/goplay/shared"
 )
 
 var emojiesType = map[string]string{
@@ -168,7 +169,7 @@ func NewPurpleTheme() Themes {
 			Foreground(lipgloss.Color("#0000FF")).
 			Margin(1, 0, 2, 3),
 		PositionStyle:    lipgloss.NewStyle().Foreground(purple).Margin(1, 0, 0, 3),
-		SelectMusicStyle: lipgloss.NewStyle().Foreground(purple).Margin(0, 0, 0, 1),
+		SelectMusicStyle: lipgloss.NewStyle().Foreground(purple).Margin(0, 0, 0, 1).Bold(true),
 		FailStyle: lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#FFA500")).
 			Margin(1, 0, 0, 3),
@@ -195,8 +196,11 @@ func NewPinkTheme() Themes {
 		PausedStyle: lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#0000FF")).
 			Margin(1, 0, 2, 3),
-		PositionStyle:    lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3),
-		SelectMusicStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(0, 0, 0, 1),
+		PositionStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3),
+		SelectMusicStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("205")).
+			Margin(0, 0, 0, 1).
+			Bold(true),
 		FailStyle: lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#FFA500")).
 			Margin(1, 0, 0, 3),
@@ -225,7 +229,7 @@ func NewBlueTheme() Themes {
 			Foreground(lipgloss.Color("#0000FF")).
 			Margin(1, 0, 2, 3),
 		PositionStyle:    lipgloss.NewStyle().Foreground(blue).Margin(1, 0, 0, 3),
-		SelectMusicStyle: lipgloss.NewStyle().Foreground(blue).Margin(0, 0, 0, 1),
+		SelectMusicStyle: lipgloss.NewStyle().Foreground(blue).Margin(0, 0, 0, 1).Bold(true),
 		FailStyle: lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#FFA500")).
 			Margin(1, 0, 0, 3),
