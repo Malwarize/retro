@@ -2,12 +2,12 @@ package player
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
 
 	"github.com/Malwarize/goplay/config"
+	"github.com/Malwarize/goplay/logger"
 )
 
 type Converter struct {
@@ -57,7 +57,7 @@ func (c *Converter) ConvertToMP3(inputFile string) error {
 	)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Println("error converting to MP3:", string(out))
+		logger.LogInfo("error converting to MP3:", string(out))
 		return fmt.Errorf("error converting to MP3: %v", err)
 	}
 
@@ -87,7 +87,7 @@ func (c *Converter) IsMp3(file string) (bool, error) {
 	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Println("Error checking file format:", string(output))
+		logger.LogInfo("Error checking file format:", string(output))
 		return false, fmt.Errorf("error checking file format: %v", err)
 	}
 	fileFormat := strings.TrimSpace(string(output))

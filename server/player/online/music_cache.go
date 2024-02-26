@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/Malwarize/goplay/config"
+	"github.com/Malwarize/goplay/logger"
 	"github.com/Malwarize/goplay/shared"
 )
 
@@ -26,7 +27,7 @@ type CachedFiles struct {
 
 func NewCachedFiles() *CachedFiles {
 	if _, err := os.Stat(config.GetConfig().CacheDir); os.IsNotExist(err) {
-		log.Println("Cache dir not found, creating it")
+		logger.LogInfo("Cache dir not found, creating it")
 		err = os.Mkdir(config.GetConfig().CacheDir, 0o755)
 		if err != nil {
 			log.Fatal(err)
@@ -44,7 +45,7 @@ func sanitizeName(name string) string {
 }
 
 func (cf *CachedFiles) Fetch() error {
-	log.Println("Fetching cached files")
+	logger.LogInfo("Fetching cached files")
 	f, err := os.Open(cf.BaseDir)
 	if err != nil {
 		return err
@@ -63,7 +64,7 @@ func (cf *CachedFiles) Fetch() error {
 			if err != nil {
 				return err
 			}
-			log.Println(dirPath, " not found, creating it")
+			logger.LogInfo(dirPath, " not found, creating it")
 		}
 
 		fs, err = os.Open(dirPath)
@@ -88,14 +89,14 @@ func (cf *CachedFiles) Fetch() error {
 			})
 		}
 	}
-	log.Println("Cached files fetched")
+	logger.LogInfo("Cached files fetched")
 	return nil
 }
 
 func (cf *CachedFiles) GetFileByKey(key string, ftype string) (string, error) {
 	for _, file := range cf.Files {
 		if file.Key == sanitizeName(key) && file.Ftype == ftype {
-			log.Println("File found in cache: ", key)
+			logger.LogInfo("File found in cache: ", key)
 			return filepath.Join(
 				cf.BaseDir,
 				ftype,
@@ -109,7 +110,7 @@ func (cf *CachedFiles) GetFileByKey(key string, ftype string) (string, error) {
 func (cf *CachedFiles) GetFileByName(name string, ftype string) (string, error) {
 	for _, file := range cf.Files {
 		if file.Name == name && file.Ftype == ftype {
-			log.Println("File found in cache: ", name)
+			logger.LogInfo("File found in cache: ", name)
 			return filepath.Join(
 				cf.BaseDir,
 				ftype,
@@ -147,7 +148,7 @@ func (cf *CachedFiles) Search(query string) []shared.SearchResult {
 }
 
 func (cf *CachedFiles) AddFile(filedata []byte, name string, ftype string, key string) string {
-	log.Println("Adding file to cache: ", name)
+	logger.LogInfo("Adding file to cache: ", name)
 	dirPath := filepath.Join(cf.BaseDir, ftype)
 	// cehck if dir exists if not create it
 	_, err := os.Open(dirPath)
@@ -157,14 +158,14 @@ func (cf *CachedFiles) AddFile(filedata []byte, name string, ftype string, key s
 			log.Printf("Error creating dir: %v", err)
 			return ""
 		}
-		log.Println(dirPath, "not found, creating it")
+		logger.LogInfo(dirPath, "not found, creating it")
 	}
 
 	filePath := filepath.Join(
 		dirPath,
 		shared.CombineNameWithKey(sanitizeName(name), sanitizeName(key)),
 	)
-	log.Println("Writing file to: ", filePath)
+	logger.LogInfo("Writing file to: ", filePath)
 	f, err := os.Create(filePath)
 	if err != nil {
 		log.Printf("Error creating file: %v", err)

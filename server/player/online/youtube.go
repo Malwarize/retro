@@ -2,13 +2,13 @@ package online
 
 import (
 	"io"
-	"log"
 	"os/exec"
 	"strconv"
 	"strings"
 
 	"github.com/kkdai/youtube/v2"
 
+	"github.com/Malwarize/goplay/logger"
 	"github.com/Malwarize/goplay/shared"
 )
 
@@ -172,18 +172,18 @@ func (yt *youtubeEngine) Search(query string, maxResults int) ([]shared.SearchRe
 	if err != nil {
 		return nil, err
 	}
-	log.Println("yt-dlp output:\n", string(out))
+	logger.LogInfo("yt-dlp output:\n", string(out))
 	lines := strings.Split(string(out), "\n")
 	// remove last empty line
 	if len(lines) < 1 {
-		log.Println("Invalid yt-dlp output, len(lines) is 0")
+		logger.LogInfo("Invalid yt-dlp output, len(lines) is 0")
 	}
 	lines = lines[:len(lines)-1]
 
 	var results []shared.SearchResult
 	var currentResult shared.SearchResult
 	if len(lines)%3 != 0 {
-		log.Println("Invalid yt-dlp output, len(lines) is not devideable by 3 its ", len(lines))
+		logger.LogInfo("Invalid yt-dlp output, len(lines) is not devideable by 3 its ", len(lines))
 		return nil, nil
 	}
 

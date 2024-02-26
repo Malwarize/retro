@@ -1,7 +1,6 @@
 package player
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -195,7 +194,7 @@ func (plm *PlayListManager) AddToPlayListFromDir(
 			continue
 		}
 		// check if its mp3
-		log.Println("Checking if", file.Name(), "is mp3")
+		logger.LogInfo("Checking if", file.Name(), "is mp3")
 		path := filepath.Join(dir, file.Name())
 		isMp3, err := converter.IsMp3(path)
 		if err != nil {

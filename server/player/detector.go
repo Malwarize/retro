@@ -3,7 +3,6 @@ package player
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -216,7 +215,7 @@ func (p *Player) DetectAndAddToPlayList(
 		)
 		return p.GetAvailableMusicOptions(query), nil
 	default:
-		log.Println("Detected Engine", whatIsThis)
+		logger.LogInfo("Detected Engine", whatIsThis)
 		go p.PlayListManager.AddToPlayListFromOnline(pl, query, whatIsThis, p)
 	}
 	return []shared.SearchResult{}, nil
@@ -224,37 +223,37 @@ func (p *Player) DetectAndAddToPlayList(
 
 // if result is empty, it means it detects and plays the music if succeed other wise it returns the search results
 func (p *Player) DetectAndPlay(unknown string) []shared.SearchResult {
-	log.Println("Checking what is this", unknown)
+	logger.LogInfo("Checking what is this", unknown)
 	whatIsThis := p.CheckWhatIsThis(unknown)
 	switch whatIsThis {
 	case "dir":
-		log.Println("Detected dir")
+		logger.LogInfo("Detected dir")
 		p.AddMusicsFromDir(unknown)
 		p.Play()
 	case "file":
-		log.Println("Detected file")
+		logger.LogInfo("Detected file")
 		go func() {
 			p.AddMusicFromFile(unknown)
 			p.Play()
 		}()
 	case "queue":
-		log.Println("Detected queue")
+		logger.LogInfo("Detected queue")
 		index, _ := strconv.Atoi(unknown)
 		go func() {
 			p.Queue.SetCurrIndex(index)
 			p.Play()
 		}()
 	case "playlist":
-		log.Println("Detected playlist")
+		logger.LogInfo("Detected playlist")
 		go func() {
 			p.AddMusicsFromPlaylist(unknown)
 			p.Play()
 		}()
 	case "unknown":
-		log.Println("Detected unknown, searching for", unknown)
+		logger.LogInfo("Detected unknown, searching for", unknown)
 		return p.GetAvailableMusicOptions(unknown)
 	default:
-		log.Println("Detected Engine", whatIsThis)
+		logger.LogInfo("Detected Engine", whatIsThis)
 		go func() {
 			p.AddMusicFromOnline(unknown, whatIsThis)
 			p.Play()

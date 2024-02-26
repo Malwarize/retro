@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 
+	"github.com/Malwarize/goplay/logger"
 	"github.com/Malwarize/goplay/shared"
 )
 
@@ -73,9 +73,9 @@ func (od *OnlineDirector) Search(
 // 		return f, name, nil
 // 	}
 
-// 	log.Println("Downloading file from ", url)
+// 	logger.LogInfo("Downloading file from ", url)
 // 	reader, name, err := engine.Download(url)
-// 	log.Println("Downloaded file from ", url)
+// 	logger.LogInfo("Downloaded file from ", url)
 // 	if err != nil {
 // 		return nil, "", err
 // 	}
@@ -105,9 +105,9 @@ func (od *OnlineDirector) Download(engineName, url string) (path string, err err
 	if err == nil {
 		return name, nil
 	}
-	log.Println("Downloading file from ", url)
+	logger.LogInfo("Downloading file from ", url)
 	reader, name, err := engine.Download(url)
-	log.Println("Downloaded file from ", url)
+	logger.LogInfo("Downloaded file from ", url)
 	if err != nil {
 		return "", err
 	}
