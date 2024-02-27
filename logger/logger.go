@@ -17,12 +17,12 @@ func init() {
 	WARNLogger = log.New(
 		log.Writer(),
 		"WARN: ",
-		log.Ldate|log.Ltime|log.Lshortfile,
+		log.Ldate,
 	)
 	ERRORLogger = log.New(
 		log.Writer(),
 		"ERROR: ",
-		log.Ldate|log.Ltime|log.Lshortfile,
+		log.Ldate,
 	)
 }
 
@@ -39,5 +39,5 @@ func LogInfo(info string, extra ...any) {
 }
 
 func LogWarn(warn string, extra ...any) {
-	WARNLogger.Println(warn)
+	WARNLogger.Println(warn, extra)
 }

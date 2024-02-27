@@ -23,7 +23,7 @@ func (q *MusicQueue) GetTitles() []string {
 	defer q.mu.Unlock()
 	titles := make([]string, 0)
 	for _, music := range q.queue {
-		titles = append(titles, music.Name())
+		titles = append(titles, music.Name)
 	}
 	return titles
 }
@@ -53,7 +53,7 @@ func (q *MusicQueue) GetMusicByName(name string) *Music {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	for _, music := range q.queue {
-		if music.Name() == name {
+		if music.Name == name {
 			return &music
 		}
 	}
@@ -73,7 +73,7 @@ func (q *MusicQueue) Enqueue(music Music) {
 	defer q.mu.Unlock()
 	// check if music is already in queue
 	for _, m := range q.queue {
-		if music.Path == m.Path {
+		if hash(m.Data) == hash(music.Data) {
 			return
 		}
 	}
@@ -103,7 +103,7 @@ func (q *MusicQueue) Remove(music *Music) {
 	// get index of music
 	index := -1
 	for i, m := range q.queue {
-		if m.Path == music.Path {
+		if m.Name == music.Name {
 			index = i
 		}
 	}

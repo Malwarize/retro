@@ -1,45 +1,41 @@
 package player
 
 import (
-	"path/filepath"
 	"time"
 
 	"github.com/gopxl/beep"
 	"github.com/gopxl/beep/effects"
 	"github.com/gopxl/beep/speaker"
 
-	"github.com/Malwarize/goplay/shared"
+	"github.com/Malwarize/goplay/logger"
 )
 
 type Music struct {
+	Name   string
 	Volume *effects.Volume
 	Format beep.Format
-	Path   string
+	Data   []byte
 }
 
-func NewMusic(path string) (Music, error) {
-	streamer, format, err := MusicDecode(path)
+func NewMusic(name string, data []byte) (*Music, error) {
+	streamer, format, err := MusicDecode(data)
 	if err != nil {
-		return Music{}, err
+		return nil, err
 	}
-	return Music{
+	logger.LogInfo(
+		"new music with data length",
+		len(data),
+	)
+	return &Music{
+		Name: name,
 		Volume: &effects.Volume{
 			Streamer: streamer,
 			Base:     2,
 			Silent:   false,
 		},
 		Format: format,
-		Path:   path,
+		Data:   data,
 	}, nil
-}
-
-func (m *Music) String() string {
-	return m.Path
-}
-
-func (m *Music) Name() string {
-	name := filepath.Base(m.Path)
-	return shared.ViewParseName(name)
 }
 
 func (m *Music) Streamer() beep.StreamSeekCloser {

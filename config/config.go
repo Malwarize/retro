@@ -25,6 +25,7 @@ type Config struct {
 	SearchTimeOut time.Duration `json:"search_timeout"`
 	Separator     string        `json:"separator"` // separator for file names cache file
 	Theme         string        `json:"theme"`     // blue, purple, pink
+	DbPath        string        `json:"db_path"`   // path to the database
 }
 
 var configPath = os.Getenv("HOME") + "/.config/goplay.json"
@@ -53,6 +54,9 @@ func loadConfig() *Config {
 		}
 		if jsonConfig.Pathytldpl == "" {
 			jsonConfig.Pathytldpl = "yt-dlp"
+		}
+		if jsonConfig.DbPath == "" {
+			jsonConfig.DbPath = os.Getenv("HOME") + "/.goplay/goplay.db"
 		}
 		if jsonConfig.Pathffmpeg == "" {
 			jsonConfig.Pathffmpeg = "ffmpeg"
@@ -96,6 +100,8 @@ func EditConfigField(field string, value string) error {
 		jsonConfig.Separator = value
 	case "theme":
 		jsonConfig.Theme = value
+	case "db_path":
+		jsonConfig.DbPath = value
 	default:
 		return errors.New("Unknown field : " + field)
 	}
@@ -114,10 +120,12 @@ func EditConfigField(field string, value string) error {
 }
 
 func DebugConfig() *Config {
+	homeDir := os.Getenv("HOME")
 	return &Config{
 		GoPlayPath:    "./goplay_storage/", // in the current directory
 		PlaylistPath:  "./goplay_storage/playlists/",
 		CacheDir:      "./goplay_storage/cache/",
+		DbPath:        homeDir + "/.goplay/goplay.db",
 		Pathytldpl:    "yt-dlp",
 		Pathffmpeg:    "ffmpeg",
 		Pathffprobe:   "ffprobe",
@@ -133,6 +141,7 @@ func ReleaseConfig() *Config {
 		GoPlayPath:    homeDir + "/.goplay/",
 		PlaylistPath:  homeDir + "/.goplay/playlists/",
 		CacheDir:      homeDir + "/.goplay/cache/",
+		DbPath:        homeDir + "/.goplay/goplay.db",
 		Pathytldpl:    "yt-dlp",
 		Pathffmpeg:    "ffmpeg",
 		Pathffprobe:   "ffprobe",

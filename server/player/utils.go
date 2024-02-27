@@ -1,6 +1,9 @@
 package player
 
 import (
+	"bytes"
+	"crypto/md5"
+	"encoding/hex"
 	"io"
 	"os"
 
@@ -8,13 +11,27 @@ import (
 	"github.com/gopxl/beep/mp3"
 )
 
-func MusicDecode(path string) (beep.StreamSeekCloser, beep.Format, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, beep.Format{}, err
-	}
+type customReadCloser struct {
+	io.Reader
+	io.Seeker
+}
 
-	return mp3.Decode(f)
+func (crc *customReadCloser) Close() error {
+	// Implement the Close method to satisfy the io.Closer interface.
+	// This is a no-op for a bytes.Reader.
+	return nil
+}
+
+// MusicDecode decodes MP3 data from a byte slice and returns a StreamSeekCloser and Format.
+func MusicDecode(data []byte) (beep.StreamSeekCloser, beep.Format, error) {
+	// Create a bytes.Reader from the data slice for seeking capabilities.
+	reader := bytes.NewReader(data)
+
+	// Wrap the reader in the customReadCloser to preserve its seeking capabilities while providing a Close method.
+	readerCloser := &customReadCloser{Reader: reader, Seeker: reader}
+
+	// Decode the MP3 data using the custom ReadCloser.
+	return mp3.Decode(readerCloser)
 }
 
 func copyFile(sourcePath, destinationPath string) error {
@@ -36,4 +53,23 @@ func copyFile(sourcePath, destinationPath string) error {
 	}
 
 	return nil
+}
+
+func hash(data []byte) string {
+	hasher := md5.New()
+	hasher.Write(data)
+	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+func createTmpFile(data []byte) (*os.File, error) {
+	f, err := os.CreateTemp("", "goplay_")
+	if err != nil {
+		return nil, err
+	}
+	if data != nil {
+		f.Write(
+			data,
+		)
+	}
+	return f, nil
 }

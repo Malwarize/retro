@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/Malwarize/goplay/config"
-	"github.com/Malwarize/goplay/logger"
 )
 
 type Converter struct {
@@ -33,19 +32,29 @@ func NewConverter() (*Converter, error) {
 	}, nil
 }
 
-func (c *Converter) ConvertToMP3(inputFile string) error {
-	tmpFile, err := os.CreateTemp("", "goplay")
+func (c *Converter) ConvertToMP3(inputData []byte) ([]byte, error) {
+	tmpInput, err := createTmpFile(inputData)
 	if err != nil {
-		return fmt.Errorf("error creating temp file: %v", err)
+		return nil, fmt.Errorf("error creating temporary input file: %v", err)
 	}
-	defer os.Remove(tmpFile.Name())
-	outputFile := tmpFile.Name() + ".mp3"
-	defer os.Remove(outputFile)
+	defer func() {
+		tmpInput.Close()
+		os.Remove(tmpInput.Name())
+	}()
+
+	tmpOutput, err := createTmpFile(nil)
+	if err != nil {
+		return nil, fmt.Errorf("error creating temporary output file: %v", err)
+	}
+	defer func() {
+		tmpOutput.Close()
+		os.Remove(tmpOutput.Name())
+	}()
 
 	cmd := exec.Command(
 		c.ffmpegPath,
 		"-i",
-		inputFile,
+		tmpInput.Name(),
 		"-vn",
 		"-ar",
 		"44100",
@@ -53,44 +62,45 @@ func (c *Converter) ConvertToMP3(inputFile string) error {
 		"2",
 		"-b:a",
 		"192k",
-		outputFile,
+		tmpOutput.Name(),
+		"-y",
 	)
+
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		logger.LogInfo("error converting to MP3:", string(out))
-		return fmt.Errorf("error converting to MP3: %v", err)
+		return nil, fmt.Errorf("error converting to MP3: %v\n%s", err, out)
 	}
 
-	err = copyFile(outputFile, inputFile)
+	data, err := os.ReadFile(tmpOutput.Name())
 	if err != nil {
-		return fmt.Errorf("error copying file: %v", err)
+		return nil, fmt.Errorf("error reading output file: %v", err)
 	}
 
-	err = os.Remove(outputFile)
-	if err != nil {
-		return fmt.Errorf("error converting to MP3: %v", err)
-	}
-
-	return nil
+	return data, nil
 }
 
-func (c *Converter) IsMp3(file string) (bool, error) {
-	cmd := exec.Command(
-		"ffprobe",
+func (c *Converter) IsMp3(fileData []byte) (bool, error) {
+	cmd := exec.Command("ffprobe",
 		"-v",
 		"error",
 		"-show_entries",
 		"format=format_name",
 		"-of",
 		"default=noprint_wrappers=1:nokey=1",
-		file,
 	)
-	output, err := cmd.CombinedOutput()
+
+	tmpFile, err := createTmpFile(fileData)
+	defer os.Remove(tmpFile.Name())
+	cmd.Args = append(cmd.Args, tmpFile.Name())
+	out, err := cmd.CombinedOutput()
 	if err != nil {
-		logger.LogInfo("Error checking file format:", string(output))
-		return false, fmt.Errorf("error checking file format: %v", err)
+		return false, fmt.Errorf(
+			"error running ffprobe to check if fileData is mp3: %v %v",
+			err,
+			string(out),
+		)
 	}
-	fileFormat := strings.TrimSpace(string(output))
-	isMP3 := strings.EqualFold(fileFormat, "mp3")
+	fileFormat := strings.TrimSpace(string(out))
+	isMP3 := fileFormat == "mp3"
 	return isMP3, nil
 }

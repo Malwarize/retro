@@ -31,7 +31,34 @@ func (p *Player) CheckWhatIsThis(unknown string) string {
 
 				for _, entry := range entries {
 					if !entry.IsDir() {
-						isMp3, _ := p.Converter.IsMp3(filepath.Join(unknown, entry.Name()))
+						data, err := os.ReadFile(
+							filepath.Join(
+								unknown,
+								entry.Name(),
+							),
+						)
+						if err != nil {
+							logger.LogWarn(
+								"error reading file",
+								err,
+							)
+						}
+						logger.LogInfo(
+							"Checking if",
+							filepath.Join(unknown, entry.Name()),
+							"is mp3",
+						)
+						isMp3, err := p.Converter.IsMp3(
+							data,
+						)
+						if err != nil {
+							logger.LogWarn(
+								"Failed to check if",
+								filepath.Join(unknown, entry.Name()),
+								"is mp3",
+								err,
+							)
+						}
 						if isMp3 {
 							return "dir"
 						}
@@ -39,7 +66,23 @@ func (p *Player) CheckWhatIsThis(unknown string) string {
 				}
 				return "unknown"
 			} else {
-				isMp3, _ := p.Converter.IsMp3(unknown)
+				data, err := os.ReadFile(
+					unknown,
+				)
+				if err != nil {
+					return "unknown"
+				}
+				isMp3, err := p.Converter.IsMp3(
+					data,
+				)
+				if err != nil {
+					logger.LogWarn(
+						"Failed to check if",
+						unknown,
+						"is mp3",
+						err,
+					)
+				}
 				if isMp3 {
 					return "file"
 				}
@@ -47,9 +90,9 @@ func (p *Player) CheckWhatIsThis(unknown string) string {
 		}
 	}
 	// check if its play list name
-	if p.PlayListManager.Exists(unknown) {
-		return "playlist"
-	}
+	// if p.PlayListManager.Exists(unknown) {
+	// 	return "playlist"
+	// }
 
 	// check if its queue index
 	if index, err := strconv.Atoi(unknown); err == nil && index >= 0 && index < p.Queue.Size() {
@@ -140,87 +183,89 @@ func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
 	}
 }
 
-func (p *Player) DetectAndAddToPlayList(
-	plname string,
-	query string,
-) ([]shared.SearchResult, error) {
-	whatIsThis := p.CheckWhatIsThis(query)
-	pl, err := p.PlayListManager.GetPlayListByName(plname)
-	if err != nil {
-		return nil, logger.LogError(
-			logger.GError(
-				"Playlist not found",
-			),
-		)
-	}
-	switch whatIsThis {
-	case "dir":
-		logger.LogInfo(
-			"detected dir for",
-			query,
-		)
-		err = p.PlayListManager.AddToPlayListFromDir(
-			pl,
-			query,
-			p.Converter,
-		)
-		if err != nil {
-			return nil, logger.LogError(
-				logger.GError(
-					"Failed to add to playlist",
-					err,
-				),
-			)
-		}
-	case "file":
-		logger.LogInfo(
-			"Detected file",
-			query,
-		)
-		err := p.PlayListManager.AddToPlayListFromFile(
-			pl,
-			query,
-		)
-		if err != nil {
-			return nil, logger.LogError(
-				logger.GError(
-					"Failed to add to playlist",
-					err,
-				),
-			)
-		}
-	case "queue":
-		logger.LogInfo(
-			"Detected queue",
-			query,
-		)
-		index, _ := strconv.Atoi(query)
-		music := p.Queue.GetMusicByIndex(index)
-		err := p.PlayListManager.AddToPlayListFromFile(
-			pl,
-			music.Path,
-		)
-		if err != nil {
-			return nil, logger.LogError(
-				logger.GError(
-					"Failed to add to playlist",
-					err,
-				),
-			)
-		}
-	case "unknown":
-		logger.LogInfo(
-			"Detected unknown",
-			query,
-		)
-		return p.GetAvailableMusicOptions(query), nil
-	default:
-		logger.LogInfo("Detected Engine", whatIsThis)
-		go p.PlayListManager.AddToPlayListFromOnline(pl, query, whatIsThis, p)
-	}
-	return []shared.SearchResult{}, nil
-}
-
+// func (p *Player) DetectAndAddToPlayList(
+//
+//	plname string,
+//	query string,
+//
+//	) ([]shared.SearchResult, error) {
+//		whatIsThis := p.CheckWhatIsThis(query)
+//		pl, err := p.PlayListManager.GetPlayListByName(plname)
+//		if err != nil {
+//			return nil, logger.LogError(
+//				logger.GError(
+//					"Playlist not found",
+//				),
+//			)
+//		}
+//		switch whatIsThis {
+//		case "dir":
+//			logger.LogInfo(
+//				"detected dir for",
+//				query,
+//			)
+//			err = p.PlayListManager.AddToPlayListFromDir(
+//				pl,
+//				query,
+//				p.Converter,
+//			)
+//			if err != nil {
+//				return nil, logger.LogError(
+//					logger.GError(
+//						"Failed to add to playlist",
+//						err,
+//					),
+//				)
+//			}
+//		case "file":
+//			logger.LogInfo(
+//				"Detected file",
+//				query,
+//			)
+//			err := p.PlayListManager.AddToPlayListFromFile(
+//				pl,
+//				query,
+//			)
+//			if err != nil {
+//				return nil, logger.LogError(
+//					logger.GError(
+//						"Failed to add to playlist",
+//						err,
+//					),
+//				)
+//			}
+//		case "queue":
+//			logger.LogInfo(
+//				"Detected queue",
+//				query,
+//			)
+//			index, _ := strconv.Atoi(query)
+//			music := p.Queue.GetMusicByIndex(index)
+//			err := p.PlayListManager.AddToPlayListFromFile(
+//				pl,
+//				music.Path,
+//			)
+//			if err != nil {
+//				return nil, logger.LogError(
+//					logger.GError(
+//						"Failed to add to playlist",
+//						err,
+//					),
+//				)
+//			}
+//		case "unknown":
+//			logger.LogInfo(
+//				"Detected unknown",
+//				query,
+//			)
+//			return p.GetAvailableMusicOptions(query), nil
+//		default:
+//			logger.LogInfo("Detected Engine", whatIsThis)
+//			go p.PlayListManager.AddToPlayListFromOnline(pl, query, whatIsThis, p)
+//		}
+//		return []shared.SearchResult{}, nil
+//	}
+//
 // if result is empty, it means it detects and plays the music if succeed other wise it returns the search results
 func (p *Player) DetectAndPlay(unknown string) []shared.SearchResult {
 	logger.LogInfo("Checking what is this", unknown)
@@ -232,10 +277,8 @@ func (p *Player) DetectAndPlay(unknown string) []shared.SearchResult {
 		p.Play()
 	case "file":
 		logger.LogInfo("Detected file")
-		go func() {
-			p.AddMusicFromFile(unknown)
-			p.Play()
-		}()
+		p.AddMusicFromFile(unknown)
+		p.Play()
 	case "queue":
 		logger.LogInfo("Detected queue")
 		index, _ := strconv.Atoi(unknown)
@@ -244,11 +287,11 @@ func (p *Player) DetectAndPlay(unknown string) []shared.SearchResult {
 			p.Play()
 		}()
 	case "playlist":
-		logger.LogInfo("Detected playlist")
-		go func() {
-			p.AddMusicsFromPlaylist(unknown)
-			p.Play()
-		}()
+		// logger.LogInfo("Detected playlist")
+		// go func() {
+		// 	p.AddMusicsFromPlaylist(unknown)
+		// 	p.Play()
+		// }()
 	case "unknown":
 		logger.LogInfo("Detected unknown, searching for", unknown)
 		return p.GetAvailableMusicOptions(unknown)

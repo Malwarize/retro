@@ -2,56 +2,58 @@ package player
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 
-	"github.com/Malwarize/goplay/config"
 	"github.com/Malwarize/goplay/logger"
+	"github.com/Malwarize/goplay/server/player/db"
 	"github.com/Malwarize/goplay/shared"
 )
 
-func (p *Player) addConvertedMp3InTemp(path string) bool {
-	f, err := os.CreateTemp("", "goplay")
-	defer os.Remove(f.Name())
-	if err != nil {
-		logger.LogError(
-			logger.GError(
-				"Failed to create temp file",
-				err,
-			),
-		)
-
-		return false
-	}
-	sourceFile, err := os.Open(path)
-	if err != nil {
-		logger.ERRORLogger.Println(err)
-		return false
-	}
-	_, err = io.Copy(f, sourceFile)
-	if err != nil {
-		logger.ERRORLogger.Println(err)
-		return false
-	}
-	err = p.Converter.ConvertToMP3(f.Name())
-	if err != nil {
-		logger.ERRORLogger.Println(err)
-		return false
-	}
-	err = p.AddMusicFromFile(f.Name())
-	if err != nil {
-		return false
-	}
-	return true
-}
-
 func (p *Player) AddMusicFromFile(path string) error {
-	music, err := NewMusic(path)
+	// read file
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
-	p.Queue.Enqueue(music)
+
+	ok, err := p.Converter.IsMp3(data)
+	if err != nil {
+		return err
+	}
+
+	var mp3data []byte
+	if !ok {
+		if mp3data, err = p.Converter.ConvertToMP3(
+			data,
+		); err != nil {
+			return err
+		}
+	} else {
+		mp3data = data
+	}
+	music, err := NewMusic(
+		filepath.Base(
+			path,
+		),
+		mp3data,
+	)
+	if err != nil {
+		logger.LogInfo(
+			"here is the error",
+			err,
+		)
+		return err
+	}
+	if music == nil {
+		return fmt.Errorf(
+			"can't enqueue music for some reason",
+		)
+	}
+	logger.LogInfo(
+		"Enqueue", music.Name,
+	)
+	p.Queue.Enqueue(*music)
 	return nil
 }
 
@@ -67,31 +69,16 @@ func (p *Player) AddMusicsFromDir(dirPath string) error {
 	}
 	for _, entry := range entries {
 		if !entry.IsDir() {
-			isMp3, err := p.Converter.IsMp3(dirPath + "/" + entry.Name())
+			musicPath := filepath.Join(dirPath, entry.Name())
+			err := p.AddMusicFromFile(musicPath)
 			if err != nil {
-				logger.WARNLogger.Println(
-					"Failed to check if file is mp3",
+				logger.LogWarn(
+					"skipping music",
+					musicPath,
+					"because of error",
 					err,
 				)
 				continue
-			}
-			if isMp3 {
-				logger.INFOLogger.Println("Playing music from dir", dirPath+"/"+entry.Name())
-				err := p.AddMusicFromFile(filepath.Join(dirPath, entry.Name()))
-				if err != nil {
-					logger.WARNLogger.Println(
-						"Failed to add music from dir",
-						err,
-					)
-				}
-			} else {
-				if !p.addConvertedMp3InTemp(filepath.Join(dirPath, entry.Name())) {
-					return logger.LogError(
-						logger.GError(
-							"file is not mp3 and failed to convert to mp3",
-						),
-					)
-				}
 			}
 		}
 	}
@@ -101,7 +88,7 @@ func (p *Player) AddMusicsFromDir(dirPath string) error {
 // the unique is the unique id of the music in the engine it can be url or id
 func (p *Player) AddMusicFromOnline(unique string, engineName string) error {
 	p.addTask(unique, shared.Downloading)
-	path, err := p.Director.Download(engineName, unique)
+	music, err := p.Director.Download(engineName, unique)
 	if err != nil {
 		p.errorifyTask(unique, err)
 		return logger.LogError(
@@ -112,7 +99,7 @@ func (p *Player) AddMusicFromOnline(unique string, engineName string) error {
 		)
 	}
 
-	err = p.Converter.ConvertToMP3(path)
+	data, err := p.Converter.ConvertToMP3(music.Data)
 	if err != nil {
 		p.errorifyTask(unique, err)
 		return logger.LogError(
@@ -123,7 +110,7 @@ func (p *Player) AddMusicFromOnline(unique string, engineName string) error {
 		)
 	}
 
-	if path == "" {
+	if len(data) == 0 {
 		p.errorifyTask(unique, fmt.Errorf("failed to download music: %s", unique))
 		return logger.LogError(
 			logger.GError(
@@ -135,11 +122,18 @@ func (p *Player) AddMusicFromOnline(unique string, engineName string) error {
 			),
 		)
 	}
-	err = p.AddMusicFromFile(path)
+
+	err = p.EnqueueDbMusic(
+		music,
+	)
 	if err != nil {
 		return logger.LogError(
 			logger.GError(
-				"Failed to add music to queue",
+				"Failed to enqueue music",
+				fmt.Errorf(
+					"failed to enqueue music: %s",
+					unique,
+				),
 				err,
 			),
 		)
@@ -148,92 +142,108 @@ func (p *Player) AddMusicFromOnline(unique string, engineName string) error {
 	return nil
 }
 
-func (p *Player) addMusicFromPlaylistByIndex(pl *PlayList, index int) error {
-	playlistPath := filepath.Join(
-		config.GetConfig().PlaylistPath,
-		pl.Name,
-	)
-	dir, err := os.Open(
-		playlistPath,
-	)
-	if err != nil {
-		return err
-	}
-	entries, err := dir.Readdir(0)
-	if err != nil {
-		return err
-	}
-	if index < len(entries) && index >= 0 {
-		err := p.AddMusicFromFile(
-			filepath.Join(playlistPath, entries[index].Name()),
-		)
-		return err
-	}
-	return nil
-}
-
-func (p *Player) addMusicFromPlaylistByName(
-	pl *PlayList,
-	name string,
-) error {
-	playlistPath := filepath.Join(
-		config.GetConfig().PlaylistPath,
-		pl.Name,
-	)
-	dir, err := os.Open(
-		playlistPath,
-	)
-	if err != nil {
-		return err
-	}
-	entries, err := dir.Readdir(0)
-	if err != nil {
-		return err
-	}
-	for _, entry := range entries {
-		if shared.ViewParseName(entry.Name()) == name {
-			err := p.AddMusicFromFile(
-				filepath.Join(playlistPath, entry.Name()),
-			)
-			return err
-		}
-	}
-	return os.ErrNotExist
-}
-
-func (p *Player) addMusicsFromPlaylist(pl *PlayList) error {
-	playlistPath := filepath.Join(config.GetConfig().PlaylistPath, pl.Name)
-	dir, err := os.Open(playlistPath)
-	if err != nil {
-		return err
-	}
-	entries, err := dir.Readdir(0)
-	if err != nil {
-		return err
-	}
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			err := p.AddMusicFromFile(filepath.Join(playlistPath, entry.Name()))
-			if err != nil {
-				logger.LogWarn(err.Error())
-			}
-		}
-	}
-	return nil
-}
-
+//
+// func (p *Player) addMusicFromPlaylistByIndex(pl *PlayList, index int) error {
+// 	playlistPath := filepath.Join(
+// 		config.GetConfig().PlaylistPath,
+// 		pl.Name,
+// 	)
+// 	dir, err := os.Open(
+// 		playlistPath,
+// 	)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	entries, err := dir.Readdir(0)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if index < len(entries) && index >= 0 {
+// 		err := p.AddMusicFromFile(
+// 			filepath.Join(playlistPath, entries[index].Name()),
+// 		)
+// 		return err
+// 	}
+// 	return nil
+// }
+//
+//
+// func (p *Player) addMusicFromPlaylistByName(
+// 	pl *PlayList,
+// 	name string,
+// ) error {
+// 	playlistPath := filepath.Join(
+// 		config.GetConfig().PlaylistPath,
+// 		pl.Name,
+// 	)
+// 	dir, err := os.Open(
+// 		playlistPath,
+// 	)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	entries, err := dir.Readdir(0)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	for _, entry := range entries {
+// 		if shared.ViewParseName(entry.Name()) == name {
+// 			err := p.AddMusicFromFile(
+// 				filepath.Join(playlistPath, entry.Name()),
+// 			)
+// 			return err
+// 		}
+// 	}
+// 	return os.ErrNotExist
+// }
+//
+// func (p *Player) addMusicsFromPlaylist(pl *PlayList) error {
+// 	playlistPath := filepath.Join(config.GetConfig().PlaylistPath, pl.Name)
+// 	dir, err := os.Open(playlistPath)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	entries, err := dir.Readdir(0)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	for _, entry := range entries {
+// 		if !entry.IsDir() {
+// 			err := p.AddMusicFromFile(filepath.Join(playlistPath, entry.Name()))
+// 			if err != nil {
+// 				logger.LogWarn(err.Error())
+// 			}
+// 		}
+// 	}
+// 	return nil
+// }
+//
 // wrapper for AddMusicsFromPlaylist() + validate playlist
-func (p *Player) AddMusicsFromPlaylist(
-	plname string,
-) error {
-	pl, err := p.PlayListManager.GetPlayListByName(plname)
+// func (p *Player) AddMusicsFromPlaylist(
+// 	plname string,
+// ) error {
+// 	pl, err := p.PlayListManager.GetPlayListByName(plname)
+// 	if err != nil {
+// 		return logger.LogError(
+// 			logger.GError(
+// 				"Failed to get playlist by name",
+// 				err,
+// 			),
+// 		)
+// 	}
+// 	return p.addMusicsFromPlaylist(pl)
+// }
+
+func (p *Player) EnqueueDbMusic(dmusic *db.Music) error {
+	playableMusic, err := NewMusic(
+		dmusic.Name,
+		dmusic.Data,
+	)
 	if err != nil {
-		return logger.LogError(
-			logger.GError(
-				"Failed to get playlist by name",
-				err,
-			),
-		)
+		return err
 	}
-	return p.addMusicsFromPlaylist(pl)
+	p.Queue.Enqueue(
+		*playableMusic,
+	)
+	return nil
 }

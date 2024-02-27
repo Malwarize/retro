@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/Malwarize/goplay/config"
 	"github.com/Malwarize/goplay/logger"
+	"github.com/Malwarize/goplay/server/player/db"
 	"github.com/Malwarize/goplay/shared"
 )
 
@@ -19,17 +21,25 @@ type OnlineEngine interface {
 type OnlineDirector struct {
 	engines map[string]OnlineEngine // key: engine name, value: engine
 	Cached  *CachedFiles
+	Db      *db.Db
 }
 
-func NewOnlineDirector() *OnlineDirector {
+func NewOnlineDirector(db *db.Db) *OnlineDirector {
 	return &OnlineDirector{
 		engines: make(map[string]OnlineEngine),
 		Cached:  NewCachedFiles(),
+		Db:      db,
 	}
 }
 
 func NewDefaultDirector() (*OnlineDirector, error) {
-	director := NewOnlineDirector()
+	db, err := db.LoadDb(config.GetConfig().DbPath)
+	if err != nil {
+		return nil, err
+	}
+	director := NewOnlineDirector(
+		db,
+	)
 	director.Cached.Fetch()
 	youtubeEngine, err := newYoutubeEngine()
 	if err != nil {
@@ -61,14 +71,14 @@ func (od *OnlineDirector) Search(
 // func (od *OnlineDirector) Download(engineName, url string) (io.ReadCloser, string, error) {
 // 	engine, ok := od.engines[engineName]
 // 	if !ok {
-// 		return nil, "", errors.New("engine not found")
+// 		return nil, nil, errors.New("engine not found")
 // 	}
 // 	// check if file is Cached
 // 	name, err := od.Cached.GetFileByKey(url, engineName)
 // 	if err == nil {
 // 		f, err := os.Open(name)
 // 		if err != nil {
-// 			return nil, "", err
+// 			return nil, nil, err
 // 		}
 // 		return f, name, nil
 // 	}
@@ -77,50 +87,104 @@ func (od *OnlineDirector) Search(
 // 	reader, name, err := engine.Download(url)
 // 	logger.LogInfo("Downloaded file from ", url)
 // 	if err != nil {
-// 		return nil, "", err
+// 		return nil, nil, err
 // 	}
 // 	// cache it
 // 	data, err := io.ReadAll(reader)
 // 	if err != nil {
-// 		return nil, "", err
+// 		return nil, nil, err
 // 	}
 // 	path := od.Cached.AddFile(data, name, engineName, url)
-// 	if path == "" {
-// 		return nil, "", errors.New("failed to cache file")
+// 	if path == nil {
+// 		return nil, nil, errors.New("failed to cache file")
 // 	}
 // 	f, err := os.Open(path)
 // 	if err != nil {
-// 		return nil, "", err
+// 		return nil, nil, err
 // 	}
 // 	return f, path, nil
 // }
+//
+// func (od *OnlineDirector) Download(engineName, url string) (path string, err error) {
+// 	engine, ok := od.engines[engineName]
+// 	if !ok {
+// 		return nil, errors.New("engine not found")
+// 	}
+// 	// check if file is Cached
+// 	name, err := od.Cached.GetFileByKey(url, engineName)
+// 	if err == nil {
+// 		return name, nil
+// 	}
+// 	logger.LogInfo("Downloading file from ", url)
+// 	reader, name, err := engine.Download(url)
+// 	logger.LogInfo("Downloaded file from ", url)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	// cache it
+// 	data, err := io.ReadAll(reader)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	path = od.Cached.AddFile(data, name, engineName, url)
+// 	if path == nil {
+// 		return nil, errors.New("failed to cache file")
+// 	}
+// 	return path, nil
+// }
 
-func (od *OnlineDirector) Download(engineName, url string) (path string, err error) {
+func (od *OnlineDirector) Download(engineName, url string) (*db.Music, error) {
 	engine, ok := od.engines[engineName]
 	if !ok {
-		return "", errors.New("engine not found")
+		return nil, errors.New("engine not found")
 	}
 	// check if file is Cached
-	name, err := od.Cached.GetFileByKey(url, engineName)
+	// so we access the db
+
+	music, err := od.Db.GetMusic(
+		engine.Name(),
+		url,
+	)
 	if err == nil {
-		return name, nil
+		return &music, nil
 	}
+
 	logger.LogInfo("Downloading file from ", url)
 	reader, name, err := engine.Download(url)
 	logger.LogInfo("Downloaded file from ", url)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	// cache it
+	// data, err := io.ReadAll(reader)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// path = od.Cached.AddFile(data, name, engineName, url)
+	// if path == nil {
+	// 	return nil, errors.New("failed to cache file")
+	// }
+	// return path, nil
+
 	data, err := io.ReadAll(reader)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	path = od.Cached.AddFile(data, name, engineName, url)
-	if path == "" {
-		return "", errors.New("failed to cache file")
+	music = db.Music{
+		Name:   name,
+		Source: engine.Name(),
+		Key:    url,
+		Data:   data,
 	}
-	return path, nil
+	err = od.Db.AddMusic(&music)
+	if err != nil {
+		logger.LogWarn(
+			"failed to add music to db",
+			err,
+		)
+		return &music, err
+	}
+	return &music, nil
 }
 
 func (od *OnlineDirector) GetEngines() map[string]OnlineEngine {
