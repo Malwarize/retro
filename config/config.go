@@ -18,7 +18,6 @@ var DEBUG = false // set to true for debug mode
 type Config struct {
 	GoPlayPath    string        `json:"goplay_path"`   // path to goplay
 	PlaylistPath  string        `json:"playlist_path"` // path to playlists
-	CacheDir      string        `json:"cache_dir"`     // path to cache
 	Pathytldpl    string        `json:"path_ytldpl"`   // path to yt-dlp
 	Pathffmpeg    string        `json:"path_ffmpeg"`   // path to ffmpeg
 	Pathffprobe   string        `json:"path_ffprobe"`  // path to ffprobe
@@ -48,9 +47,6 @@ func loadConfig() *Config {
 		}
 		if jsonConfig.PlaylistPath == "" {
 			jsonConfig.PlaylistPath = os.Getenv("HOME") + "/.goplay/playlists/"
-		}
-		if jsonConfig.CacheDir == "" {
-			jsonConfig.CacheDir = os.Getenv("HOME") + "/.goplay/cache/"
 		}
 		if jsonConfig.Pathytldpl == "" {
 			jsonConfig.Pathytldpl = "yt-dlp"
@@ -86,8 +82,6 @@ func EditConfigField(field string, value string) error {
 		jsonConfig.GoPlayPath = value
 	case "playlist_path":
 		jsonConfig.PlaylistPath = value
-	case "cache_dir":
-		jsonConfig.CacheDir = value
 	case "path_ytldpl":
 		jsonConfig.Pathytldpl = value
 	case "path_ffmpeg":
@@ -124,7 +118,6 @@ func DebugConfig() *Config {
 	return &Config{
 		GoPlayPath:    "./goplay_storage/", // in the current directory
 		PlaylistPath:  "./goplay_storage/playlists/",
-		CacheDir:      "./goplay_storage/cache/",
 		DbPath:        homeDir + "/.goplay/goplay.db",
 		Pathytldpl:    "yt-dlp",
 		Pathffmpeg:    "ffmpeg",
@@ -140,7 +133,6 @@ func ReleaseConfig() *Config {
 	return &Config{
 		GoPlayPath:    homeDir + "/.goplay/",
 		PlaylistPath:  homeDir + "/.goplay/playlists/",
-		CacheDir:      homeDir + "/.goplay/cache/",
 		DbPath:        homeDir + "/.goplay/goplay.db",
 		Pathytldpl:    "yt-dlp",
 		Pathffmpeg:    "ffmpeg",

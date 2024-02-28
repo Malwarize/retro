@@ -6,8 +6,6 @@ import (
 	"github.com/gopxl/beep"
 	"github.com/gopxl/beep/effects"
 	"github.com/gopxl/beep/speaker"
-
-	"github.com/Malwarize/goplay/logger"
 )
 
 type Music struct {
@@ -22,10 +20,6 @@ func NewMusic(name string, data []byte) (*Music, error) {
 	if err != nil {
 		return nil, err
 	}
-	logger.LogInfo(
-		"new music with data length",
-		len(data),
-	)
 	return &Music{
 		Name: name,
 		Volume: &effects.Volume{
@@ -42,7 +36,7 @@ func (m *Music) Streamer() beep.StreamSeekCloser {
 	return m.Volume.Streamer.(beep.StreamSeekCloser)
 }
 
-func (m *Music) SetVolume(vp int) {
+func (m *Music) SetVolume(vp uint8) {
 	if vp == 0 {
 		m.Volume.Silent = true
 	} else {
@@ -78,7 +72,9 @@ func (m *Music) SetPositionN(p int) error { // this indicates where the music pl
 	return m.Streamer().Seek(p)
 }
 
-func (m *Music) SetPositionD(d time.Duration) error {
+func (m *Music) SetPositionD(
+	d time.Duration,
+) error {
 	dur := m.DurationN()
 	new := m.Format.SampleRate.N(d)
 	if new < 0 {

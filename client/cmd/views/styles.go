@@ -24,7 +24,7 @@ var playingEmojies = []string{
 	"🎺",
 }
 
-var emojiesStatus = map[int]string{
+var emojiesStatus = map[shared.PState]string{
 	shared.Playing: "▶️",
 	shared.Stopped: "🛑",
 	shared.Paused:  "⏸️",

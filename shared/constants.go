@@ -12,13 +12,15 @@ const (
 )
 
 const (
-	Playing = iota
-	Paused
-	Stopped
-)
-
-const (
 	PinkTheme   = "pink"
 	BlueTheme   = "blue"
 	PurpleTheme = "purple"
+)
+
+type PState uint
+
+const (
+	Playing PState = iota
+	Paused
+	Stopped
 )

@@ -34,27 +34,16 @@ var playCmd = &cobra.Command{
 		var options []string
 		list := controller.GetPlayListsNames(client)
 		for _, song := range list {
-			options = append(options, shared.ViewParseName(song))
+			options = append(options, song)
 		}
 		// songs in the queue
 		for _, song := range controller.GetPlayerStatus(client).MusicQueue {
-			options = append(options, shared.ViewParseName(song))
+			options = append(options, song)
 		}
 
 		return options, cobra.ShellCompDirectiveDefault
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if dir, err := cmd.Flags().GetString("dir"); err == nil && dir != "" {
-			controller.PlayDir(dir, client)
-			os.Exit(0)
-		}
-		// convert song name to index if it's in the queue
-		for i, song := range controller.GetPlayerStatus(client).MusicQueue {
-			if shared.ViewParseName(song) == strings.Join(args, " ") {
-				controller.DetectAndPlay(strconv.Itoa(i), client)
-				return
-			}
-		}
 		if len(args) > 0 {
 			song := strings.Join(args, " ")
 			views.SearchThenSelect(song, client)
@@ -217,7 +206,7 @@ it accepts the index of the song in the queue or the name of the song
 
 		names := make([]string, 0, len(playerStatus.MusicQueue))
 		for _, name := range playerStatus.MusicQueue {
-			names = append(names, shared.ViewParseName(name))
+			names = append(names, name)
 		}
 		return names, cobra.ShellCompDirectiveNoFileComp
 	},
@@ -280,7 +269,7 @@ if a playlist name is provided, it will list all the songs in the playlist
 		if len(args) > 0 {
 			listname := strings.TrimSpace(strings.Join(args, " "))
 			listname = strings.TrimSpace(listname)
-			views.PlayListSongsDisplay(listname, client)
+			views.PlayListMusicsDisplay(listname, client)
 			return
 		}
 		views.PlayListsDisplay(client)
@@ -328,26 +317,26 @@ if a song index is provided, it will remove the song from the playlist
 			return controller.GetPlayListsNames(client), cobra.ShellCompDirectiveDefault
 		}
 		if len(args) == 1 {
-			songs := controller.PlayListSongs(args[0], client)
-			parsedSongs := make([]string, 0, len(songs))
+			songs := controller.PlayListMusics(args[0], client)
+			parsedMusics := make([]string, 0, len(songs))
 			for _, song := range songs {
-				parsedSongs = append(parsedSongs, shared.ViewParseName(song))
+				parsedMusics = append(parsedMusics, song)
 			}
-			return parsedSongs, cobra.ShellCompDirectiveDefault
+			return parsedMusics, cobra.ShellCompDirectiveDefault
 		}
 
 		return nil, cobra.ShellCompDirectiveNoFileComp
 	},
 	Run: func(_ *cobra.Command, args []string) {
 		listname := strings.TrimSpace(args[0])
-		songs := controller.PlayListSongs(listname, client)
+		songs := controller.PlayListMusics(listname, client)
 		if len(args) == 1 {
 			controller.RemovePlayList(listname, client)
 		} else if len(args) == 2 {
 			// check if number provided is valid
 			songIndex, err := strconv.Atoi(strings.TrimSpace(args[1]))
 			if err == nil && songIndex >= 0 && songIndex < len(songs) {
-				controller.RemoveSongFromPlayList(
+				controller.RemoveMusicFromPlayList(
 					listname,
 					shared.IntOrString{
 						IntVal: songIndex,
@@ -357,7 +346,7 @@ if a song index is provided, it will remove the song from the playlist
 				)
 			} else {
 				songName := strings.TrimSpace(args[1])
-				controller.RemoveSongFromPlayList(
+				controller.RemoveMusicFromPlayList(
 					listname,
 					shared.IntOrString{
 						StrVal: songName,
@@ -392,7 +381,7 @@ and you can play it using the "list play" command
 			musics := controller.GetPlayerStatus(client).MusicQueue
 			parsedMusics := make([]string, 0, len(musics))
 			for _, music := range musics {
-				parsedMusics = append(parsedMusics, shared.ViewParseName(music))
+				parsedMusics = append(parsedMusics, music)
 			}
 
 			return parsedMusics, cobra.ShellCompDirectiveDefault
@@ -404,22 +393,8 @@ and you can play it using the "list play" command
 			fmt.Println("playlist name and query required")
 			return
 		}
-		// check if the playlist exist
-		lists := controller.GetPlayListsNames(client)
 		listname := strings.TrimSpace(args[0])
 		query := strings.Join(args[1:], " ")
-		queue := controller.GetPlayerStatus(client).MusicQueue
-		for _, list := range lists {
-			if list == listname {
-				// if its from the queue convert the name to index
-				for i, song := range queue {
-					if shared.ViewParseName(song) == query {
-						views.SearchThenAddToPlayList(listname, strconv.Itoa(i), client)
-						return
-					}
-				}
-			}
-		}
 		views.SearchThenAddToPlayList(listname, query, client)
 	},
 }
@@ -441,7 +416,7 @@ if a song name is provided, it will add the song to the queue
 			return playlists, cobra.ShellCompDirectiveDefault
 		}
 		if len(args) == 1 {
-			songs := controller.PlayListSongs(args[0], client)
+			songs := controller.PlayListMusics(args[0], client)
 			return songs, cobra.ShellCompDirectiveDefault
 		}
 		return nil, cobra.ShellCompDirectiveNoFileComp
@@ -451,7 +426,7 @@ if a song name is provided, it will add the song to the queue
 			lisname := args[0]
 			songIndex, err := strconv.Atoi(args[1])
 			if err != nil {
-				controller.PlayListPlaySong(
+				controller.PlayListPlayMusic(
 					lisname,
 					shared.IntOrString{
 						StrVal: args[1],
@@ -459,7 +434,7 @@ if a song name is provided, it will add the song to the queue
 					client,
 				)
 			} else {
-				controller.PlayListPlaySong(
+				controller.PlayListPlayMusic(
 					lisname,
 					shared.IntOrString{
 						IntVal: songIndex,

@@ -5,7 +5,6 @@ import (
 	"net/rpc"
 
 	"github.com/Malwarize/goplay/client/controller"
-	"github.com/Malwarize/goplay/shared"
 )
 
 func PlayListsDisplay(client *rpc.Client) {
@@ -20,8 +19,8 @@ func PlayListsDisplay(client *rpc.Client) {
 	}
 }
 
-func PlayListSongsDisplay(name string, client *rpc.Client) {
-	songs := controller.PlayListSongs(name, client)
+func PlayListMusicsDisplay(name string, client *rpc.Client) {
+	songs := controller.PlayListMusics(name, client)
 	if len(songs) == 0 {
 		fmt.Println("No songs in playlist")
 		return
@@ -29,7 +28,7 @@ func PlayListSongsDisplay(name string, client *rpc.Client) {
 	fmt.Println(GetTheme().ProgressStyle.Render("🎧 Playlist: ") + name)
 	for index, song := range songs {
 		fmt.Printf(
-			"\n    %d : %s\n", index, shared.ViewParseName(song),
+			"\n    %d : %s\n", index, song,
 		)
 	}
 }

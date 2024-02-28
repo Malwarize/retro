@@ -40,5 +40,15 @@ func LoadDb(
 		return nil, err
 	}
 
+	err = db.InitPlaylist()
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.InitMusicPlaylist()
+	if err != nil {
+		return nil, err
+	}
+
 	return db, nil
 }

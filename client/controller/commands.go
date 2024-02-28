@@ -8,22 +8,6 @@ import (
 	"github.com/Malwarize/goplay/shared"
 )
 
-func Play(client *rpc.Client) {
-	args := 0
-	var reply int
-	err := client.Call("Player.RPCPlay", args, &reply)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-}
-
-func PlayFile(file string, client *rpc.Client) {
-	fmt.Println("Adding music: ", file)
-	AddMusic(file, client)
-	Play(client)
-}
-
 func Next(client *rpc.Client) {
 	args := 0
 	var reply int
@@ -74,26 +58,6 @@ func Stop(client *rpc.Client) {
 	}
 }
 
-func PlayDir(dir string, client *rpc.Client) {
-	args := dir
-	var reply int
-	err := client.Call("Player.RPCAddDir", args, &reply)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-}
-
-func AddMusic(music string, client *rpc.Client) {
-	args := music
-	var reply int
-	err := client.Call("Player.RPCAddMusic", args, &reply)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-}
-
 func Seek(d int, client *rpc.Client) {
 	args := d
 	var reply int
@@ -107,10 +71,10 @@ func Seek(d int, client *rpc.Client) {
 func Volume(vp int, client *rpc.Client) {
 	if vp > 100 {
 		// health warning
-		fmt.Print("    ⚠️ Volume greater than 100% may damage your ears, skip this warning? (y/n)")
+		fmt.Print(" ⚠️ Volume greater than 100% may damage your ears, skip this warning? (y/n)")
 		var response string
-		fmt.Scanln(&response)
-		if response != "y" {
+		_, err := fmt.Scanln(&response)
+		if err != nil || response != "y" {
 			return
 		}
 	}
@@ -143,25 +107,10 @@ func GetPlayerStatus(client *rpc.Client) shared.Status {
 	return reply
 }
 
-func PlayYoutube(url string, client *rpc.Client) {
-	args := url
-	var reply int
-	err := client.Call("Player.RPCPlayYoutube", args, &reply)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	fmt.Println("this may take a while before the music starts playing")
-}
-
-func DetectAndPlay(query string, client *rpc.Client) []shared.SearchResult {
+func DetectAndPlay(query string, client *rpc.Client) ([]shared.SearchResult, error) {
 	var reply []shared.SearchResult
 	err := client.Call("Player.RPCDetectAndPlay", query, &reply)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	return reply
+	return reply, err
 }
 
 func GetTheme(client *rpc.Client) string {
@@ -186,12 +135,13 @@ func SetTheme(theme string, client *rpc.Client) {
 
 var client *rpc.Client
 
-func GetClient() (client *rpc.Client, err error) {
+func GetClient() (*rpc.Client, error) {
 	if client == nil {
+		var err error
 		client, err = rpc.Dial("tcp", "localhost:3131")
 		if err != nil {
 			return nil, err
 		}
 	}
-	return client, err
+	return client, nil
 }
