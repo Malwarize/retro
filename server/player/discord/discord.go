@@ -60,7 +60,7 @@ func Start(music string) error {
 
 func Pause() error {
 	Activity.State = string(Paused)
-	Activity.SmallImage = "paused"
+	Activity.SmallImage = "pause"
 	Activity.SmallText = "Paused"
 	return client.SetActivity(
 		Activity,
