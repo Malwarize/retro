@@ -184,7 +184,7 @@ this command will set the volume to a percentage between 0 and 100
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			controller.Volume(vol, client)
+			controller.Volume(uint8(vol), client)
 		} else {
 			fmt.Println("no volume specified")
 		}

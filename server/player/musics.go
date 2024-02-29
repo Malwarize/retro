@@ -15,7 +15,10 @@ type Music struct {
 	Data   []byte
 }
 
-func NewMusic(name string, data []byte) (*Music, error) {
+func NewMusic(
+	name string,
+	data []byte,
+) (*Music, error) {
 	streamer, format, err := MusicDecode(data)
 	if err != nil {
 		return nil, err

@@ -56,7 +56,7 @@ func (p *Player) RPCSeek(d time.Duration, _ *int) error {
 	return err
 }
 
-func (p *Player) RPCVolume(vp int /*volume percentage*/, reply *int) error {
+func (p *Player) RPCVolume(vp uint8 /*volume percentage*/, reply *int) error {
 	logger.LogInfo("RPCVolume called with volume percentage :", vp)
 	err := p.Volume(vp)
 	*reply = 0

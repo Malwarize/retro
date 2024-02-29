@@ -68,7 +68,7 @@ func Seek(d int, client *rpc.Client) {
 	}
 }
 
-func Volume(vp int, client *rpc.Client) {
+func Volume(vp uint8, client *rpc.Client) {
 	if vp > 100 {
 		// health warning
 		fmt.Print(" ⚠️ Volume greater than 100% may damage your ears, skip this warning? (y/n)")
