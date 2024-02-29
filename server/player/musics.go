@@ -43,8 +43,9 @@ func (m *Music) SetVolume(vp uint8) {
 	if vp == 0 {
 		m.Volume.Silent = true
 	} else {
+		v := int(vp)
 		m.Volume.Silent = false
-		volume := float64(vp-100) / 16.0
+		volume := float64(v-100) / 16.0
 		m.Volume.Volume = volume
 	}
 }

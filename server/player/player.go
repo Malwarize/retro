@@ -51,9 +51,7 @@ func NewPlayer() *Player {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err != nil {
-		log.Fatal(err)
-	}
+
 	return &Player{
 		Queue:       NewMusicQueue(),
 		playerState: shared.Stopped,
@@ -153,8 +151,14 @@ func (p *Player) setPlayerState(
 	state shared.PState,
 ) {
 	p.mu.Lock()
-	defer p.mu.Unlock()
 	p.playerState = state
+	p.mu.Unlock()
+	cur := p.Queue.GetCurrMusic()
+	if cur == nil {
+		adjustDiscordRPC(p.playerState, "")
+	} else {
+		adjustDiscordRPC(p.playerState, cur.Name)
+	}
 }
 
 func (p *Player) Next() error {
@@ -269,10 +273,10 @@ func (p *Player) Pause() error {
 		return nil
 	}
 	p._setlMeta(
-	  lmeta{
-	    _lcurrentDur: p.GetCurrMusicDuration(),
-	    _lcurrentPos: p.GetCurrMusicPosition(),
-	  },
+		lmeta{
+			_lcurrentDur: p.GetCurrMusicDuration(),
+			_lcurrentPos: p.GetCurrMusicPosition(),
+		},
 	)
 	p.setPlayerState(shared.Paused)
 	speaker.Lock()
@@ -322,7 +326,7 @@ func (p *Player) Seek(d time.Duration) error {
 	}
 	if err := currentMusic.Seek(d); err != nil {
 		logger.ERRORLogger.Println(
-		  err,
+			err,
 		)
 		return logger.LogError(
 			logger.GError(
@@ -334,7 +338,7 @@ func (p *Player) Seek(d time.Duration) error {
 }
 
 func (p *Player) Volume(
-  vp uint8,
+	vp uint8,
 ) error {
 	if p.getPlayerState() == shared.Stopped {
 		return nil
