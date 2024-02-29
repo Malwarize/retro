@@ -1,4 +1,4 @@
-package online
+package engines
 
 import (
 	"io"
@@ -144,7 +144,7 @@ type youtubeEngine struct {
 	Client    *youtube.Client
 }
 
-func newYoutubeEngine() (*youtubeEngine, error) {
+func NewYoutubeEngine() (*youtubeEngine, error) {
 	path := "yt-dlp"
 	absPath, err := exec.LookPath(path)
 	if err != nil {
@@ -157,7 +157,7 @@ func newYoutubeEngine() (*youtubeEngine, error) {
 	}, nil
 }
 
-// why I used ytdlp instead of youtube lib : because ytdlp doesn't need API key to search
+// Search why I used ytdlp instead of YouTube lib : because ytdlp doesn't need API key to search
 func (yt *youtubeEngine) Search(query string, maxResults int) ([]shared.SearchResult, error) {
 	cmd := exec.Command(
 		yt.ytdlpPath,
@@ -182,35 +182,29 @@ func (yt *youtubeEngine) Search(query string, maxResults int) ([]shared.SearchRe
 
 	var results []shared.SearchResult
 	var currentResult shared.SearchResult
-	if len(lines)%3 != 0 {
-		logger.LogInfo("Invalid yt-dlp output, len(lines) is not devideable by 3 its ", len(lines))
-		return nil, nil
-	}
 
-	for i := 0; i < len(lines); i += 3 {
-		currentResult.Title = lines[i]
-		id := lines[i+1]
-		if len(id) != 11 {
-			continue
-		}
-		currentResult.Destination = "https://www.youtube.com/watch?v=" + lines[i+1]
-		sdur := lines[i+2]
-		if dur, err := shared.StringToDuration(sdur); err == nil {
+	for i := 0; i < len(lines); i++ {
+		line := lines[i]
+		if strings.Contains(
+			line,
+			":",
+		) {
+			dur, err := shared.StringToDuration(line)
+			if err != nil {
+				continue
+			}
 			currentResult.Duration = dur
-		} else {
-			continue
+			currentResult.Destination = "https://www.youtube.com/watch?v=" + lines[i-1]
+			currentResult.Title = lines[i-2]
+			currentResult.Type = yt.Name()
+			results = append(results, currentResult)
 		}
-		results = append(results, currentResult)
-
-	}
-	if currentResult.Destination != "" {
-		results = append(results, currentResult)
 	}
 
 	return results, nil
 }
 
-// returns stream, title, error
+// Download returns stream, title, error
 // why don't use ytdlp : because this lib much faster
 func (yt *youtubeEngine) Download(videoUrl string) (io.ReadCloser, string, error) {
 	video, err := yt.Client.GetVideo(videoUrl)
@@ -223,4 +217,8 @@ func (yt *youtubeEngine) Download(videoUrl string) (io.ReadCloser, string, error
 		return nil, "", err
 	}
 	return stream, video.Title, nil
+}
+
+func (yt *youtubeEngine) MaxResults() int {
+	return 10
 }

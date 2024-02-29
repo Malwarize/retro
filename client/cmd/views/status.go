@@ -17,7 +17,7 @@ func reformatDuration(duration time.Duration) string {
 	return fmt.Sprintf("%02d:%02d", int(duration.Minutes()), int(duration.Seconds())%60)
 }
 
-func convertVolumeToEmojie(volume int) string {
+func convertVolumeToEmojie(volume uint8) string {
 	if volume == 0 {
 		return volumeLevels[0]
 	}
@@ -39,7 +39,6 @@ func DisplayStatus(client *rpc.Client) {
 
 		currentMusicName := queue[status.CurrMusicIndex]
 
-		currentMusicName = shared.ViewParseName(currentMusicName)
 		currentPosition := status.CurrMusicPosition
 		currentPositionStr := reformatDuration(currentPosition)
 
@@ -62,9 +61,9 @@ func DisplayStatus(client *rpc.Client) {
 		// display queue
 		for i, music := range queue {
 			if i == status.CurrMusicIndex {
-				fmt.Println(GetTheme().SelectMusicStyle.Render("->", strconv.Itoa(i), ":", shared.ViewParseName(music)))
+				fmt.Println(GetTheme().SelectMusicStyle.Render("->", strconv.Itoa(i), ":", music))
 			} else {
-				fmt.Println("  ", i, ":", shared.ViewParseName(music))
+				fmt.Println("  ", i, ":", music)
 			}
 		}
 	}

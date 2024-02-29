@@ -2,15 +2,11 @@ package shared
 
 import (
 	"fmt"
-	"net/url"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/gopxl/beep/mp3"
-
-	"github.com/Malwarize/goplay/config"
 )
 
 type Task struct {
@@ -22,9 +18,9 @@ type Status struct {
 	CurrMusicIndex    int
 	CurrMusicPosition time.Duration
 	CurrMusicDuration time.Duration
-	PlayerState       int
+	PlayerState       PState
 	MusicQueue        []string
-	Volume            int
+	Volume            uint8
 	Tasks             map[string]Task // key: target, value: task
 }
 
@@ -65,38 +61,17 @@ type SearchResult struct {
 	Duration    time.Duration
 }
 
-func EscapeSpecialDirChars(path string) string {
-	// escape special chars
-	path = url.PathEscape(path)
-	// first 40 chars
-	path = path[:40]
-	return path
-}
-
-func ParseCachedFileName(filename string) (string, string) {
-	// split filename by __
-	split := strings.Split(filename, config.GetConfig().Separator)
-	if len(split) != 2 {
-		return "", ""
-	}
-	return split[0], split[1]
-}
-
-func CombineNameWithKey(name string, key string) string {
-	return name + config.GetConfig().Separator + key
-}
-
 type AddToPlayListArgs struct {
 	PlayListName string
 	Query        string
 }
 
-type RemoveSongFromPlayListArgs struct {
+type RemoveMusicFromPlayListArgs struct {
 	PlayListName string
 	IndexOrName  IntOrString
 }
 
-type PlayListPlaySongArgs struct {
+type PlayListPlayMusicArgs struct {
 	PlayListName string
 	IndexOrName  IntOrString
 }
@@ -141,14 +116,6 @@ func StringToDuration(s string) (time.Duration, error) {
 func DurationToString(d time.Duration) string {
 	// to format 00:00:00
 	return fmt.Sprintf("%02d:%02d:%02d", int(d.Hours()), int(d.Minutes())%60, int(d.Seconds())%60)
-}
-
-func ViewParseName(name string) string {
-	name = filepath.Base(name)
-	if strings.Contains(name, config.GetConfig().Separator) {
-		name = strings.Split(name, config.GetConfig().Separator)[0]
-	}
-	return name
 }
 
 type IntOrString struct {

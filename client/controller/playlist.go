@@ -38,21 +38,21 @@ func RemovePlayList(name string, client *rpc.Client) {
 	}
 }
 
-func DetectAndAddToPlayList(name string, query string, client *rpc.Client) []shared.SearchResult {
+func DetectAndAddToPlayList(
+	name string,
+	query string,
+	client *rpc.Client,
+) ([]shared.SearchResult, error) {
 	args := shared.AddToPlayListArgs{PlayListName: name, Query: query}
 	var reply []shared.SearchResult
 	err := client.Call("Player.RPCDetectAndAddToPlayList", args, &reply)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	return reply
+	return reply, err
 }
 
-func PlayListSongs(name string, client *rpc.Client) []string {
+func PlayListMusics(name string, client *rpc.Client) []string {
 	args := name
 	var reply []string
-	err := client.Call("Player.RPCPlayListSongs", args, &reply)
+	err := client.Call("Player.RPCPlayListMusics", args, &reply)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -60,26 +60,26 @@ func PlayListSongs(name string, client *rpc.Client) []string {
 	return reply
 }
 
-func RemoveSongFromPlayList(name string, indexOrName shared.IntOrString, client *rpc.Client) {
-	args := shared.RemoveSongFromPlayListArgs{
+func RemoveMusicFromPlayList(name string, indexOrName shared.IntOrString, client *rpc.Client) {
+	args := shared.RemoveMusicFromPlayListArgs{
 		PlayListName: name,
 		IndexOrName:  indexOrName,
 	}
 	var reply int
-	err := client.Call("Player.RPCRemoveSongFromPlayList", args, &reply)
+	err := client.Call("Player.RPCRemoveMusicFromPlayList", args, &reply)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 }
 
-func PlayListPlaySong(lname string, indexOrName shared.IntOrString, client *rpc.Client) {
-	args := shared.PlayListPlaySongArgs{
+func PlayListPlayMusic(lname string, indexOrName shared.IntOrString, client *rpc.Client) {
+	args := shared.PlayListPlayMusicArgs{
 		PlayListName: lname,
 		IndexOrName:  indexOrName,
 	}
 	var reply int
-	err := client.Call("Player.RPCPlayListPlaySong", args, &reply)
+	err := client.Call("Player.RPCPlayListPlayMusic", args, &reply)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

@@ -1,13 +1,12 @@
 package player
 
 import (
+	"bytes"
 	"fmt"
-	"os"
 	"os/exec"
 	"strings"
 
 	"github.com/Malwarize/goplay/config"
-	"github.com/Malwarize/goplay/logger"
 )
 
 type Converter struct {
@@ -33,64 +32,51 @@ func NewConverter() (*Converter, error) {
 	}, nil
 }
 
-func (c *Converter) ConvertToMP3(inputFile string) error {
-	tmpFile, err := os.CreateTemp("", "goplay")
-	if err != nil {
-		return fmt.Errorf("error creating temp file: %v", err)
-	}
-	defer os.Remove(tmpFile.Name())
-	outputFile := tmpFile.Name() + ".mp3"
-	defer os.Remove(outputFile)
-
+func (c *Converter) ConvertToMP3(inputData []byte) ([]byte, error) {
 	cmd := exec.Command(
 		c.ffmpegPath,
-		"-i",
-		inputFile,
+		"-i", "pipe:0", // Read from stdin
 		"-vn",
-		"-ar",
-		"44100",
-		"-ac",
-		"2",
-		"-b:a",
-		"192k",
-		outputFile,
+		"-ar", "44100",
+		"-ac", "2",
+		"-b:a", "192k",
+		"-f", "mp3", // Specify output format
+		"pipe:1", // Write to stdout
 	)
-	out, err := cmd.CombinedOutput()
+
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdin = bytes.NewReader(inputData)
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
 	if err != nil {
-		logger.LogInfo("error converting to MP3:", string(out))
-		return fmt.Errorf("error converting to MP3: %v", err)
+		return nil, fmt.Errorf("error converting to MP3: %v\n%s", err, stderr.String())
 	}
 
-	err = copyFile(outputFile, inputFile)
-	if err != nil {
-		return fmt.Errorf("error copying file: %v", err)
-	}
-
-	err = os.Remove(outputFile)
-	if err != nil {
-		return fmt.Errorf("error converting to MP3: %v", err)
-	}
-
-	return nil
+	return out.Bytes(), nil
 }
 
-func (c *Converter) IsMp3(file string) (bool, error) {
-	cmd := exec.Command(
-		"ffprobe",
-		"-v",
-		"error",
-		"-show_entries",
-		"format=format_name",
-		"-of",
-		"default=noprint_wrappers=1:nokey=1",
-		file,
+func (c *Converter) IsMp3(fileData []byte) (bool, error) {
+	cmd := exec.Command("ffprobe",
+		"-v", "error",
+		"-show_entries", "format=format_name",
+		"-of", "default=noprint_wrappers=1:nokey=1",
+		"-i", "pipe:0", // Read from stdin
 	)
-	output, err := cmd.CombinedOutput()
+
+	cmd.Stdin = bytes.NewReader(fileData)
+	out, err := cmd.CombinedOutput()
 	if err != nil {
-		logger.LogInfo("Error checking file format:", string(output))
-		return false, fmt.Errorf("error checking file format: %v", err)
+		return false, fmt.Errorf(
+			"error running ffprobe to check if fileData is mp3: %v %s",
+			err,
+			string(out),
+		)
 	}
-	fileFormat := strings.TrimSpace(string(output))
-	isMP3 := strings.EqualFold(fileFormat, "mp3")
+
+	fileFormat := strings.TrimSpace(string(out))
+	isMP3 := fileFormat == "mp3"
 	return isMP3, nil
 }

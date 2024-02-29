@@ -10,10 +10,11 @@ import (
 
 	"github.com/Malwarize/goplay/config"
 	"github.com/Malwarize/goplay/logger"
+	"github.com/Malwarize/goplay/server/player/db"
 	"github.com/Malwarize/goplay/shared"
 )
 
-func (p *Player) CheckWhatIsThis(unknown string) string {
+func (p *Player) CheckWhatIsThis(unknown string) DResults {
 	// check if its a dir or file
 	if fi, err := os.Stat(unknown); err == nil {
 		if err == nil {
@@ -21,65 +22,126 @@ func (p *Player) CheckWhatIsThis(unknown string) string {
 				// check if there is music files in the dir
 				files, err := os.Open(unknown)
 				if err != nil {
-					return "unknown"
+					return DUnknown
 				}
 
 				entries, err := files.Readdir(0)
 				if err != nil {
-					return "unknown"
+					return DUnknown
 				}
 
 				for _, entry := range entries {
 					if !entry.IsDir() {
-						isMp3, _ := p.Converter.IsMp3(filepath.Join(unknown, entry.Name()))
+						data, err := os.ReadFile(
+							filepath.Join(
+								unknown,
+								entry.Name(),
+							),
+						)
+						if err != nil {
+							logger.LogWarn(
+								"error reading file",
+								err,
+							)
+						}
+						logger.LogInfo(
+							"Checking if",
+							filepath.Join(unknown, entry.Name()),
+							"is mp3",
+						)
+						isMp3, err := p.Director.Converter.IsMp3(
+							data,
+						)
+						if err != nil {
+							logger.LogWarn(
+								"Failed to check if",
+								filepath.Join(unknown, entry.Name()),
+								"is mp3",
+								err,
+							)
+						}
 						if isMp3 {
-							return "dir"
+							return DDir
 						}
 					}
 				}
-				return "unknown"
+				return DUnknown
 			} else {
-				isMp3, _ := p.Converter.IsMp3(unknown)
+				data, err := os.ReadFile(
+					unknown,
+				)
+				if err != nil {
+					return DUnknown
+				}
+				isMp3, err := p.Director.Converter.IsMp3(
+					data,
+				)
+				if err != nil {
+					logger.LogWarn(
+						"Failed to check if",
+						unknown,
+						"is mp3",
+						err,
+					)
+				}
 				if isMp3 {
-					return "file"
+					return DFile
 				}
 			}
 		}
 	}
 	// check if its play list name
-	if p.PlayListManager.Exists(unknown) {
-		return "playlist"
+	_, err := p.Director.Db.GetPlaylist(
+		unknown,
+	)
+	if err == nil {
+		return DPlaylist
 	}
-
-	// check if its queue index
-	if index, err := strconv.Atoi(unknown); err == nil && index >= 0 && index < p.Queue.Size() {
-		return "queue"
+	i, err := strconv.Atoi(unknown)
+	if err != nil {
+		ok := p.Queue.GetMusicByName(
+			unknown,
+		)
+		if ok != nil {
+			return DQueue
+		}
+	} else {
+		if i < p.Queue.Size() && i >= 0 {
+			return DQueue
+		}
 	}
 	engines := p.Director.GetEngines()
 	for _, engine := range engines {
 		ok, _ := engine.Exists(unknown)
 		if ok {
-			return engine.Name()
+			return DResults(engine.Name())
 		}
 	}
-	return "unknown"
+	return DUnknown
 }
 
 func (p *Player) searchWorker(
 	ctx context.Context,
 	engine string,
-	query string,
+	unknown string,
 	musicChan chan shared.SearchResult,
 	wg *sync.WaitGroup,
 ) {
 	defer func() {
-		logger.LogInfo("Search worker done for", engine, query)
+		logger.LogInfo(
+			"Search worker done for",
+			engine,
+			unknown,
+		)
 		wg.Done()
 	}()
 
-	searchRes, err := p.Director.Search(engine, query, 5)
+	searchRes, err := p.Director.Search(
+		engine,
+		unknown,
+	)
 	if err != nil {
-		logger.LogWarn("Failed to search for", query, ":", err)
+		logger.LogWarn("Failed to search for", unknown, ":", err)
 	}
 
 	for _, music := range searchRes {
@@ -87,9 +149,12 @@ func (p *Player) searchWorker(
 	}
 }
 
-func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
+func (p *Player) GetAvailableMusicOptions(unknown string) []shared.SearchResult {
 	// add task : this task displayed in the status: if the task is done, it will be removed
-	p.addTask(query, shared.Searching)
+	p.addTask(
+		unknown,
+		shared.Searching,
+	)
 	wg := &sync.WaitGroup{}
 	musicChan := make(
 		chan shared.SearchResult,
@@ -99,16 +164,44 @@ func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
 	defer cancel()
 	for name := range p.Director.GetEngines() {
 		wg.Add(1)
-		go p.searchWorker(ctx, name, query, musicChan, wg)
+		go p.searchWorker(
+			ctx,
+			name,
+			unknown,
+			musicChan,
+			wg,
+		)
 	}
 
 	wg.Add(1)
 	go func() {
+		// Get cached music
 		defer wg.Done()
-		cacheMusic := p.Director.Cached.Search(query)
-		fmt.Println("Cached files", cacheMusic)
-		for _, music := range cacheMusic {
-			musicChan <- music
+		ms, err := p.Director.Db.FilterMusic(
+			unknown,
+		)
+		if err != nil {
+			return
+		}
+
+		for _, m := range ms {
+			music, err := NewMusic(
+				m.Name,
+				m.Data,
+			)
+			if err != nil {
+				logger.LogWarn(
+					"skipping music",
+					err,
+				)
+				continue
+			}
+			musicChan <- shared.SearchResult{
+				Title:       m.Name,
+				Destination: m.Key,
+				Duration:    music.DurationD(),
+				Type:        "cache",
+			}
 		}
 	}()
 
@@ -125,15 +218,16 @@ func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
 			}
 			musics = append(musics, music)
 			p.removeTask(
-				query,
+				unknown,
 			)
 		case <-ctx.Done():
-			p.errorifyTask(
-				query, fmt.Errorf("Search timed out"),
+			p.errorTask(
+				unknown,
+				fmt.Errorf("Search timed out"),
 			)
 			logger.LogWarn(
 				"Search timed out",
-				query,
+				unknown,
 			)
 			return musics
 		}
@@ -142,44 +236,49 @@ func (p *Player) GetAvailableMusicOptions(query string) []shared.SearchResult {
 
 func (p *Player) DetectAndAddToPlayList(
 	plname string,
-	query string,
+	unknown string,
 ) ([]shared.SearchResult, error) {
-	whatIsThis := p.CheckWhatIsThis(query)
-	pl, err := p.PlayListManager.GetPlayListByName(plname)
+	whatIsThis := p.CheckWhatIsThis(
+		unknown,
+	)
+	pl, err := p.Director.Db.GetPlaylist(
+		plname,
+	)
 	if err != nil {
 		return nil, logger.LogError(
 			logger.GError(
-				"Playlist not found",
+				"Playlist does not exist",
 			),
 		)
 	}
 	switch whatIsThis {
-	case "dir":
+	case DDir:
 		logger.LogInfo(
 			"detected dir for",
-			query,
+			unknown,
 		)
-		err = p.PlayListManager.AddToPlayListFromDir(
-			pl,
-			query,
-			p.Converter,
+		return nil, p.AddMusicsFromDir(
+			unknown,
+			func(m db.Music) error {
+				return p.Director.Db.AddMusicToPlaylist(
+					m.Name,
+					pl.Name,
+				)
+			},
 		)
-		if err != nil {
-			return nil, logger.LogError(
-				logger.GError(
-					"Failed to add to playlist",
-					err,
-				),
-			)
-		}
-	case "file":
+	case DFile:
 		logger.LogInfo(
 			"Detected file",
-			query,
+			unknown,
 		)
-		err := p.PlayListManager.AddToPlayListFromFile(
-			pl,
-			query,
+		err := p.AddMusicFromFile(
+			unknown,
+			func(m db.Music) error {
+				return p.Director.Db.AddMusicToPlaylist(
+					m.Name,
+					pl.Name,
+				)
+			},
 		)
 		if err != nil {
 			return nil, logger.LogError(
@@ -189,75 +288,129 @@ func (p *Player) DetectAndAddToPlayList(
 				),
 			)
 		}
-	case "queue":
+	case DQueue:
 		logger.LogInfo(
 			"Detected queue",
-			query,
+			unknown,
 		)
-		index, _ := strconv.Atoi(query)
-		music := p.Queue.GetMusicByIndex(index)
-		err := p.PlayListManager.AddToPlayListFromFile(
-			pl,
-			music.Path,
-		)
-		if err != nil {
-			return nil, logger.LogError(
-				logger.GError(
-					"Failed to add to playlist",
-					err,
-				),
+		index, err := strconv.Atoi(unknown)
+		var m *Music
+		if err == nil {
+			m = p.Queue.GetMusicByIndex(
+				index,
+			)
+		} else {
+			m = p.Queue.GetMusicByName(
+				unknown,
 			)
 		}
-	case "unknown":
+		return nil, p.Director.Db.AddMusicToPlaylist(
+			m.Name,
+			pl.Name,
+		)
+	case DUnknown:
 		logger.LogInfo(
 			"Detected unknown",
-			query,
+			unknown,
 		)
-		return p.GetAvailableMusicOptions(query), nil
+		return p.GetAvailableMusicOptions(unknown), nil
 	default:
-		logger.LogInfo("Detected Engine", whatIsThis)
-		go p.PlayListManager.AddToPlayListFromOnline(pl, query, whatIsThis, p)
+		logger.LogInfo(
+			"Detected Engine",
+			whatIsThis,
+		)
+		go p.AddMusicFromOnline(
+			unknown,
+			string(whatIsThis),
+			func(m db.Music) error {
+				return p.Director.Db.AddMusicToPlaylist(
+					m.Name,
+					pl.Name,
+				)
+			},
+		)
 	}
 	return []shared.SearchResult{}, nil
 }
 
-// if result is empty, it means it detects and plays the music if succeed other wise it returns the search results
-func (p *Player) DetectAndPlay(unknown string) []shared.SearchResult {
+// DetectAndPlay if result is empty, it means it detects and plays the music if succeed other wise it returns the search results
+func (p *Player) DetectAndPlay(unknown string) ([]shared.SearchResult, error) {
 	logger.LogInfo("Checking what is this", unknown)
 	whatIsThis := p.CheckWhatIsThis(unknown)
 	switch whatIsThis {
-	case "dir":
+	case DDir:
 		logger.LogInfo("Detected dir")
-		p.AddMusicsFromDir(unknown)
-		p.Play()
-	case "file":
+		return nil, p.AddMusicsFromDir(
+			unknown,
+			func(m db.Music) error {
+				pmusic, err := NewMusic(
+					m.Name,
+					m.Data,
+				)
+				if err != nil {
+					return err
+				}
+				p.Queue.Enqueue(*pmusic)
+				err = p.Play()
+				return err
+			},
+		)
+	case DFile:
 		logger.LogInfo("Detected file")
-		go func() {
-			p.AddMusicFromFile(unknown)
-			p.Play()
-		}()
-	case "queue":
-		logger.LogInfo("Detected queue")
-		index, _ := strconv.Atoi(unknown)
-		go func() {
-			p.Queue.SetCurrIndex(index)
-			p.Play()
-		}()
-	case "playlist":
-		logger.LogInfo("Detected playlist")
-		go func() {
-			p.AddMusicsFromPlaylist(unknown)
-			p.Play()
-		}()
-	case "unknown":
+		return nil, p.AddMusicFromFile(
+			unknown,
+			func(m db.Music) error {
+				pmusic, err := NewMusic(
+					m.Name,
+					m.Data,
+				)
+				if err != nil {
+					return err
+				}
+				p.Queue.Enqueue(*pmusic)
+				p.Play()
+				return nil
+			},
+		)
+	case DQueue:
+		logger.LogInfo(
+			"Detected queue",
+			unknown,
+		)
+		index, err := strconv.Atoi(unknown)
+		var m *Music
+		if err == nil {
+			m = p.Queue.GetMusicByIndex(index)
+		} else {
+			m = p.Queue.GetMusicByName(unknown)
+		}
+		p.Queue.SetCurrrMusic(m)
+		return nil, p.Play()
+	case DPlaylist:
+		return nil, p.PlayListPlayAll(
+			unknown,
+		)
+	case DUnknown:
 		logger.LogInfo("Detected unknown, searching for", unknown)
-		return p.GetAvailableMusicOptions(unknown)
+		return p.GetAvailableMusicOptions(unknown), nil
 	default:
 		logger.LogInfo("Detected Engine", whatIsThis)
-		go func() {
-			p.AddMusicFromOnline(unknown, whatIsThis)
-			p.Play()
-		}()
+		go p.AddMusicFromOnline(
+			unknown,
+			string(whatIsThis),
+			func(m db.Music) error {
+				pmusic, err := NewMusic(
+					m.Name,
+					m.Data,
+				)
+				if err != nil {
+					return err
+				}
+				p.Queue.Enqueue(*pmusic)
+				p.Play()
+				return nil
+			},
+		)
 	}
-	return []shared.SearchResult{}
+	return []shared.SearchResult{}, nil
 }

@@ -4,15 +4,17 @@ import (
 	"math/rand"
 	"net/rpc"
 
-	"github.com/Malwarize/goplay/client/controller"
-	"github.com/Malwarize/goplay/shared"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+
+	"github.com/Malwarize/goplay/client/controller"
+	"github.com/Malwarize/goplay/shared"
 )
 
-func playCallback(m model) {
+func playCallback(m model) error {
 	i := m.selectList.Index()
-	controller.DetectAndPlay(m.selectList.Items()[i].(searchResultItem).desc, m.client)
+	_, err := controller.DetectAndPlay(m.selectList.Items()[i].(searchResultItem).desc, m.client)
+	return err
 }
 
 func PlayQuitMessage(m model) string {
@@ -24,7 +26,10 @@ func PlayQuitMessage(m model) string {
 
 func (m model) PlaySearch() tea.Msg {
 	var results []list.Item
-	musics := controller.DetectAndPlay(m.query, m.client)
+	musics, err := controller.DetectAndPlay(m.query, m.client)
+	if err != nil {
+		return searchDone{nil, err}
+	}
 	for _, music := range musics {
 		results = append(results, searchResultItem{
 			title:    music.Title,

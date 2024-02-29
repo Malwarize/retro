@@ -56,7 +56,7 @@ func (p *Player) RPCSeek(d time.Duration, _ *int) error {
 	return err
 }
 
-func (p *Player) RPCVolume(vp int /*volume percentage*/, reply *int) error {
+func (p *Player) RPCVolume(vp uint8 /*volume percentage*/, reply *int) error {
 	logger.LogInfo("RPCVolume called with volume percentage :", vp)
 	err := p.Volume(vp)
 	*reply = 0
@@ -89,16 +89,18 @@ func (p *Player) RPCGetPlayerStatus(_ int, reply *shared.Status) error {
 
 func (p *Player) RPCDetectAndPlay(query string, reply *[]shared.SearchResult) error {
 	logger.LogInfo("RPCDetectAndPlay called with query :", query)
-	*reply = p.DetectAndPlay(query)
+	var err error
+	*reply, err = p.DetectAndPlay(query)
 	logger.LogInfo("RPCDetectAndPlay done with reply :", reply)
-	return nil
+	return err
 }
 
 func (p *Player) RPCPlayListsNames(_ int, reply *[]string) error {
 	logger.LogInfo("RPCPlayLists called")
-	*reply = p.PlayListsNames()
+	var err error
+	*reply, err = p.PlayListsNames()
 	logger.LogInfo("RPCPlayLists done with reply :", reply)
-	return nil
+	return err
 }
 
 func (p *Player) RPCCreatePlayList(name string, reply *int) error {
@@ -133,47 +135,47 @@ func (p *Player) RPCDetectAndAddToPlayList(
 	return err
 }
 
-func (p *Player) RPCPlayListSongs(
+func (p *Player) RPCPlayListMusics(
 	plname string,
 	reply *[]string,
 ) error {
-	logger.LogInfo("RPCPlayListSongs called with name :", plname)
+	logger.LogInfo("RPCPlayListMusics called with name :", plname)
 	var err error
-	*reply, err = p.GetPlayListSongNames(plname)
-	logger.LogInfo("RPCPlayListSongs done with reply :", reply)
+	*reply, err = p.GetPlayListMusicNames(plname)
+	logger.LogInfo("RPCPlayListMusics done with reply :", reply)
 	return err
 }
 
-func (p *Player) RPCRemoveSongFromPlayList(
-	args shared.RemoveSongFromPlayListArgs,
+func (p *Player) RPCRemoveMusicFromPlayList(
+	args shared.RemoveMusicFromPlayListArgs,
 	reply *int,
 ) error {
 	logger.LogInfo(
-		"RPCRemoveSongFromPlayList called with name :",
+		"RPCRemoveMusicFromPlayList called with name :",
 		args.PlayListName,
 		"target",
 		args.IndexOrName,
 	)
-	err := p.RemoveSongFromPlayList(
+	err := p.RemoveMusicFromPlayList(
 		args.PlayListName,
 		args.IndexOrName,
 	)
 	logger.LogInfo(
-		"RPCRemoveSongFromPlayList done",
+		"RPCRemoveMusicFromPlayList done",
 	)
 	return err
 }
 
-func (p *Player) RPCPlayListPlaySong(args shared.PlayListPlaySongArgs, reply *int) error {
+func (p *Player) RPCPlayListPlayMusic(args shared.PlayListPlayMusicArgs, reply *int) error {
 	logger.LogInfo(
-		"RPCPlayListPlaySong called with name :",
+		"RPCPlayListPlayMusic called with name :",
 		args.PlayListName,
 		"target",
 		args.IndexOrName,
 	)
-	err := p.PlayListPlaySong(args.PlayListName, args.IndexOrName)
+	err := p.PlayListPlayMusic(args.PlayListName, args.IndexOrName)
 	*reply = 1
-	logger.LogInfo("RPCPlayListPlaySong done")
+	logger.LogInfo("RPCPlayListPlayMusic done")
 	return err
 }
 

@@ -23,7 +23,7 @@ func (q *MusicQueue) GetTitles() []string {
 	defer q.mu.Unlock()
 	titles := make([]string, 0)
 	for _, music := range q.queue {
-		titles = append(titles, music.Name())
+		titles = append(titles, music.Name)
 	}
 	return titles
 }
@@ -40,6 +40,17 @@ func (q *MusicQueue) SetCurrIndex(index int) {
 	q.current = index
 }
 
+func (q *MusicQueue) SetCurrrMusic(m *Music) {
+	for i, music := range q.queue {
+		if music.Name == m.Name {
+			q.SetCurrIndex(
+				i,
+			)
+			return
+		}
+	}
+}
+
 func (q *MusicQueue) GetMusicByIndex(index int) *Music {
 	if index < 0 || index >= q.Size() {
 		return nil
@@ -53,7 +64,7 @@ func (q *MusicQueue) GetMusicByName(name string) *Music {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	for _, music := range q.queue {
-		if music.Name() == name {
+		if music.Name == name {
 			return &music
 		}
 	}
@@ -71,9 +82,8 @@ func (q *MusicQueue) GetCurrMusic() *Music {
 func (q *MusicQueue) Enqueue(music Music) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	// check if music is already in queue
 	for _, m := range q.queue {
-		if music.Path == m.Path {
+		if hash(m.Data) == hash(music.Data) {
 			return
 		}
 	}
@@ -103,7 +113,7 @@ func (q *MusicQueue) Remove(music *Music) {
 	// get index of music
 	index := -1
 	for i, m := range q.queue {
-		if m.Path == music.Path {
+		if m.Name == music.Name {
 			index = i
 		}
 	}

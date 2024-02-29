@@ -5,11 +5,12 @@ import (
 	"net/rpc"
 	"sync"
 
-	"github.com/Malwarize/goplay/shared"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
+	"github.com/Malwarize/goplay/shared"
 )
 
 type searchResultItem struct {
@@ -21,7 +22,7 @@ type searchResultItem struct {
 
 func (i searchResultItem) Title() string {
 	if i.ftype == "cache" {
-		return shared.ViewParseName(i.title)
+		return i.title
 	}
 	return i.title
 }
@@ -29,6 +30,7 @@ func (i searchResultItem) Title() string {
 func (i searchResultItem) Description() string {
 	return emojiesType[i.ftype] + " " + i.ftype + " " + i.duration
 }
+
 func (i searchResultItem) FilterValue() string { return "" }
 
 type model struct {
@@ -37,7 +39,7 @@ type model struct {
 
 	// select callback to be called when a song is selected
 	// func of reciever model
-	callback func(model)
+	callback func(model) error
 
 	initCmd     tea.Cmd
 	quitMessage func(model) string
@@ -119,6 +121,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case searchDone:
+		if t.err != nil {
+			return m, tea.Quit
+		}
 		if len(t.results) == 0 {
 			return m, tea.Quit
 		}
@@ -134,4 +139,5 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 type searchDone struct {
 	results []list.Item
+	err     error
 }

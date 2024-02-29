@@ -3,19 +3,21 @@ package views
 import (
 	"net/rpc"
 
-	"github.com/Malwarize/goplay/client/controller"
-	"github.com/Malwarize/goplay/shared"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+
+	"github.com/Malwarize/goplay/client/controller"
+	"github.com/Malwarize/goplay/shared"
 )
 
-func addToPlayListCallback(m model) {
+func addToPlayListCallback(m model) error {
 	i := m.selectList.Index()
-	controller.DetectAndAddToPlayList(
+	_, err := controller.DetectAndAddToPlayList(
 		m.args[0].(string),
 		m.selectList.Items()[i].(searchResultItem).desc,
 		m.client,
 	)
+	return err
 }
 
 func AddToPlayListQuitMessage(m model) string {
@@ -26,7 +28,10 @@ func AddToPlayListQuitMessage(m model) string {
 
 func (m model) AddSearch() tea.Msg {
 	var results []list.Item
-	musics := controller.DetectAndAddToPlayList(m.args[0].(string), m.query, m.client)
+	musics, err := controller.DetectAndAddToPlayList(m.args[0].(string), m.query, m.client)
+	if err != nil {
+		return searchDone{nil, err}
+	}
 	for _, music := range musics {
 		results = append(results, searchResultItem{
 			title:    music.Title,

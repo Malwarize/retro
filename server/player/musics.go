@@ -1,57 +1,51 @@
 package player
 
 import (
-	"path/filepath"
 	"time"
 
 	"github.com/gopxl/beep"
 	"github.com/gopxl/beep/effects"
 	"github.com/gopxl/beep/speaker"
-
-	"github.com/Malwarize/goplay/shared"
 )
 
 type Music struct {
+	Name   string
 	Volume *effects.Volume
 	Format beep.Format
-	Path   string
+	Data   []byte
 }
 
-func NewMusic(path string) (Music, error) {
-	streamer, format, err := MusicDecode(path)
+func NewMusic(
+	name string,
+	data []byte,
+) (*Music, error) {
+	streamer, format, err := MusicDecode(data)
 	if err != nil {
-		return Music{}, err
+		return nil, err
 	}
-	return Music{
+	return &Music{
+		Name: name,
 		Volume: &effects.Volume{
 			Streamer: streamer,
 			Base:     2,
 			Silent:   false,
 		},
 		Format: format,
-		Path:   path,
+		Data:   data,
 	}, nil
-}
-
-func (m *Music) String() string {
-	return m.Path
-}
-
-func (m *Music) Name() string {
-	name := filepath.Base(m.Path)
-	return shared.ViewParseName(name)
 }
 
 func (m *Music) Streamer() beep.StreamSeekCloser {
 	return m.Volume.Streamer.(beep.StreamSeekCloser)
 }
 
-func (m *Music) SetVolume(vp int) {
+func (m *Music) SetVolume(vp uint8) {
 	if vp == 0 {
 		m.Volume.Silent = true
 	} else {
+		v := int(vp)
 		m.Volume.Silent = false
-		volume := float64(vp-100) / 16.0
+		volume := float64(v-100) / 16.0
 		m.Volume.Volume = volume
 	}
 }
@@ -82,7 +76,9 @@ func (m *Music) SetPositionN(p int) error { // this indicates where the music pl
 	return m.Streamer().Seek(p)
 }
 
-func (m *Music) SetPositionD(d time.Duration) error {
+func (m *Music) SetPositionD(
+	d time.Duration,
+) error {
 	dur := m.DurationN()
 	new := m.Format.SampleRate.N(d)
 	if new < 0 {
