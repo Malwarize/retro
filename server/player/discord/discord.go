@@ -34,6 +34,7 @@ func initClient(music string) error {
 		return err
 	}
 	Activity.Details = music
+	Activity.State = string(Playing)
 	Activity.SmallImage = "play"
 	Activity.SmallText = "Playing"
 	if err := client.SetActivity(
