@@ -2,8 +2,10 @@ package db
 
 import (
 	"database/sql"
-
+	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"os"
+	"path/filepath"
 )
 
 type Db struct {
@@ -11,9 +13,16 @@ type Db struct {
 	path string
 }
 
-func NewDb(
-	path string,
-) (*Db, error) {
+func NewDb(path string) (*Db, error) {
+	// create one if not exists mkdirAll
+	fmt.Println(path)
+	dir := filepath.Dir(
+		filepath.Dir(path),
+	)
+	err := os.MkdirAll(dir, 0755)
+	if err != nil {
+		return nil, err
+	}
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		return nil, err

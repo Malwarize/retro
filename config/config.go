@@ -48,7 +48,7 @@ func loadConfig() *Config {
 			jsonConfig.Pathytldpl = "yt-dlp"
 		}
 		if jsonConfig.DbPath == "" {
-			jsonConfig.DbPath = os.Getenv("HOME") + jsonConfig.GoPlayPath
+			jsonConfig.DbPath = os.Getenv("HOME") + jsonConfig.GoPlayPath + "goplay.db"
 		}
 		if jsonConfig.Pathffmpeg == "" {
 			jsonConfig.Pathffmpeg = "ffmpeg"
