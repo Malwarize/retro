@@ -33,6 +33,7 @@ jobs:
         ./scripts/compile_installer.sh
 
     - name: Upload Installer Script
+      id : upload-installer
       uses: actions/upload-artifact@v4
       with:
         name: installer-script
@@ -41,10 +42,6 @@ jobs:
     - name: Release Installer 
       uses: softprops/action-gh-release@v1
       with:
-        files: ./bin/install.sh
-        tag_name: goplay  {{ GITHUB_TOKEN.VERSION }}
-        release_name: goplay {{ GITHUB_TOKEN.VERSION }}
-        draft: false
-        prerelease: false
-        token: ${{ secrets.GITHUB_TOKEN }}
-
+        files: ${{ steps.upload-installer.outputs.artifact-id }}
+        tag_name: ${{ github.ref }}
+        release_name: goplay ${{ github.ref }}
