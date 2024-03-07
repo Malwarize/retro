@@ -12,7 +12,7 @@ jobs:
     steps:
     - name: Installing alsa 
       run : |
-        apt-get install alsa-utils
+        sudo apt install alsa-utils
 
     - uses: actions/checkout@v4
       name: Checkout code
