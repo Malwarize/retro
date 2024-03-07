@@ -44,7 +44,7 @@ jobs:
       with:
         url: ${{ steps.upload-installer.outputs.artifact-url }}
         tag_name: ${{ github.ref }}
-        token:  ${{ github.token }
+        token:  ${{ github.token }}
         body: "Installer for version ${{ github.ref }}"
         draft: false
         prerelease: false
