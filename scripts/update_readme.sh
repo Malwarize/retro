@@ -1,4 +1,11 @@
 #!/bin/bash
-# this script is to update readme after deploy to new version
-# it the readme command
-# https://github.com/Malwarize/goplay/releases/download/v0.0.5/install.sh
+
+# Update the README.md file with the new version
+# this script is called from github actions when 
+# a new release is created to replace the version 
+# regex in the README.md to the new version
+
+version=$1
+sed -i "s/v[0-9]\.[0-9]\.[0-9]/v$version/" README.md
+
+
