@@ -64,4 +64,4 @@ jobs:
     - name: Update Readme
       run:
         chmod +x ./scripts/update_readme.sh
-        ./update_readme.sh ${{ env.RELEASE_VERSION }} 
+        ./scripts/update_readme.sh ${{ env.RELEASE_VERSION }} 
