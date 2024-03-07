@@ -44,4 +44,3 @@ jobs:
       with:
         files: ${{ steps.upload-installer.outputs.artifact-id }}
         tag_name: ${{ github.ref }}
-        release_name: goplay ${{ github.ref }}
