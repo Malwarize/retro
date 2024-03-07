@@ -15,7 +15,3 @@ git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 git config user.name "github-actions[bot]"
 
 sed -i "s/v[0-9]\.[0-9]\.[0-9]/v$version/" README.md
-git add README.md
-git commit -m "bump version to $version"
-git push origin main 
-
