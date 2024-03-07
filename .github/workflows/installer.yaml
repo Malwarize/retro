@@ -30,5 +30,3 @@ jobs:
         name: installer-script
         path: ./bin/install.sh
 
-    - name: Release 
-
