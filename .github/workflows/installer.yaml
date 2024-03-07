@@ -36,12 +36,12 @@ jobs:
         chmod +x ./scripts/compile_installer.sh
         ./scripts/compile_installer.sh
 
-    # - name: Upload Installer Script
-    #   id : upload-installer
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: installer-script
-    #     path: ./bin/install.sh
+    - name: Upload Installer Script
+      id : upload-installer
+      uses: actions/upload-artifact@v4
+      with:
+        name: installer-script
+        path: ./bin/install.sh
     
     - name: Release Installer 
       uses: softprops/action-gh-release@v1
