@@ -49,5 +49,6 @@ jobs:
         prerelease: false
         name: "Installer for version ${{ github.ref }}"
         files: ./bin/install.sh
+        token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
