@@ -10,21 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       name: Checkout code
 
     - name: Set up Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v4
       with:
         go-version: '1.21.3'
 
     - name: Build and Generate Installer
       run: |
         chmod +x ./scripts/compile_installer.sh
+        make build
         ./scripts/compile_installer.sh
 
     - name: Upload Installer Script
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: installer-script
         path: ./bin/install.sh
+
+    - name: Release 
+

@@ -1,16 +1,13 @@
 .PHONY: build run clean
 
-all: clean build 
+all:  clean init build 
 
-build: 
+build: init
 	go build -ldflags="-s -w" -o bin/goplay client/main.go
 	go build -ldflags="-s -w" -o bin/goplayer server/main.go
-	goupx bin/goplay bin/goplayer
-
-completion:
-	go build -o bin/goplay client/main.go
-	go build -o bin/goplayer server/main.go
 	
-
-clean:
+clean: 
 	rm -rf bin/
+
+init:
+	mkdir -p bin/
