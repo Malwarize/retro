@@ -10,6 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Installing alsa 
+      run : |
+        apt-get install alsa-utils
+
     - uses: actions/checkout@v4
       name: Checkout code
 
@@ -24,9 +28,6 @@ jobs:
         make build
         ./scripts/compile_installer.sh
 
-    - name: Installing alsa 
-      run : |
-        apt-get install alsa-utils
     - name: Upload Installer Script
       uses: actions/upload-artifact@v4
       with:
