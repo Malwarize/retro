@@ -51,3 +51,4 @@ jobs:
         name: "Installer for version ${{ github.ref }}"
         files:
           ./bin/install.sh
+        token: ${{ github.token }}
