@@ -42,5 +42,5 @@ jobs:
     - name: Release Installer 
       uses: softprops/action-gh-release@v1
       with:
-        files: ${{ steps.upload-installer.outputs.artifact-url}}
+        files: ./bin/install.sh
         tag_name: ${{ github.ref }}
