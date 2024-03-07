@@ -21,10 +21,15 @@ jobs:
       with:
         go-version: '1.21.3'
 
-    - name: Build and Generate Installer
+    - name: Build server 
+      run: make build-server 
+
+    - name: Build Client 
+      run: make build-client
+
+    - name: Generate Installer
       run: |
         chmod +x ./scripts/compile_installer.sh
-        make build
         ./scripts/compile_installer.sh
 
     - name: Upload Installer Script
@@ -32,4 +37,14 @@ jobs:
       with:
         name: installer-script
         path: ./bin/install.sh
+    
+    - name: Release Installer 
+      uses: softprops/action-gh-release@v1
+        with:
+          files: ./bin/install.sh
+          tag_name: goplay  {{ GITHUB_TOKEN.VERSION }}
+          release_name: goplay {{ GITHUB_TOKEN.VERSION }}
+          draft: false
+          prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
 
