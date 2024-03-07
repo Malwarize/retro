@@ -16,12 +16,12 @@ type Converter struct {
 
 func NewConverter() (*Converter, error) {
 	// check if ffmpegPath and ffprobePath exist and are executable
-	ppegPath, err := exec.LookPath(config.GetConfig().Pathffmpeg)
+	ppegPath, err := exec.LookPath(config.GetConfig().PathFFmpeg)
 	if err != nil {
 		return nil, fmt.Errorf("ffmpeg not found: %v", err)
 	}
 
-	probePath, err := exec.LookPath(config.GetConfig().Pathffprobe)
+	probePath, err := exec.LookPath(config.GetConfig().PathFFprobe)
 	if err != nil {
 		return nil, fmt.Errorf("ffprobe not found: %v", err)
 	}

@@ -31,7 +31,7 @@ func NewDirector(db *db.Db) (*Director, error) {
 }
 
 func NewDefaultDirector() (*Director, error) {
-	db, err := db.LoadDb(config.GetConfig().DbPath)
+	db, err := db.LoadDb(config.GetConfig().DBPath)
 	if err != nil {
 		return nil, err
 	}

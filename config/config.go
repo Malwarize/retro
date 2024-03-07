@@ -13,132 +13,98 @@ var (
 	cfg  *Config // singleton instance
 )
 
-var DEBUG = false // set to true for debug mode
+var (
+	DEBUG      = false // set to true for debug mode
+	configPath = os.Getenv("HOME") + "/.config/goplay.json"
+)
 
 type Config struct {
-	GoPlayPath    string        `json:"goplay_path"`  // path to goplay
-	Pathytldpl    string        `json:"path_ytldpl"`  // path to yt-dlp
-	Pathffmpeg    string        `json:"path_ffmpeg"`  // path to ffmpeg
-	Pathffprobe   string        `json:"path_ffprobe"` // path to ffprobe
-	SearchTimeOut time.Duration `json:"search_timeout"`
-	Theme         string        `json:"theme"`   // blue, purple, pink
-	DbPath        string        `json:"db_path"` // path to the database
-	DiscordRPC    bool          `json:"discord"` // bool discord presence
+	GoPlayPath    string        `json:"goplay_path"`    // path to goplay
+	PathYTDL      string        `json:"path_ytldpl"`    // path to yt-dlp
+	PathFFmpeg    string        `json:"path_ffmpeg"`    // path to ffmpeg
+	PathFFprobe   string        `json:"path_ffprobe"`   // path to ffprobe
+	SearchTimeout time.Duration `json:"search_timeout"` // search timeout
+	Theme         string        `json:"theme"`          // UI theme
+	DBPath        string        `json:"db_path"`        // path to the database
+	DiscordRPC    bool          `json:"discord_rpc"`    // Discord Rich Presence
+	LogFile       string        `json:"log_file"`       // path to the log file
 }
 
-var configPath = os.Getenv("HOME") + "/.config/goplay.json"
-
-func loadConfig() *Config {
-	// read config file
-	if _, err := os.Stat(configPath); err == nil {
-		jsonFile, err := os.ReadFile(configPath)
-		if err != nil {
-			return nil
-		}
-		var jsonConfig Config
-		err = json.Unmarshal(jsonFile, &jsonConfig)
-		if err != nil {
-			return nil
-		}
-		// default values
-		if jsonConfig.GoPlayPath == "" {
-			jsonConfig.GoPlayPath = os.Getenv("HOME") + "/.goplay/"
-		}
-		if jsonConfig.Pathytldpl == "" {
-			jsonConfig.Pathytldpl = "yt-dlp"
-		}
-		if jsonConfig.DbPath == "" {
-			jsonConfig.DbPath = os.Getenv("HOME") + jsonConfig.GoPlayPath + "goplay.db"
-		}
-		if jsonConfig.Pathffmpeg == "" {
-			jsonConfig.Pathffmpeg = "ffmpeg"
-		}
-		if jsonConfig.Pathffprobe == "" {
-			jsonConfig.Pathffprobe = "ffprobe"
-		}
-		if jsonConfig.SearchTimeOut == 0 {
-			jsonConfig.SearchTimeOut = 60 * time.Second
-		}
-		if jsonConfig.Theme == "" {
-			jsonConfig.Theme = "pink"
-		}
-		return &jsonConfig
-	}
-	return nil
-}
-
-func EditConfigField(field string, value string) error {
-	jsonConfig := GetConfig()
-	switch field {
-	case "goplay_path":
-		jsonConfig.GoPlayPath = value
-	case "path_ytldpl":
-		jsonConfig.Pathytldpl = value
-	case "path_ffmpeg":
-		jsonConfig.Pathffmpeg = value
-	case "path_ffprobe":
-		jsonConfig.Pathffprobe = value
-	case "search_timeout":
-		jsonConfig.SearchTimeOut, _ = time.ParseDuration(value)
-	case "theme":
-		jsonConfig.Theme = value
-	case "db_path":
-		jsonConfig.DbPath = value
-	default:
-		return errors.New("Unknown field : " + field)
-	}
-	// write config file
-	jsonData, err := json.MarshalIndent(jsonConfig, "", "  ")
-	if err != nil {
-		return err
-	}
-	err = os.WriteFile(configPath, jsonData, 0o644)
-	if err != nil {
-		return err
-	}
-	// update the singleton instance
-	cfg = jsonConfig
-	return nil
-}
-
-func DebugConfig() *Config {
-	homeDir := os.Getenv("HOME")
-	return &Config{
-		GoPlayPath:    "./goplay_storage/", // in the current directory
-		DbPath:        homeDir + "/.goplay/goplay.db",
-		Pathytldpl:    "yt-dlp",
-		Pathffmpeg:    "ffmpeg",
-		Pathffprobe:   "ffprobe",
-		SearchTimeOut: 60 * time.Second,
+func initConfig() *Config {
+	config := &Config{
+		GoPlayPath:    os.Getenv("HOME") + "/.goplay/",
+		PathYTDL:      "yt-dlp",
+		PathFFmpeg:    "ffmpeg",
+		PathFFprobe:   "ffprobe",
+		SearchTimeout: 60 * time.Second,
 		Theme:         "pink",
 		DiscordRPC:    true,
+		LogFile:       os.Getenv("HOME") + "/.goplay/goplay.log",
 	}
-}
 
-func ReleaseConfig() *Config {
-	homeDir := os.Getenv("HOME")
-	return &Config{
-		GoPlayPath:    homeDir + "/.goplay/",
-		DbPath:        homeDir + "/.goplay/goplay.db",
-		Pathytldpl:    "yt-dlp",
-		Pathffmpeg:    "ffmpeg",
-		Pathffprobe:   "ffprobe",
-		SearchTimeOut: 60 * time.Second,
-		Theme:         "pink",
-		DiscordRPC:    true,
+	// Attempt to load from file
+	if jsonFile, err := os.ReadFile(configPath); err == nil {
+		if err = json.Unmarshal(jsonFile, config); err != nil {
+			return config // Return default config if unmarshaling fails
+		}
 	}
+
+	// Set derived or missing default values
+	if config.DBPath == "" {
+		config.DBPath = config.GoPlayPath + "goplay.db"
+	}
+
+	return config
 }
 
 func GetConfig() *Config {
 	once.Do(func() {
-		if DEBUG {
-			cfg = DebugConfig()
-		} else {
-			if cfg = loadConfig(); cfg != nil {
-				return
-			}
-			cfg = ReleaseConfig()
-		}
+		cfg = initConfig()
 	})
 	return cfg
+}
+
+func EditConfigField(field, value string) error {
+	config := GetConfig()
+	switch field {
+	case "goplay_path":
+		config.GoPlayPath = value
+	case "path_ytldpl":
+		config.PathYTDL = value
+	case "path_ffmpeg":
+		config.PathFFmpeg = value
+	case "path_ffprobe":
+		config.PathFFprobe = value
+	case "search_timeout":
+		if duration, err := time.ParseDuration(value); err == nil {
+			config.SearchTimeout = duration
+		} else {
+			return err
+		}
+	case "theme":
+		config.Theme = value
+	case "db_path":
+		config.DBPath = value
+	case "discord_rpc":
+		if value == "true" {
+			config.DiscordRPC = true
+		} else if value == "false" {
+			config.DiscordRPC = false
+		}
+	case "log_file":
+		config.LogFile = value
+	default:
+		return errors.New("unknown field: " + field)
+	}
+
+	// Save updated config to file
+	return saveConfig(config)
+}
+
+func saveConfig(config *Config) error {
+	jsonData, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(configPath, jsonData, 0o644)
 }

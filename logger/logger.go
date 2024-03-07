@@ -1,6 +1,11 @@
 package logger
 
-import "log"
+import (
+	"log"
+	"os"
+
+	"github.com/Malwarize/goplay/config"
+)
 
 var (
 	INFOLogger  *log.Logger
@@ -9,20 +14,29 @@ var (
 )
 
 func init() {
+	logFile, err := os.OpenFile(
+		config.GetConfig().LogFile,
+		os.O_CREATE|os.O_APPEND|os.O_WRONLY,
+		0o666,
+	)
+	if err != nil {
+		panic(err)
+	}
+
 	INFOLogger = log.New(
-		log.Writer(),
+		logFile,
 		"INFO: ",
-		log.Ldate,
+		log.Ldate|log.Ltime,
 	)
 	WARNLogger = log.New(
-		log.Writer(),
+		logFile,
 		"WARN: ",
-		log.Ldate,
+		log.Ldate|log.Ltime,
 	)
 	ERRORLogger = log.New(
-		log.Writer(),
+		logFile,
 		"ERROR: ",
-		log.Ldate,
+		log.Ldate|log.Ltime,
 	)
 }
 

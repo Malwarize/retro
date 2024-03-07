@@ -158,7 +158,7 @@ func (p *Player) GetAvailableMusicOptions(unknown string) []shared.SearchResult 
 		chan shared.SearchResult,
 	)
 	var musics []shared.SearchResult
-	ctx, cancel := context.WithTimeout(context.Background(), config.GetConfig().SearchTimeOut)
+	ctx, cancel := context.WithTimeout(context.Background(), config.GetConfig().SearchTimeout)
 	defer cancel()
 	for name := range p.Director.GetEngines() {
 		wg.Add(1)
