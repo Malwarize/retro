@@ -1,7 +1,7 @@
 #!/bin/bash
-
+# Author: XORbit01
 # Update the README.md file with the new version
-# this script is called from github actions when 
+# this script is called from the deployer script
 # a new release is created to replace the version 
 # regex in the README.md to the new version
 
@@ -11,7 +11,6 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
-git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-git config user.name "github-actions[bot]"
-
+echo "updating README.md with the new version v$version"
 sed -i "s/v[0-9]\.[0-9]\.[0-9]/v$version/" README.md
+echo "README.md updated with the new version v$version

@@ -21,8 +21,13 @@ git commit -m "bump version to $new_tag"
 git push origin main
 
 # create a tag
+echo "creating new tag"
 git tag "$new_tag"
+echo "push tag to origin"
 git push origin "$new_tag"
 
+
 # update the README 
-./scripts/update_readme.sh
+echo "updating README.md with the new version v$version"
+./scripts/update_readme.sh $new_tag
+echo "README.md updated with the new version v$version
