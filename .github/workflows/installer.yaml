@@ -1,4 +1,7 @@
 name: Build and Package
+  
+permissions:
+  contents: write
 
 on:
   push:
