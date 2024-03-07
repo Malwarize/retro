@@ -1,7 +1,8 @@
 #!/bin/bash
 # author: XORbit01@protonmail
 #
-# this script is used locally to deploy the app to the server 
+# this script is used localy to deploy the app 
+# to the server 
 # get the latest tag then increment it by 1 
 # then push the new tag to the repo 
 # get the latest tag name from remote
