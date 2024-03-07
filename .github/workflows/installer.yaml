@@ -12,8 +12,7 @@ jobs:
     steps:
     - name: Installing alsa 
       run : |
-        sudo apt install alsa-utils
-
+        sudo apt-get install libasound2-dev
     - uses: actions/checkout@v4
       name: Checkout code
 
