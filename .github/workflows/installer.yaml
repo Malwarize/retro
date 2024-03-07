@@ -14,9 +14,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Installing alsa 
+    - name: Set up ENV 
+      run: |
+        echo "RELEASE_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+    - name: Installing Dependencies
       run : |
         sudo apt-get install libasound2-dev
+
     - uses: actions/checkout@v4
       name: Checkout code
 
@@ -46,12 +51,17 @@ jobs:
     - name: Release Installer 
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ github.ref }}
+        tag_name: ${{ env.RELEASE_VERSION }}
         body: "Installer for version ${{ github.ref }}"
         draft: false
         prerelease: false
-        name: "goplay ${{ github.ref }}"
+        name: "goplay-${{ env.RELEASE_VERSION}}"
         files: ./bin/install.sh
         token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Update Readme 
+      run: |
+      chmod +x ./scripts/update_readme.sh
+      ./scripts/update_readme.sh

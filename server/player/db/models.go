@@ -2,10 +2,10 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"os"
 	"path/filepath"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Db struct {
@@ -14,12 +14,10 @@ type Db struct {
 }
 
 func NewDb(path string) (*Db, error) {
-	// create one if not exists mkdirAll
-	fmt.Println(path)
 	dir := filepath.Dir(
-		filepath.Dir(path),
+		path,
 	)
-	err := os.MkdirAll(dir, 0755)
+	err := os.MkdirAll(dir, 0o755)
 	if err != nil {
 		return nil, err
 	}
