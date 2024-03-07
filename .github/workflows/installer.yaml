@@ -40,11 +40,11 @@ jobs:
     
     - name: Release Installer 
       uses: softprops/action-gh-release@v1
-        with:
-          files: ./bin/install.sh
-          tag_name: goplay  {{ GITHUB_TOKEN.VERSION }}
-          release_name: goplay {{ GITHUB_TOKEN.VERSION }}
-          draft: false
-          prerelease: false
-          token: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        files: ./bin/install.sh
+        tag_name: goplay  {{ GITHUB_TOKEN.VERSION }}
+        release_name: goplay {{ GITHUB_TOKEN.VERSION }}
+        draft: false
+        prerelease: false
+        token: ${{ secrets.GITHUB_TOKEN }}
 
