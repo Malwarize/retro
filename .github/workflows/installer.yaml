@@ -44,10 +44,10 @@ jobs:
       with:
         # url: ${{ steps.upload-installer.outputs.artifact-url }}
         tag_name: ${{ github.ref }}
-        token:  ${{ github.token }}
         body: "Installer for version ${{ github.ref }}"
         draft: false
         prerelease: false
         name: "Installer for version ${{ github.ref }}"
-        files:
-          ./bin/install.sh
+        files: ./bin/install.sh
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
