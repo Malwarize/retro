@@ -17,6 +17,11 @@ echo "latest tag is $latest_tag"
 new_tag=$(echo "$latest_tag" | awk -F. -v OFS=. '{$NF++;print}')
 echo "new tag is $new_tag"
 
+# update the README 
+echo "updating README.md with the new version $new_tag"
+./scripts/update_readme.sh $new_tag
+echo "README.md updated with the new version $new_tag"
+git add README.md 
 git commit -m "bump version to $new_tag"
 git push origin main
 
@@ -27,7 +32,3 @@ echo "push tag to origin"
 git push origin "$new_tag"
 
 
-# update the README 
-echo "updating README.md with the new version v$new_tag"
-./scripts/update_readme.sh $new_tag
-echo "README.md updated with the new version v$new_tag"
