@@ -11,6 +11,4 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
-echo "updating README.md with the new version v$version"
 sed -i "s/v[0-9]\.[0-9]\.[0-9]/v$version/" README.md
-echo "README.md updated with the new version v$version
