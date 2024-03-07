@@ -60,8 +60,3 @@ jobs:
         token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Update Readme 
-      run: |
-      chmod +x ./scripts/update_readme.sh
-      ./scripts/update_readme.sh
