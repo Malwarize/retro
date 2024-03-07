@@ -620,14 +620,6 @@ func (p *Player) PlayListPlayMusic(plname string, music shared.IntOrString) erro
 				),
 			)
 		}
-		if err != nil {
-			return logger.LogError(
-				logger.GError(
-					"Failed to get musics from playlist",
-					err,
-				),
-			)
-		}
 		m, err = NewMusic(
 			ms[index].Name,
 			ms[index].Data,

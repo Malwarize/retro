@@ -17,76 +17,74 @@ import (
 func (p *Player) CheckWhatIsThis(unknown string) DResults {
 	// check if its a dir or file
 	if fi, err := os.Stat(unknown); err == nil {
-		if err == nil {
-			if fi.IsDir() {
-				// check if there is music files in the dir
-				files, err := os.Open(unknown)
-				if err != nil {
-					return DUnknown
-				}
+		if fi.IsDir() {
+			// check if there is music files in the dir
+			files, err := os.Open(unknown)
+			if err != nil {
+				return DUnknown
+			}
 
-				entries, err := files.Readdir(0)
-				if err != nil {
-					return DUnknown
-				}
+			entries, err := files.Readdir(0)
+			if err != nil {
+				return DUnknown
+			}
 
-				for _, entry := range entries {
-					if !entry.IsDir() {
-						data, err := os.ReadFile(
-							filepath.Join(
-								unknown,
-								entry.Name(),
-							),
+			for _, entry := range entries {
+				if !entry.IsDir() {
+					data, err := os.ReadFile(
+						filepath.Join(
+							unknown,
+							entry.Name(),
+						),
+					)
+					if err != nil {
+						logger.LogWarn(
+							"error reading file",
+							err,
 						)
-						if err != nil {
-							logger.LogWarn(
-								"error reading file",
-								err,
-							)
-						}
-						logger.LogInfo(
-							"Checking if",
+					}
+					logger.LogInfo(
+						"Checking if",
+						filepath.Join(unknown, entry.Name()),
+						"is mp3",
+					)
+					isMp3, err := p.Director.Converter.IsMp3(
+						data,
+					)
+					if err != nil {
+						logger.LogWarn(
+							"Failed to check if",
 							filepath.Join(unknown, entry.Name()),
 							"is mp3",
+							err,
 						)
-						isMp3, err := p.Director.Converter.IsMp3(
-							data,
-						)
-						if err != nil {
-							logger.LogWarn(
-								"Failed to check if",
-								filepath.Join(unknown, entry.Name()),
-								"is mp3",
-								err,
-							)
-						}
-						if isMp3 {
-							return DDir
-						}
+					}
+					if isMp3 {
+						return DDir
 					}
 				}
+			}
+			return DUnknown
+		} else {
+			data, err := os.ReadFile(
+				unknown,
+			)
+			if err != nil {
 				return DUnknown
-			} else {
-				data, err := os.ReadFile(
+			}
+			isMp3, err := p.Director.Converter.IsMp3(
+				data,
+			)
+			if err != nil {
+				logger.LogWarn(
+					"Failed to check if",
 					unknown,
+					"is mp3",
+					err,
 				)
-				if err != nil {
-					return DUnknown
-				}
-				isMp3, err := p.Director.Converter.IsMp3(
-					data,
-				)
-				if err != nil {
-					logger.LogWarn(
-						"Failed to check if",
-						unknown,
-						"is mp3",
-						err,
-					)
-				}
-				if isMp3 {
-					return DFile
-				}
+			}
+			if isMp3 {
+				return DFile
 			}
 		}
 	}

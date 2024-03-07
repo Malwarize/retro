@@ -1,0 +1,34 @@
+name: Publish Release
+
+on:
+  workflow_dispatch: # This allows manual triggering of the workflow
+    inputs:
+      tag:
+        description: 'Release Tag'
+        required: true
+
+jobs:
+  publish-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      name: Checkout code
+
+    - name: Download Installer Script Artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: installer-script
+        path: ./bin
+
+    - name: Create Release and Upload Installer
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.event.inputs.tag }}
+        name: Release ${{ github.event.inputs.tag }}
+        files: ./bin/install.sh
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
