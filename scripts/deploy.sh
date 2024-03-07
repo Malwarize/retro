@@ -22,7 +22,7 @@ echo "updating README.md with the new version $new_tag"
 ./scripts/update_readme.sh $new_tag
 echo "README.md updated with the new version $new_tag"
 git add README.md 
-git commit -m "bump version to $new_tag"
+git commit -m "bump version to $new_tag" -a
 git push origin main
 
 # create a tag
