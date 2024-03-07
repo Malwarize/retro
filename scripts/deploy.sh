@@ -4,7 +4,10 @@
 # this script is used locally to deploy the app to the server 
 # get the latest tag then increment it by 1 
 # then push the new tag to the repo 
-#get the latest tag name from remote
+# get the latest tag name from remote
+# then update the (
+#   README.md,
+# )
 
 git fetch --tags
 latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
@@ -20,3 +23,6 @@ git push origin main
 # create a tag
 git tag "$new_tag"
 git push origin "$new_tag"
+
+# update the README 
+./scripts/update_readme.sh
