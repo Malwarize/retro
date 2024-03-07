@@ -5,8 +5,9 @@ permissions:
 
 on:
   push:
-    branches:
-      - main # Adjust this as needed
+    tags : 
+      - '*'
+
 
 jobs:
   build-and-package:
