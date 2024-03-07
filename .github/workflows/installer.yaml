@@ -67,9 +67,9 @@ jobs:
         ./scripts/update_readme.sh  $RELEASE_VERSION
 
     - name: Push changes 
-    - uses: mikeal/publish-to-github-action@master
+      uses: mikeal/publish-to-github-action@master
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        BRANCH_NAME: 'main'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_NAME: 'main'
 
 
