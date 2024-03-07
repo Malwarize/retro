@@ -30,4 +30,4 @@ git push origin "$new_tag"
 # update the README 
 echo "updating README.md with the new version v$version"
 ./scripts/update_readme.sh $new_tag
-echo "README.md updated with the new version v$version
+echo "README.md updated with the new version v$version"
