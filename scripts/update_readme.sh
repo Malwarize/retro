@@ -11,4 +11,4 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
-sed -i "s/v[0-9]\.[0-9]\.[0-9]/v$version/" README.md
+sed -i "s/v[0-9]\.[0-9]\.[0-9]/$version/" README.md
