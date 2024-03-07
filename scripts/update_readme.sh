@@ -7,5 +7,7 @@
 
 version=$1
 sed -i "s/v[0-9]\.[0-9]\.[0-9]/v$version/" README.md
-
+git add README.md
+git commit -m "bump version to $version"
+git push origin main
 
