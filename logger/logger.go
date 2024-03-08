@@ -19,10 +19,9 @@ func init() {
 		os.O_CREATE|os.O_APPEND|os.O_WRONLY,
 		0o666,
 	)
-	if err != nil {
-		panic(err)
+	if err != nil && !os.IsNotExist(err) {
+		logFile = os.Stdout
 	}
-
 	INFOLogger = log.New(
 		logFile,
 		"INFO: ",
