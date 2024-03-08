@@ -39,7 +39,7 @@ func init() {
 	)
 }
 
-func LogError(err GoPlayError, extra ...any) error {
+func LogError(err RetroError, extra ...any) error {
 	ERRORLogger.Println(
 		err,
 		extra,

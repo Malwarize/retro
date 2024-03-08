@@ -25,4 +25,4 @@ cache/*
 cache/
 .vscode
 TODO
-goplay_storage
+retro_storage

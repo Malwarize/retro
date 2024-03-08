@@ -16,11 +16,11 @@ var (
 
 var (
 	DEBUG      = false // set to true for debug mode
-	configPath = os.Getenv("HOME") + "/.config/goplay.json"
+	configPath = os.Getenv("HOME") + "/.config/retro.json"
 )
 
 type Config struct {
-	GoPlayPath    string        `json:"goplay_path"`    // path to goplay
+	RetroPath     string        `json:"retro_path"`     // path to retro
 	PathYTDL      string        `json:"path_ytldpl"`    // path to yt-dlp
 	PathFFmpeg    string        `json:"path_ffmpeg"`    // path to ffmpeg
 	PathFFprobe   string        `json:"path_ffprobe"`   // path to ffprobe
@@ -32,17 +32,17 @@ type Config struct {
 }
 
 func initConfig() *Config {
-	goplay_path := os.Getenv("HOME") + "/.goplay/"
+	retro_path := os.Getenv("HOME") + "/.retro/"
 	config := &Config{
-		GoPlayPath:    goplay_path,
+		RetroPath:     retro_path,
 		PathYTDL:      "yt-dlp",
 		PathFFmpeg:    "ffmpeg",
 		PathFFprobe:   "ffprobe",
 		SearchTimeout: 60 * time.Second,
 		Theme:         "pink",
 		DiscordRPC:    true,
-		LogFile:       filepath.Join(goplay_path, "goplay.log"),
-		DBPath:        filepath.Join(goplay_path, "goplay.db"),
+		LogFile:       filepath.Join(retro_path, "retro.log"),
+		DBPath:        filepath.Join(retro_path, "retro.db"),
 	}
 
 	// Attempt to load from file
@@ -65,8 +65,8 @@ func GetConfig() *Config {
 func EditConfigField(field, value string) error {
 	config := GetConfig()
 	switch field {
-	case "goplay_path":
-		config.GoPlayPath = value
+	case "retro_path":
+		config.RetroPath = value
 	case "path_ytldpl":
 		config.PathYTDL = value
 	case "path_ffmpeg":

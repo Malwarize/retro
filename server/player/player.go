@@ -39,10 +39,10 @@ type Player struct {
 
 func NewPlayer() *Player {
 	if _, err := os.Stat(
-		config.GetConfig().GoPlayPath,
+		config.GetConfig().RetroPath,
 	); os.IsNotExist(err) {
-		logger.LogInfo("goplay dir not found, creating it")
-		err = os.Mkdir(config.GetConfig().GoPlayPath, 0o755)
+		logger.LogInfo("retro dir not found, creating it")
+		err = os.Mkdir(config.GetConfig().RetroPath, 0o755)
 		if err != nil {
 			log.Fatal(err)
 		}

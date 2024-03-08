@@ -55,7 +55,7 @@ func copyFile(sourcePath, destinationPath string) error {
 }
 
 func createTmpFile(data []byte) (*os.File, error) {
-	f, err := os.CreateTemp("", "goplay_")
+	f, err := os.CreateTemp("", "retro_")
 	if err != nil {
 		return nil, err
 	}

@@ -19,7 +19,7 @@ import (
 // 	"strings"
 // 	"time"
 
-// 	"github.com/Malwarize/goplay/shared"
+// 	"github.com/Malwarize/retro/shared"
 // 	"github.com/kkdai/youtube/v2"
 // 	"google.golang.org/api/option"
 // 	gyoutube "google.golang.org/api/youtube/v3"
@@ -98,7 +98,7 @@ import (
 
 // // returns stream, title, error
 // func (yt *youtubeEngine) Download(videoUrl string) (io.ReadCloser, string, error) {
-// 	tmpFile, err := os.CreateTemp("", "goplay-youtube-*.mp3")
+// 	tmpFile, err := os.CreateTemp("", "retro-youtube-*.mp3")
 // 	if err != nil {
 // 		return nil, "", err
 // 	}

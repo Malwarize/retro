@@ -1,11 +1,11 @@
 package logger
 
-type GoPlayError struct {
+type RetroError struct {
 	Err     string
 	Details []error
 }
 
-func (e GoPlayError) Error() string {
+func (e RetroError) Error() string {
 	ers := e.Err
 	for _, detail := range e.Details {
 		ers += "\n" + detail.Error()
@@ -13,8 +13,8 @@ func (e GoPlayError) Error() string {
 	return ers
 }
 
-func GError(err string, details ...error) GoPlayError {
-	return GoPlayError{
+func GError(err string, details ...error) RetroError {
+	return RetroError{
 		Err:     err,
 		Details: details,
 	}

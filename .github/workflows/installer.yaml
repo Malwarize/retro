@@ -55,7 +55,7 @@ jobs:
         body: "Installer for version ${{ github.ref }}"
         draft: false
         prerelease: false
-        name: "goplay-${{ env.RELEASE_VERSION}}"
+        name: "retro-${{ env.RELEASE_VERSION}}"
         files: ./bin/install.sh
         token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
       env:

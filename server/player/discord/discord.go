@@ -17,12 +17,12 @@ const (
 var Activity = client.Activity{
 	State:      "Playing",
 	Details:    "",
-	LargeImage: "goplay",
-	LargeText:  "goplay",
+	LargeImage: "retro",
+	LargeText:  "retro",
 	Buttons: []*client.Button{
 		{
-			Label: "Download goplay",
-			Url:   "https://github.com/Malwarize/goplay",
+			Label: "Download retro",
+			Url:   "https://github.com/Malwarize/retro",
 		},
 	},
 }

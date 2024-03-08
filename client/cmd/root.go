@@ -10,16 +10,16 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "goplay",
-	Short: "goplay is a music player",
-	Long: `goplay is a music player
-goplay is client for goplayer server
-you can controll goplayer server like any other systemd service
-goplay [command] --help for more information about a command`,
+	Use:   "retro",
+	Short: "retro is a music player",
+	Long: `retro is a music player
+retro is client for retroPlayer server
+you can controll retroPlayer server like any other systemd service
+retro [command] --help for more information about a command`,
 
 	Run: func(_ *cobra.Command, _ []string) {
-		fmt.Println("goplay is a music player")
-		fmt.Println("use goplay --help to see available commands")
+		fmt.Println("retro is a music player")
+		fmt.Println("use retro --help to see available commands")
 	},
 }
 

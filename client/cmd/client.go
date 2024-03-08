@@ -282,7 +282,7 @@ var playlistCreateCmd = &cobra.Command{
 	Long: `create a new playlist
 this command will create a new playlist with the provided name
 playlist stores the songs in path provided in the config file
-default: $HOME/.goplay/playlists
+default: $HOME/.retro/playlists
 `,
 	Run: func(_ *cobra.Command, args []string) {
 		lists := controller.GetPlayListsNames(client)
@@ -455,7 +455,7 @@ var setThemeCmd = &cobra.Command{
 	Use:   "theme",
 	Short: "set the theme [purple|pink|blue]",
 	Long: `set the theme [purple|pink|blue]
-this command will set the theme of the goplay client
+this command will set the theme of the retro client
 the theme is stored in the config file 
 `,
 	ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {

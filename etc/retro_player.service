@@ -1,0 +1,13 @@
+[Unit]
+Description="retro music player server"
+After=network.target
+
+[Service]
+Restart=always
+RestartSec=1
+ExecStart=/bin/bash -c ~/.local/bin/retroPlayer
+
+[Install]
+WantedBy=default.target
+Alias=retro.service
+
