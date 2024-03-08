@@ -8,8 +8,8 @@ import (
 
 	"github.com/kkdai/youtube/v2"
 
-	"github.com/Malwarize/goplay/logger"
-	"github.com/Malwarize/goplay/shared"
+	"github.com/Malwarize/retro/logger"
+	"github.com/Malwarize/retro/shared"
 )
 
 // import (

@@ -5,7 +5,7 @@ import (
 	"net/rpc"
 	"os"
 
-	"github.com/Malwarize/goplay/shared"
+	"github.com/Malwarize/retro/shared"
 )
 
 func GetPlayListsNames(client *rpc.Client) []string {

@@ -4,8 +4,8 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/Malwarize/goplay/client/controller"
-	"github.com/Malwarize/goplay/shared"
+	"github.com/Malwarize/retro/client/controller"
+	"github.com/Malwarize/retro/shared"
 )
 
 var emojiesType = map[string]string{

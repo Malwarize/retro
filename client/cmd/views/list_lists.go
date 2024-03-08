@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/rpc"
 
-	"github.com/Malwarize/goplay/client/controller"
+	"github.com/Malwarize/retro/client/controller"
 )
 
 func PlayListsDisplay(client *rpc.Client) {

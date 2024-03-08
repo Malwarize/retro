@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/Malwarize/goplay/client/controller"
+	"github.com/Malwarize/retro/client/controller"
 )
 
 var rootCmd = &cobra.Command{

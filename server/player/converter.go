@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/Malwarize/goplay/config"
+	"github.com/Malwarize/retro/config"
 )
 
 type Converter struct {

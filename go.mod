@@ -1,4 +1,4 @@
-module github.com/Malwarize/goplay
+module github.com/Malwarize/retro
 
 go 1.21.3
 

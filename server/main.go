@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Malwarize/goplay/server/player"
+	"github.com/Malwarize/retro/server/player"
 )
 
 func main() {

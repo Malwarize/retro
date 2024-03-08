@@ -3,7 +3,7 @@ package engines
 import (
 	"io"
 
-	"github.com/Malwarize/goplay/shared"
+	"github.com/Malwarize/retro/shared"
 )
 
 type Engine interface {

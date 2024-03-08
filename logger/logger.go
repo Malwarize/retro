@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Malwarize/goplay/config"
+	"github.com/Malwarize/retro/config"
 )
 
 var (

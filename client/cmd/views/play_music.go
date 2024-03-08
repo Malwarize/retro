@@ -7,8 +7,8 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/Malwarize/goplay/client/controller"
-	"github.com/Malwarize/goplay/shared"
+	"github.com/Malwarize/retro/client/controller"
+	"github.com/Malwarize/retro/shared"
 )
 
 func playCallback(m model) error {

@@ -1,6 +1,6 @@
 package player
 
-import "github.com/Malwarize/goplay/shared"
+import "github.com/Malwarize/retro/shared"
 
 func (p *Player) addTask(target string, typeTask int) {
 	p.mu.Lock()

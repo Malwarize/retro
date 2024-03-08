@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/Malwarize/goplay/config"
-	"github.com/Malwarize/goplay/logger"
-	"github.com/Malwarize/goplay/server/player/db"
-	en "github.com/Malwarize/goplay/server/player/engines"
-	"github.com/Malwarize/goplay/shared"
+	"github.com/Malwarize/retro/config"
+	"github.com/Malwarize/retro/logger"
+	"github.com/Malwarize/retro/server/player/db"
+	en "github.com/Malwarize/retro/server/player/engines"
+	"github.com/Malwarize/retro/shared"
 )
 
 type Director struct {

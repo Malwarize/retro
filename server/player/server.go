@@ -6,8 +6,8 @@ import (
 	"net/rpc"
 	"time"
 
-	"github.com/Malwarize/goplay/logger"
-	"github.com/Malwarize/goplay/shared"
+	"github.com/Malwarize/retro/logger"
+	"github.com/Malwarize/retro/shared"
 )
 
 func (p *Player) RPCPlay(_ int, reply *int) error {
