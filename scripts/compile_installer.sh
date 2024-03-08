@@ -32,23 +32,38 @@ goplayer_binary_data="$(base64 $goplayer_binary)"
 service_data="$(base64 $service_file)"
 
 install_yt-dlp() {
+    installed=0
     echo "Installing yt-dlp"
-    sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux -o /usr/local/bin/yt-dlp
-    sudo chmod a+rx /usr/local/bin/yt-dlp
+    sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux -o /usr/local/bin/yt-dlp && installed=1
+    sudo chmod a+rx /usr/local/bin/yt-dlp && installed=1
+
+    if [ \$installed -eq 1 ]; then
+      echo "yt-dlp installed successfully"
+    else
+      echo "Failed to install yt-dlp, please install it manually"
+      kill -2 $$
+    fi
 }
 
 install_ffmpeg() {
     echo "Installing ffmpeg"
+    installed=0
     if command -v apt > /dev/null; then
-        sudo apt install -y ffmpeg
+        sudo apt install -y ffmpeg && installed=1
     elif command -v dnf > /dev/null; then
-        sudo dnf install -y ffmpeg
-    elif command -v pacman > /dev/null
+        sudo dnf install -y ffmpeg && installed=1
+    elif command -v pacman > /dev/null 
     then
-        sudo pacman -S ffmpeg
+        sudo pacman -S ffmpeg && installed=1
     else
         echo "Could not install ffmpeg. Please install it manually."
-        exit 1
+        kill -2 $$
+    fi
+    if [ \$installed -eq 1 ]; then
+      echo "ffmpeg installed successfully"
+    else
+      echo "Failed to install ffmpeg, please install it manually"
+      kill -2 $$
     fi
 }
 
