@@ -2,7 +2,7 @@ module github.com/Malwarize/retro
 
 go 1.21.3
 
-replace github.com/kkdai/youtube/v2 => github.com/ppalone/youtube/v2 v2.0.0-20240101224416-c38aa718e193
+replace github.com/kkdai/youtube/v2 => github.com/ppalone/youtube/v2 v2.0.0-20240307204930-212376cf3354
 
 require (
 	github.com/charmbracelet/bubbles v0.17.1
