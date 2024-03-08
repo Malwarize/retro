@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"io"
 	"os"
+	"time"
 
 	"github.com/gopxl/beep"
 	"github.com/gopxl/beep/mp3"
@@ -93,19 +94,36 @@ func adjustDiscordRPC(state shared.PState, music string) {
 					err,
 				)
 			}
-
 		case shared.Playing:
-			if err := discord.Start(music); err != nil {
-				logger.LogWarn(
-					"error start discord RPC",
-					err,
-				)
+			for {
+				if err := discord.Start(music); err != nil {
+					logger.LogWarn(
+						"error start discord RPC trying again in 10 seconds",
+						err,
+					)
+					time.Sleep(10 * time.Second)
+				} else {
+					logger.LogInfo(
+						"Discord RPC started",
+						"music", music,
+					)
+					adjustDiscordRPC(
+						shared.Stopped,
+						"",
+					)
+					return
+				}
 			}
 		case shared.Paused:
 			if err := discord.Pause(); err != nil {
 				logger.LogWarn(
 					"error pause discord RPC",
 					err,
+				)
+			} else {
+				logger.LogInfo(
+					"Discord RPC paused",
+					"music", music,
 				)
 			}
 		}

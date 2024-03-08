@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 )
@@ -31,15 +32,17 @@ type Config struct {
 }
 
 func initConfig() *Config {
+	goplay_path := os.Getenv("HOME") + "/.goplay/"
 	config := &Config{
-		GoPlayPath:    os.Getenv("HOME") + "/.goplay/",
+		GoPlayPath:    goplay_path,
 		PathYTDL:      "yt-dlp",
 		PathFFmpeg:    "ffmpeg",
 		PathFFprobe:   "ffprobe",
 		SearchTimeout: 60 * time.Second,
 		Theme:         "pink",
 		DiscordRPC:    true,
-		LogFile:       os.Getenv("HOME") + "/.goplay/goplay.log",
+		LogFile:       filepath.Join(goplay_path, "goplay.log"),
+		DBPath:        filepath.Join(goplay_path, "goplay.db"),
 	}
 
 	// Attempt to load from file
@@ -47,11 +50,6 @@ func initConfig() *Config {
 		if err = json.Unmarshal(jsonFile, config); err != nil {
 			return config // Return default config if unmarshaling fails
 		}
-	}
-
-	// Set derived or missing default values
-	if config.DBPath == "" {
-		config.DBPath = config.GoPlayPath + "goplay.db"
 	}
 
 	return config

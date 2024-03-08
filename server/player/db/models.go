@@ -14,9 +14,7 @@ type Db struct {
 }
 
 func NewDb(path string) (*Db, error) {
-	dir := filepath.Dir(
-		path,
-	)
+	dir := filepath.Dir(path)
 	err := os.MkdirAll(dir, 0o755)
 	if err != nil {
 		return nil, err

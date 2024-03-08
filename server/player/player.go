@@ -155,9 +155,9 @@ func (p *Player) setPlayerState(
 	p.mu.Unlock()
 	cur := p.Queue.GetCurrMusic()
 	if cur == nil {
-		adjustDiscordRPC(p.playerState, "")
+		go adjustDiscordRPC(p.playerState, "")
 	} else {
-		adjustDiscordRPC(p.playerState, cur.Name)
+		go adjustDiscordRPC(p.playerState, cur.Name)
 	}
 }
 
