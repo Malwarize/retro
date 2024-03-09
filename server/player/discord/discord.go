@@ -21,7 +21,7 @@ var Activity = client.Activity{
 	LargeText:  "retro",
 	Buttons: []*client.Button{
 		{
-			Label: "Download retro",
+			Label: "Download Retro",
 			Url:   "https://github.com/Malwarize/retro",
 		},
 	},

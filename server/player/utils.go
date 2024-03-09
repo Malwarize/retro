@@ -101,15 +101,12 @@ func adjustDiscordRPC(state shared.PState, music string) {
 						"error start discord RPC trying again in 10 seconds",
 						err,
 					)
+					discord.Stop()
 					time.Sleep(10 * time.Second)
 				} else {
 					logger.LogInfo(
 						"Discord RPC started",
 						"music", music,
-					)
-					adjustDiscordRPC(
-						shared.Stopped,
-						"",
 					)
 					return
 				}
