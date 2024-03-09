@@ -538,14 +538,6 @@ func (p *Player) RemoveMusicFromPlayList(plname string, music shared.IntOrString
 			)
 		}
 	}
-	if err != nil {
-		return logger.LogError(
-			logger.GError(
-				"Failed to remove song from playlist",
-				err,
-			),
-		)
-	}
 	return nil
 }
 

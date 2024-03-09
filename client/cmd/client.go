@@ -470,3 +470,46 @@ the theme is stored in the config file
 		}
 	},
 }
+
+var logCmd = &cobra.Command{
+	Use:   "logs",
+	Short: "get logs",
+	Long: `get logs
+  this command will get the logs from the server
+  `,
+	Run: func(_ *cobra.Command, _ []string) {
+		controller.PrintAllLogs(client)
+	},
+}
+
+var logErrCmd = &cobra.Command{
+	Use:   "error",
+	Short: "get error logs",
+	Long: `get error logs
+  this command will get the error logs from the server
+  `,
+	Run: func(_ *cobra.Command, _ []string) {
+		controller.PrintErrorLogs(client)
+	},
+}
+var logInfoCmd = &cobra.Command{
+	Use:   "info",
+	Short: "get info logs",
+	Long: `get info logs
+  this command will get the info logs from the server
+  `,
+	Run: func(_ *cobra.Command, _ []string) {
+		controller.PrintInfoLogs(client)
+	},
+}
+
+var logWarnCmd = &cobra.Command{
+	Use:   "warn",
+	Short: "get warn logs",
+	Long: `get warn logs
+  this command will get the warn logs from the server
+  `,
+	Run: func(_ *cobra.Command, _ []string) {
+		controller.PrintWarnLogs(client)
+	},
+}

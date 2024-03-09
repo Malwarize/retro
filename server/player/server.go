@@ -202,6 +202,14 @@ func (p *Player) RPCSetTheme(theme string, reply *int) error {
 	return nil
 }
 
+func (p *Player) GetLogs(_ int, reply *[]string) error {
+	logger.LogInfo("GetLogs called")
+	var err error
+	*reply, err = logger.GetLogs()
+	logger.LogInfo("GetLogs done")
+	return err
+}
+
 func StartIPCServer(port string) {
 	logger.LogInfo("Creating Player instance")
 	player := NewPlayer()

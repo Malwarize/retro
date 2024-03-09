@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"bufio"
 	"log"
 	"os"
 
@@ -53,4 +54,24 @@ func LogInfo(info string, extra ...any) {
 
 func LogWarn(warn string, extra ...any) {
 	WARNLogger.Println(warn, extra)
+}
+
+func GetLogs() ([]string, error) {
+	logFile, err := os.Open(
+		config.GetConfig().LogFile,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var lastLines []string
+	scanner := bufio.NewScanner(logFile)
+	for scanner.Scan() {
+		lastLines = append(lastLines, scanner.Text())
+		if len(lastLines) > 200 {
+			lastLines = lastLines[1:]
+		}
+	}
+	return lastLines, nil
 }

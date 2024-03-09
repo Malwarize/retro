@@ -16,6 +16,7 @@ import (
 
 func (p *Player) CheckWhatIsThis(unknown string) DResults {
 	// check if its a dir or file
+	// TODO: check if its local path
 	if fi, err := os.Stat(unknown); err == nil {
 		if fi.IsDir() {
 			// check if there is music files in the dir
@@ -108,6 +109,7 @@ func (p *Player) CheckWhatIsThis(unknown string) DResults {
 			return DQueue
 		}
 	}
+
 	engines := p.Director.GetEngines()
 	for _, engine := range engines {
 		ok, _ := engine.Exists(unknown)
@@ -119,7 +121,6 @@ func (p *Player) CheckWhatIsThis(unknown string) DResults {
 }
 
 func (p *Player) searchWorker(
-	ctx context.Context,
 	engine string,
 	unknown string,
 	musicChan chan shared.SearchResult,
@@ -163,7 +164,6 @@ func (p *Player) GetAvailableMusicOptions(unknown string) []shared.SearchResult 
 	for name := range p.Director.GetEngines() {
 		wg.Add(1)
 		go p.searchWorker(
-			ctx,
 			name,
 			unknown,
 			musicChan,

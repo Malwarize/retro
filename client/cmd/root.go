@@ -49,8 +49,14 @@ func init() {
 	rootCmd.AddCommand(statusCmd)
 	rootCmd.AddCommand(setThemeCmd)
 	rootCmd.AddCommand(playlistCmd)
+	rootCmd.AddCommand(logCmd)
+
 	playlistCmd.AddCommand(playlistCreateCmd)
 	playlistCmd.AddCommand(playlistRemoveCmd)
 	playlistCmd.AddCommand(playlistAddCmd)
 	playlistCmd.AddCommand(playlistPlayCmd)
+
+	logCmd.AddCommand(logErrCmd)
+  logCmd.AddCommand(logInfoCmd)
+  logCmd.AddCommand(logWarnCmd)
 }
