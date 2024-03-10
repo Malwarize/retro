@@ -44,6 +44,11 @@ $${\color{#AC3097}Play \space \color{white} Music}$$
 ```sh
 retro play "Despacito - Luis Fonsi"
 ```
+  
+$${\color{#AC3097}Status \space \color{white} Music}$$
+```sh
+retro status # 🎵 check the queue status tasks downloading|searching, playing|paused, songs in queue
+```
 
 #### $${\color{#AC3097}Pause/Resume \space \color{white}Music}$$
 ```sh
@@ -54,7 +59,7 @@ retro resume # ▶ ️
 #### $${\color{#AC3097}Next/Previous \space \color{white}Music Queue}$$
 ```sh
 retro next     # ⏭️️
-retro previous # ⏮️️
+retro prev # ⏮️️
 ```
 
 #### $${\color{#AC3097}Adjust \space Volume \space \color{white}Music Queue}$$
@@ -67,7 +72,6 @@ retro vol 0  # 🔇 mute volume
 ```sh
 retro stop # 🛑
 ```
-
 
 ## 🚦 Controls
 #### $${\color{#AC3097}Logs \space \color{white}Control}$$
