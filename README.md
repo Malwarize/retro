@@ -27,54 +27,54 @@
 
 
 ## 📦 Installation
-$${\color{#AC3097}Install \space \color{black}Retro}$$ 
+$${\color{#AC3097}Install \space \color{#56565E}Retro}$$ 
 ```sh
 wget https://github.com/Malwarize/retro/releases/download/v0.0.28/install.sh
 chmod +x install.sh
 ./install.sh 
 ```
-$${\color{#AC3097}Uninstall \space \color{black}Retro}$$
+$${\color{#AC3097}Uninstall \space \color{#56565E}Retro}$$
 ```sh
 ~/.local/bin/uninstall_retro.sh
 ```
 
 ## 🕹️ Music Management
-$${\color{#AC3097}Play \space \color{black} Music}$$
+$${\color{#AC3097}Play \space \color{#56565E} Music}$$
 
 ```sh
 retro play "Despacito - Luis Fonsi"
 ```
   
-$${\color{#AC3097}Status \space \color{black} Music}$$
+$${\color{#AC3097}Status \space \color{#56565E} Music}$$
 ```sh
 retro status # 🎵 check the queue status tasks downloading|searching, playing|paused, songs in queue
 ```
 
-#### $${\color{#AC3097}Pause/Resume \space \color{black}Music}$$
+#### $${\color{#AC3097}Pause/Resume \space \color{#56565E}Music}$$
 ```sh
 retro pause  # ⏸️
 retro resume # ▶ ️
 ```
 
-#### $${\color{#AC3097}Next/Previous \space \color{black}Music Queue}$$
+#### $${\color{#AC3097}Next/Previous \space \color{#56565E}Music Queue}$$
 ```sh
 retro next     # ⏭️️
 retro prev # ⏮️️
 ```
 
-#### $${\color{#AC3097}Adjust \space Volume \space \color{black}Music Queue}$$
+#### $${\color{#AC3097}Adjust \space Volume \space \color{#56565E}Music Queue}$$
 ```sh
 retro vol 50 # 🎚️ set volume to 50% 
 retro vol 0  # 🔇 mute volume 
 ```
 
-#### $${\color{#AC3097}Stop \space \color{black}Music Queue}$$
+#### $${\color{#AC3097}Stop \space \color{#56565E}Music Queue}$$
 ```sh
 retro stop # 🛑
 ```
 
 ## 🚦 Controls
-#### $${\color{#AC3097}Logs \space \color{black}Control}$$
+#### $${\color{#AC3097}Logs \space \color{#56565E}Control}$$
 ```sh
 retro logs        # 📜 show all logs #last 200 lines 
 retro logs info   # 📢 show all info logs 
@@ -82,7 +82,7 @@ retro logs error  # 🚫 show all error logs
 retro logs warn   # ⚠️ show all warning logs
 ```
 
-#### $${\color{#AC3097}Changing \space \color{black}Theme}$$
+#### $${\color{#AC3097}Changing \space \color{#56565E}Theme}$$
 ```sh
 retro theme pink    #🧼 
 retro theme purple  #🔮  
@@ -90,21 +90,21 @@ retro theme blue    #🌊
 # TODO: retro theme custom 
 ```
 
-#### $${\color{#AC3097}Command \space \color{black}Help}$$
+#### $${\color{#AC3097}Command \space \color{#56565E}Help}$$
 ```sh
 retro help      #❓ show all commands
 retro help play #❗ show play command help
 ```
 
 ## ⚙️ Configuration
-#### $${\color{#AC3097}Config \space \color{black}File}$$
+#### $${\color{#AC3097}Config \space \color{#56565E}File}$$
 the config file is located by default in `~/.retro/config.json`
 if not found, you can create it manually by 
 ```sh
 mkdir -p ~/.retro
 touch ~/.retro/config.json
 ```
-$${\color{#AC3097}Default \space \color{black}Config}$$
+$${\color{#AC3097}Default \space \color{#56565E}Config}$$
 ```json
 
 {
@@ -123,7 +123,7 @@ $${\color{#AC3097}Default \space \color{black}Config}$$
 
 you can change the config manually, easy to understand and modify.
 
-$${\color{#AC3097}Note \space \color{black}that}$$
+$${\color{#AC3097}Note \space \color{#56565E}that}$$
 
 * ☝ ️ if you change the config file, its recommended to restart the retro service.
 with `systemctl --user restart retro`
@@ -132,6 +132,6 @@ with `systemctl --user restart retro`
 
 ## 📝 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-
+d
 ## 📢 Acknowledgments
-#### $${\color{#AC3097}retro \space \color{black}is \space  made  \space  by  \space  \color{#FF99EE} @Malwarize \color{black} \space with \space \color{red} ❤️}$$ 
+#### $${\color{#AC3097}retro \space \color{#56565E}is \space  made  \space  by  \space  \color{#FF99EE} @Malwarize \color{#56565E} \space with \space \color{red} ❤️}$$ 
