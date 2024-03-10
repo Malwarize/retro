@@ -27,36 +27,36 @@
 
 
 ## 📦 Installation
-$${\color{#AC3097}Install \space \color{white}Retro}$$ 
+$${\color{#AC3097}Install \space \color{black}Retro}$$ 
 ```sh
 wget https://github.com/Malwarize/retro/releases/download/v0.0.28/install.sh
 chmod +x install.sh
 ./install.sh 
 ```
-$${\color{#AC3097}Uninstall \space \color{white}Retro}$$
+$${\color{#AC3097}Uninstall \space \color{black}Retro}$$
 ```sh
 ~/.local/bin/uninstall_retro.sh
 ```
 
 ## 🕹️ Music Management
-$${\color{#AC3097}Play \space \color{white} Music}$$
+$${\color{#AC3097}Play \space \color{black} Music}$$
 
 ```sh
 retro play "Despacito - Luis Fonsi"
 ```
   
-$${\color{#AC3097}Status \space \color{white} Music}$$
+$${\color{#AC3097}Status \space \color{black} Music}$$
 ```sh
 retro status # 🎵 check the queue status tasks downloading|searching, playing|paused, songs in queue
 ```
 
-#### $${\color{#AC3097}Pause/Resume \space \color{white}Music}$$
+#### $${\color{#AC3097}Pause/Resume \space \color{black}Music}$$
 ```sh
 retro pause  # ⏸️
 retro resume # ▶ ️
 ```
 
-#### $${\color{#AC3097}Next/Previous \space \color{white}Music Queue}$$
+#### $${\color{#AC3097}Next/Previous \space \color{black}Music Queue}$$
 ```sh
 retro next     # ⏭️️
 retro prev # ⏮️️
