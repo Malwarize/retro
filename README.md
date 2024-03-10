@@ -74,10 +74,10 @@ retro remove music_name
 ```
 you can remove music from queue by name or index `retro remove 1`
 
-#### $${\color{#AC3097}Adjust \space Volume \space \color{#56565E}Music Queue}$$
+#### $${\color{#AC3097}Adjust \space \color{#56565E}Volume}$$
 ```sh
 retro vol 50 # 🎚️ set volume to 50% 
-retro vol 0  # 🔇 mute volume 
+retro vol 0  # 🔇 mute volume Adjust
 ```
 
 #### $${\color{#AC3097}Stop \sp%EF%B8%8Face \color{#56565E}Music Queue}$$
@@ -136,7 +136,7 @@ retro theme blue    #🌊
 ```
 
 #### $${\color{#AC3097}Command \space \color{#56565E}Help}$$
-```sh
+```sh   
 retro help      #❓ show all commands
 retro help play #❗ show play command help
 ```
