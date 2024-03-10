@@ -16,8 +16,16 @@
 </div>
 
 
-## 📖 About
-$${\color{#AC3097}retro \space \color{white}is \space a \space command \space line \space music \space player \space that \space uses \space youtube \space as \space a \space source \space for \space music \space and \space play \space it \space using \space ffmpeg \space and \space yt-dlp}$$
+## map 
+- [🗺️ map](#map)
+- [📦 Installation](#-installation)
+- [🕹️ Music management](#-music-management)
+- [🚦️ Controls](#-controls)
+- [⚙️ Configuration](#-configuration)
+- [📝 License](#-license)
+- [📢 Acknowledgments](#-acknowledgments)
+- [🍿 Demo](#-TODO) 
+
 
 
 ## 📦 Installation
@@ -33,7 +41,7 @@ $${\color{#AC3097}Uninstall \space \color{white}Retro}$$
 ````
 
 
-## 🕹️ Music Controls
+## 🕹️ Music Management
 $${\color{#AC3097}Play \space \color{white} Music}$$
 
 ```sh
@@ -64,7 +72,7 @@ retro stop # 🛑
 ```
 
 
-## 🚦️ Controls
+## 🚦 Controls
 #### $${\color{#AC3097}Logs \space \color{white}Control}$$
 ```sh
 retro logs        # 📜 show all logs #last 200 lines 
@@ -87,7 +95,7 @@ retro help      #❓ show all commands
 retro help play #❗ show play command help
 ```
 
-## ⚙️ Configuration 
+## ⚙️ Configuration
 #### $${\color{#AC3097}Config \space \color{white}File}$$
 the config file is located by default in `~/.retro/config.json`
 if not found, you can create it manually by 
@@ -120,8 +128,9 @@ $${\color{#AC3097}Note \space \color{white}that}$$
 with `systemctl --user restart retro`
 * ⚠️  the config file will override the default values.
 
-## 📢 Acknowledgments
-#### $${\color{#AC3097}retro \space \color{white}is \space  made  \space  by  \space  \color{#FF99EE} @Malwarize \color{white} \space with \space \color{red} ❤️}$$ 
 
 ## 📝 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+
+## 📢 Acknowledgments
+#### $${\color{#AC3097}retro \space \color{white}is \space  made  \space  by  \space  \color{#FF99EE} @Malwarize \color{white} \space with \space \color{red} ❤️}$$ 
