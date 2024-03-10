@@ -16,6 +16,10 @@
 </div>
 
 
+## 📖 About
+$${\color{#AC3097}retro \space \color{white}is \space a \space command \space line \space music \space player \space that \space uses \space youtube \space as \space a \space source \space for \space music \space and \space play \space it \space using \space ffmpeg \space and \space yt-dlp}$$
+
+
 ## 📦 Installation
 $${\color{#AC3097}Install \space \color{white}Retro}$$ 
 ```sh
