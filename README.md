@@ -94,8 +94,9 @@ retro list create  my_playlist # 📂
 ```sh
 retro list add my_playlist "Despacito - Luis Fonsi"                      # ➕ search and add song to playlist
 retro list add my_playlist "https://www.youtube.com/watch?v=kJQP7kiw5Fk" # ➕ add song to playlist by url
-retro list add my_playlist queue_music                                   # ➕ add music from queue, you can do this with music index in the queue
+retro list add my_playlist queue_music                                   # ➕ add music from queue
 ```
+you can add music to playlist by name, url, queue (index or name), and playlist.
 
 #### $${\color{#AC3097}Remove \space \color{#56565E}Music from Playlist}$$
 ```sh
@@ -172,8 +173,7 @@ $${\color{#AC3097}Note \space \color{#56565E}that}$$
 * ☝ ️ if you change the config file, its recommended to restart the retro service.
 with `systemctl --user restart retro`
 * ⚠️  the config file will override the default values.
-
-
+* 🤖  please make sure to setup the autocompletion script to have a better experience with retro. see `retro completion`
 ## 📝 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 d
