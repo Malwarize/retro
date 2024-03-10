@@ -35,9 +35,8 @@ chmod +x install.sh
 ```
 $${\color{#AC3097}Uninstall \space \color{white}Retro}$$
 ```sh
-# Todo
-````
-
+~/.local/bin/uninstall_retro.sh
+```
 
 ## 🕹️ Music Management
 $${\color{#AC3097}Play \space \color{white} Music}$$
