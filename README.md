@@ -15,17 +15,15 @@
 
 </div>
 
-
 ## map 
-- [🗺️ map](#map)
-- [📦 Installation](#-installation)
-- [🕹️ Music management](#-music-management)
-- [🚦️ Controls](#-controls)
-- [⚙️ Configuration](#-configuration)
-- [📝 License](#-license)
-- [📢 Acknowledgments](#-acknowledgments)
-- [🍿 Demo](#-TODO) 
-
+- [<code>📦 Installation</code>](#-installation)
+- [<code>🕹️ Music management</code>](#-music-management)
+- [<code>🚦️ Controls</code>](#-controls)
+- [<code>⚙️ Configuration</code>](#-configuration)
+- [<code>📝 License</code>](#-license)
+- [<code>📢 Acknowledgments</code>](#-acknowledgments)
+- [<code>🍿 Demo</code>](#-TODO)
+- [<code>📢 Acknowledgments</code>](#-acknowledgments)
 
 
 ## 📦 Installation
