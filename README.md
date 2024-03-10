@@ -24,7 +24,7 @@ chmod +x install.sh
 ```sh
 retro play "Despacito - Luis Fonsi"
 ```
-    
+
 #### <span style="color:#AC3097">*pause* ⏸️ </span> and <span style="color:#AC3097">*resume* ▶️</span> *music*
 ```sh
 retro pause 
