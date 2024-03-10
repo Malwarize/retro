@@ -160,7 +160,6 @@ function generate_completion {
 
         # load the completion
         grep -q "source \$HOME/.zsh_completion.d/_retro" ~/.zshrc || echo "source \$HOME/.zsh_completion.d/_retro" >> ~/.zshrc
-        exec zsh
     fi
 
     # check if bash is installed
@@ -171,8 +170,43 @@ function generate_completion {
         $install_path/retro completion bash > \$completion_path/retro
         grep -q "source \$HOME/.bash_completion.d/retro" ~/.bashrc || echo "source \$HOME/.bash_completion.d/retro" >> ~/.bashrc
     fi
+    echo "Completion script created, restart your shell to use it"
 }
+function generate_uninstall {
+    echo "Generating uninstall script"
+      echo "#!/bin/bash" > $install_path/uninstall_retro.sh
+      echo "echo \"Uninstalling retro...\"" >> $install_path/uninstall_retro.sh
 
+      echo "echo \"Disabling and stopping retro service...\"" >> $install_path/uninstall_retro.sh
+      echo "systemctl --user is-active --quiet retro && systemctl --user stop retro" >> $install_path/uninstall_retro.sh
+      echo "systemctl --user is-enabled --quiet retro && systemctl --user disable retro" >> $install_path/uninstall_retro.sh
+
+      echo "echo \"Removing files...\"" >> $install_path/uninstall_retro.sh
+      echo "rm -rf $install_path/retro" >> $install_path/uninstall_retro.sh
+      echo "rm -rf $install_path/retroPlayer" >> $install_path/uninstall_retro.sh
+      echo "sudo rm -rf $systemd_user_path/retro.service" >> $install_path/uninstall_retro.sh
+      echo "rm -rf ~/.zsh_completion.d/_retro" >> $install_path/uninstall_retro.sh
+      echo "rm -rf ~/.bash_completion.d/retro" >> $install_path/uninstall_retro.sh
+
+      echo "sudo rm -rf /usr/local/bin/retro" >> $install_path/uninstall_retro.sh
+      echo "sudo rm -rf /usr/local/bin/retroPlayer" >> $install_path/uninstall_retro.sh
+
+      echo "echo \"Reloading daemon...\"" >> $install_path/uninstall_retro.sh
+      echo "systemctl --user daemon-reload" >> $install_path/uninstall_retro.sh
+      echo "echo \"Uninstall complete\"" >> $install_path/uninstall_retro.sh
+      chmod +x $install_path/uninstall_retro.sh
+
+      echo "Removing retro from RC files..."
+      [ -f ~/.bashrc ] && sed -i '/retro/d' ~/.bashrc
+      [ -f ~/.zshrc ] && sed -i '/retro/d' ~/.zshrc
+      [ -f ~/.config/fish/config.fish ] && sed -i '/retro/d' ~/.config/fish/config.fish
+
+      echo "echo \"Removing uninstall script...\"" >> $install_path/uninstall_retro.sh
+      echo "rm -rf $install_path/uninstall_retro.sh" >> $install_path/uninstall_retro.sh
+
+
+    echo "Uninstall script created: $install_path/uninstall_retro.sh"
+}
 function main {
     trap cleanup SIGINT
     cleanup
@@ -182,6 +216,7 @@ function main {
     install_service
     start_services
     generate_completion
+    generate_uninstall
     echo "Installation complete, use retro --help to get started"
 }
 
