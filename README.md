@@ -5,7 +5,6 @@ play music with command line
 ## 📦 Installation
 * <span style="color:#AC3097">*install*</span> *retro* 
 ```sh
-```go
 wget https://github.com/Malwarize/retro/releases/download/v0.0.27/install.sh
 chmod +x install.sh
 ./install.sh
@@ -17,7 +16,11 @@ chmod +x install.sh
 
 
 ## 🕹️ Music Controls
-####  🎮 <span style="color:#AC3097">*play*</span> *music*
+<svg xmlns="http://www.w3.org/2000/svg" height="20" width="90">
+  <text x="0" y="15" font-family="Arial" font-size="14" fill="#AC3097" font-style="italic">play</text>
+  <text x="30" y="15" font-family="Arial" font-size="14" fill="white" font-style="italic">music</text>
+</svg>
+
 ```sh
 retro play "Despacito - Luis Fonsi"
 ```
