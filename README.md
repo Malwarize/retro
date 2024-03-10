@@ -92,9 +92,9 @@ retro list create  my_playlist # 📂
 
 #### $${\color{#AC3097}Add \space \color{#56565E}Music to Playlist}$$
 ```sh
-retro list add my_playlist "Despacito - Luis Fonsi" # ➕ search and add song to playlist
+retro list add my_playlist "Despacito - Luis Fonsi"                      # ➕ search and add song to playlist
 retro list add my_playlist "https://www.youtube.com/watch?v=kJQP7kiw5Fk" # ➕ add song to playlist by url
-retro list add my_playlist queue_music # ➕ add music from queue, you can do this with music index in the queue
+retro list add my_playlist queue_music                                   # ➕ add music from queue, you can do this with music index in the queue
 ```
 
 #### $${\color{#AC3097}Remove \space \color{#56565E}Music from Playlist}$$
