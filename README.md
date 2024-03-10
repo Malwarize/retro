@@ -3,61 +3,57 @@ play music with command line
 ![retro_music](https://github.com/Malwarize/retro/assets/130087473/c9824547-9b09-48fc-a113-e1a847793cca)
 
 ## 📦 Installation
-* <span style="color:#AC3097">*install*</span> *retro* 
+$${\color{#AC3097}Install \space \color{white}Retro}$$ 
 ```sh
 wget https://github.com/Malwarize/retro/releases/download/v0.0.27/install.sh
 chmod +x install.sh
-./install.sh
+./install.sh 
 ```
-* <span style="color:#AC3097">*uninstall*</span> *retro* 
+$${\color{#AC3097}Uninstall \space \color{white}Retro}$$
 ```sh
 # Todo
 ````
 
 
 ## 🕹️ Music Controls
-<svg xmlns="http://www.w3.org/2000/svg" height="20" width="90">
-  <text x="0" y="15" font-family="Arial" font-size="14" fill="#AC3097" font-style="italic">play</text>
-  <text x="30" y="15" font-family="Arial" font-size="14" fill="white" font-style="italic">music</text>
-</svg>
+$${\color{#AC3097}play \space \color{white} music}$$
 
 ```sh
 retro play "Despacito - Luis Fonsi"
 ```
 
-#### <span style="color:#AC3097">*pause* ⏸️ </span> and <span style="color:#AC3097">*resume* ▶️</span> *music*
+#### $${\color{#AC3097}Pause/Resume \space \color{white}Music}$$
 ```sh
 retro pause 
 retro resume
 ```
 
-#### <span style="color:#AC3097">*next* ⏭️</span> and <span style="color:#AC3097">*previous* ⏮️</span> *music*
+#### $${\color{#AC3097}Next/Previous \space \color{white}Music Queue}$$
 ```sh
 retro next
 retro previous
 ```
-
-<span style="color:#AC3097">*stop* 🛑</span> *music*
+#### $${\color{#AC3097}Stop \space \color{white}Music Queue}$$
 ```sh
-retro stop
+retro stop #🛑
 ```
 
-#### <span style="color:#AC3097">*volume* 🔊</span> *control*
+#### $${\color{#AC3097}Adjust \space Volume \space \color{white}Music Queue}$$
 ```sh
 retro vol 50 # set volume to 50% 🎚️
 retro vol 0 # mute volume 🔇
 ```
 
 ## ⚙️ Controls
-#### <span style="color:#AC3097">*logs* 📜</span> *control*
+#### $${\color{#AC3097}Logs \space \color{white}Control}$$
 ```sh
-retro logs # show all logs (last 200 lines)
-retro logs info # show all info logs
+retro logs # show all logs #last 200 lines 📜
+retro logs info # show all info logs 
 retro logs error # show all error logs
 retro logs warn # show all debug logs
 ```
 
-#### <span style="color:#AC3097">*theme* 🎨</span> *control*
+#### $${\color{#AC3097}Changing \space \color{white}Theme}$$
 ```sh
 retro theme pink #🧼 
 retro theme purple #🔮  
@@ -65,13 +61,13 @@ retro theme blue #🌊
 # TODO: retro theme custom 
 ```
 
-#### <span style="color:#AC3097">*help* 🆘</span> *control*
+#### $${\color{#AC3097}Command \space \color{white}Help}$$
 ```sh
 retro help # show all commands
 retro help play # show help for play command
 ```
 ## 📢 Acknowledgments
-<span style="font-weight: bold;color:#AC3097">*retro*</span> is made by <span style="font-weight: bold; color:#FF99EE">*@Malwarize*</span> with ❤️
+#### $${\color{#AC3097}retro \space \color{white}is \space  made  \space  by  \space  \color{#FF99EE} @Malwarize \color{white} \space with \space ❤️}$$ 
 
 ## 📝 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
