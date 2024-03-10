@@ -62,19 +62,19 @@ retro next     # ⏭️️
 retro prev # ⏮️️
 ```
 
-#### $${\color{#AC3097}Adjust \space Volume \space \color{white}Music Queue}$$
+#### $${\color{#AC3097}Adjust \space Volume \space \color{black}Music Queue}$$
 ```sh
 retro vol 50 # 🎚️ set volume to 50% 
 retro vol 0  # 🔇 mute volume 
 ```
 
-#### $${\color{#AC3097}Stop \space \color{white}Music Queue}$$
+#### $${\color{#AC3097}Stop \space \color{black}Music Queue}$$
 ```sh
 retro stop # 🛑
 ```
 
 ## 🚦 Controls
-#### $${\color{#AC3097}Logs \space \color{white}Control}$$
+#### $${\color{#AC3097}Logs \space \color{black}Control}$$
 ```sh
 retro logs        # 📜 show all logs #last 200 lines 
 retro logs info   # 📢 show all info logs 
@@ -82,7 +82,7 @@ retro logs error  # 🚫 show all error logs
 retro logs warn   # ⚠️ show all warning logs
 ```
 
-#### $${\color{#AC3097}Changing \space \color{white}Theme}$$
+#### $${\color{#AC3097}Changing \space \color{black}Theme}$$
 ```sh
 retro theme pink    #🧼 
 retro theme purple  #🔮  
@@ -90,21 +90,21 @@ retro theme blue    #🌊
 # TODO: retro theme custom 
 ```
 
-#### $${\color{#AC3097}Command \space \color{white}Help}$$
+#### $${\color{#AC3097}Command \space \color{black}Help}$$
 ```sh
 retro help      #❓ show all commands
 retro help play #❗ show play command help
 ```
 
 ## ⚙️ Configuration
-#### $${\color{#AC3097}Config \space \color{white}File}$$
+#### $${\color{#AC3097}Config \space \color{black}File}$$
 the config file is located by default in `~/.retro/config.json`
 if not found, you can create it manually by 
 ```sh
 mkdir -p ~/.retro
 touch ~/.retro/config.json
 ```
-$${\color{#AC3097}Default \space \color{white}Config}$$
+$${\color{#AC3097}Default \space \color{black}Config}$$
 ```json
 
 {
@@ -123,7 +123,7 @@ $${\color{#AC3097}Default \space \color{white}Config}$$
 
 you can change the config manually, easy to understand and modify.
 
-$${\color{#AC3097}Note \space \color{white}that}$$
+$${\color{#AC3097}Note \space \color{black}that}$$
 
 * ☝ ️ if you change the config file, its recommended to restart the retro service.
 with `systemctl --user restart retro`
@@ -134,4 +134,4 @@ with `systemctl --user restart retro`
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
 ## 📢 Acknowledgments
-#### $${\color{#AC3097}retro \space \color{white}is \space  made  \space  by  \space  \color{#FF99EE} @Malwarize \color{white} \space with \space \color{red} ❤️}$$ 
+#### $${\color{#AC3097}retro \space \color{black}is \space  made  \space  by  \space  \color{#FF99EE} @Malwarize \color{black} \space with \space \color{red} ❤️}$$ 
