@@ -15,7 +15,7 @@
 
 </div>
 
-## map 
+## 🗺️ map 
 - [<code>📦 Installation</code>](#-installation)
 - [<code>🕹️ Music management</code>](#-music-management)
 - [<code>🚦️ Controls</code>](#-controls)
