@@ -1,8 +1,5 @@
 # retro
 
-
-$$\color{#AC3097}\Huge retro$$
-
 <div align="center">
 
 ![retro_music](https://github.com/Malwarize/retro/assets/130087473/c9824547-9b09-48fc-a113-e1a847793cca)
