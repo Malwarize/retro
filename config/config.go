@@ -16,7 +16,7 @@ var (
 
 var (
 	DEBUG      = false // set to true for debug mode
-	configPath = os.Getenv("HOME") + "/.config/retro.json"
+	configPath = os.Getenv("HOME") + "/.retro/config.json"
 )
 
 type Config struct {

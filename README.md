@@ -46,7 +46,7 @@ retro stop # 🛑
 ```
 
 
-## ⚙️ Controls
+## 🚦️ Controls
 #### $${\color{#AC3097}Logs \space \color{white}Control}$$
 ```sh
 retro logs        # 📜 show all logs #last 200 lines 
@@ -70,6 +70,40 @@ retro help play #❗ show play command help
 ```
 ## 📢 Acknowledgments
 #### $${\color{#AC3097}retro \space \color{white}is \space  made  \space  by  \space  \color{#FF99EE} @Malwarize \color{white} \space with \space ❤️}$$ 
+
+## ⚙️ Configuration 
+#### $${\color{#AC3097}Config \space \color{white}File}$$
+the config file is located by default in `~/.retro/config.json`
+if not found, you can create it manually by 
+```sh
+mkdir -p ~/.retro
+touch ~/.retro/config.json
+```
+$${\color{#AC3097}Default \space \color{white}Config}$$
+```json
+
+{
+  "retro_path": "~/.retro/", // default path for main retro directory
+  "path_ytldpl": "yt-dlp",   // path to yt-dlp
+  "path_ffmpeg": "ffmpeg",   // path to ffmpeg
+  "path_ffprobe": "ffprobe", // path to ffprobe
+  "search_timeout": 60000000000, // 60 seconds timeout for search
+  "theme": "pink",         // default theme 
+  "db_path": "/home/xorbit/.retro/retro.db",
+  "discord_rpc": true, // enable discord rpc (rich presence)
+  "log_file": "~/.retro/retro.log" // log file path
+}
+```
+
+
+you can change the config manually, easy to understand and modify.
+
+$${\color{#AC3097}Note \space \color{white}that}$$
+
+* ☝ ️ if you change the config file, its recommended to restart the retro service.
+with `systemctl --user restart retro`
+* ⚠️  the config file will override the default values.
+
 
 ## 📝 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
