@@ -1,6 +1,13 @@
 # retro
-play music with command line
+
 ![retro_music](https://github.com/Malwarize/retro/assets/130087473/c9824547-9b09-48fc-a113-e1a847793cca)
+
+$$\color{#AC3097}\Huge retro$$
+
+<div align="center">
+    play music with command line
+</div>
+
 
 ## 📦 Installation
 $${\color{#AC3097}Install \space \color{white}Retro}$$ 
