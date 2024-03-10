@@ -20,7 +20,7 @@
 - [<code>🕹️ Music management</code>](#-music-management)
 - [<code>🎧 Playlist management</code>](#-playlist-management)
 - [<code>🚦️ Controls</code>](#-controls)
-- [<code>⚙️ Configuration</code>](#-configuration)
+- [<code>⚙️ Configuration</code>](#️-
 - [<code>🍿 Demo</code>](#-TODO)
 - [<code>📝 License</code>](#-license)
 - [<code>📢 Acknowledgments</code>](#-acknowledgments)
@@ -80,14 +80,14 @@ retro vol 50 # 🎚️ set volume to 50%
 retro vol 0  # 🔇 mute volume 
 ```
 
-#### $${\color{#AC3097}Stop \space \color{#56565E}Music Queue}$$
+#### $${\color{#AC3097}Stop \sp%EF%B8%8Face \color{#56565E}Music Queue}$$
 ```sh
 retro stop # 🛑
 ```
 ## 🎧 Playlist Management
 #### $${\color{#AC3097}Create \space \color{#56565E}Playlist}$$
 ```sh
-retro list create  my_playlist # 📂
+retro list create my_playlist # 📂
 ```
 
 #### $${\color{#AC3097}Add \space \color{#56565E}Music to Playlist}$$
