@@ -29,7 +29,7 @@
 ## 📦 Installation
 $${\color{#AC3097}Install \space \color{white}Retro}$$ 
 ```sh
-wget https://github.com/Malwarize/retro/releases/download/v0.0.27/install.sh
+wget https://github.com/Malwarize/retro/releases/download/v0.0.28/install.sh
 chmod +x install.sh
 ./install.sh 
 ```
