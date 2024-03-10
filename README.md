@@ -83,15 +83,15 @@ $${\color{#AC3097}Default \space \color{white}Config}$$
 ```json
 
 {
-  "retro_path": "~/.retro/", // default path for main retro directory
-  "path_ytldpl": "yt-dlp",   // path to yt-dlp
-  "path_ffmpeg": "ffmpeg",   // path to ffmpeg
-  "path_ffprobe": "ffprobe", // path to ffprobe
-  "search_timeout": 60000000000, // 60 seconds timeout for search
-  "theme": "pink",         // default theme 
-  "db_path": "/home/xorbit/.retro/retro.db",
-  "discord_rpc": true, // enable discord rpc (rich presence)
-  "log_file": "~/.retro/retro.log" // log file path
+  "retro_path": "~/.retro/",       
+  "path_ytldpl": "yt-dlp",        
+  "path_ffmpeg": "ffmpeg",         
+  "path_ffprobe": "ffprobe",      
+  "search_timeout": 60000000000,   
+  "theme": "pink",        
+  "db_path": "~/.retro/retro.db",
+  "discord_rpc": false, 
+  "log_file": "~/.retro/retro.log"
 }
 ```
 
