@@ -1,11 +1,21 @@
 # retro
 
-![retro_music](https://github.com/Malwarize/retro/assets/130087473/c9824547-9b09-48fc-a113-e1a847793cca)
 
 $$\color{#AC3097}\Huge retro$$
 
 <div align="center">
-    play music with command line
+
+![retro_music](https://github.com/Malwarize/retro/assets/130087473/c9824547-9b09-48fc-a113-e1a847793cca)
+
+<h2> play music with command line </h2>
+
+[![GitHub release](https://img.shields.io/github/v/release/Malwarize/retro?color=blue&label=release)]()
+[![GitHub license](https://img.shields.io/github/license/Malwarize/retro?color=green)]()
+[![GitHub issues](https://img.shields.io/github/issues/Malwarize/retro?color=red)]()
+[![GitHub stars](https://img.shields.io/github/stars/Malwarize/retro?color=yellow)]()
+[![GitHub forks](https://img.shields.io/github/forks/Malwarize/retro?color=orange)]()
+[![GitHub watchers](https://img.shields.io/github/watchers/Malwarize/retro?color=blue)]()
+
 </div>
 
 
