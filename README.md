@@ -68,8 +68,6 @@ retro theme blue    #🌊
 retro help      #❓ show all commands
 retro help play #❗ show play command help
 ```
-## 📢 Acknowledgments
-#### $${\color{#AC3097}retro \space \color{white}is \space  made  \space  by  \space  \color{#FF99EE} @Malwarize \color{white} \space with \space ❤️}$$ 
 
 ## ⚙️ Configuration 
 #### $${\color{#AC3097}Config \space \color{white}File}$$
@@ -104,6 +102,8 @@ $${\color{#AC3097}Note \space \color{white}that}$$
 with `systemctl --user restart retro`
 * ⚠️  the config file will override the default values.
 
+## 📢 Acknowledgments
+#### $${\color{#AC3097}retro \space \color{white}is \space  made  \space  by  \space  \color{#FF99EE} @Malwarize \color{white} \space with \space \color{red} ❤️}$$ 
 
 ## 📝 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
