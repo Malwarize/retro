@@ -16,7 +16,7 @@ $${\color{#AC3097}Uninstall \space \color{white}Retro}$$
 
 
 ## 🕹️ Music Controls
-$${\color{#AC3097}play \space \color{white} music}$$
+$${\color{#AC3097}Play \space \color{white} Music}$$
 
 ```sh
 retro play "Despacito - Luis Fonsi"
@@ -24,47 +24,49 @@ retro play "Despacito - Luis Fonsi"
 
 #### $${\color{#AC3097}Pause/Resume \space \color{white}Music}$$
 ```sh
-retro pause 
-retro resume
+retro pause  # ⏸️
+retro resume # ▶ ️
 ```
 
 #### $${\color{#AC3097}Next/Previous \space \color{white}Music Queue}$$
 ```sh
-retro next
-retro previous
-```
-#### $${\color{#AC3097}Stop \space \color{white}Music Queue}$$
-```sh
-retro stop #🛑
+retro next     # ⏭️️
+retro previous # ⏮️️
 ```
 
 #### $${\color{#AC3097}Adjust \space Volume \space \color{white}Music Queue}$$
 ```sh
-retro vol 50 # set volume to 50% 🎚️
-retro vol 0 # mute volume 🔇
+retro vol 50 # 🎚️ set volume to 50% 
+retro vol 0  # 🔇 mute volume 
 ```
+
+#### $${\color{#AC3097}Stop \space \color{white}Music Queue}$$
+```sh
+retro stop # 🛑
+```
+
 
 ## ⚙️ Controls
 #### $${\color{#AC3097}Logs \space \color{white}Control}$$
 ```sh
-retro logs # show all logs #last 200 lines 📜
-retro logs info # show all info logs 
-retro logs error # show all error logs
-retro logs warn # show all debug logs
+retro logs        # 📜 show all logs #last 200 lines 
+retro logs info   # 📢 show all info logs 
+retro logs error  # 🚫 show all error logs
+retro logs warn   # ⚠️ show all warning logs
 ```
 
 #### $${\color{#AC3097}Changing \space \color{white}Theme}$$
 ```sh
-retro theme pink #🧼 
-retro theme purple #🔮  
-retro theme blue #🌊
+retro theme pink    #🧼 
+retro theme purple  #🔮  
+retro theme blue    #🌊
 # TODO: retro theme custom 
 ```
 
 #### $${\color{#AC3097}Command \space \color{white}Help}$$
 ```sh
-retro help # show all commands
-retro help play # show help for play command
+retro help      #❓ show all commands
+retro help play #❗ show play command help
 ```
 ## 📢 Acknowledgments
 #### $${\color{#AC3097}retro \space \color{white}is \space  made  \space  by  \space  \color{#FF99EE} @Malwarize \color{white} \space with \space ❤️}$$ 
