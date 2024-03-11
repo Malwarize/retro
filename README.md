@@ -80,7 +80,7 @@ retro vol 50 # 🎚️ set volume to 50%
 retro vol 0  # 🔇 mute volume Adjust
 ```
 
-#### $${\color{#AC3097}Stop \sp%EF%B8%8Face \color{#56565E}Music Queue}$$
+#### $${\color{#AC3097}Stop \color{#56565E}Music Queue}$$
 ```sh
 retro stop # 🛑
 ```
