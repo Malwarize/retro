@@ -21,7 +21,7 @@ smart terminal music player, play music and continue your work on the terminal.
 - [<code>🕹️ Music management</code>](#-music-management)
 - [<code>🎧 Playlist management</code>](#-playlist-management)
 - [<code>🚦️ Controls</code>](#-controls)
-- [<code>⚙️ Configuration</code>](#️-
+- [<code>⚙️ Configuration</code>](#-configuration)
 - [<code>🍿 Demo</code>](#-TODO)
 - [<code>📝 License</code>](#-license)
 - [<code>📢 Acknowledgments</code>](#-acknowledgments)
