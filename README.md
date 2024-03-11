@@ -13,6 +13,7 @@
 [![GitHub forks](https://img.shields.io/github/forks/Malwarize/retro?color=orange)]()
 [![GitHub watchers](https://img.shields.io/github/watchers/Malwarize/retro?color=blue)]()
 
+smart terminal music player, play music and continue your work on the terminal.
 </div>
 
 ## 🗺️ map 
