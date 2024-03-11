@@ -72,7 +72,7 @@ retro prev # ⏮️️
 ```sh
 retro remove music_name
 ```
-you can remove music from queue by name or index `retro remove 1`
+*you can remove music from queue by name or index `retro remove 1`*
 
 #### $${\color{#AC3097}Adjust \space \color{#56565E}Volume}$$
 ```sh
@@ -96,7 +96,7 @@ retro list add my_playlist "Despacito - Luis Fonsi"                      # ➕ s
 retro list add my_playlist "https://www.youtube.com/watch?v=kJQP7kiw5Fk" # ➕ add song to playlist by url
 retro list add my_playlist queue_music                                   # ➕ add music from queue
 ```
-you can add music to playlist by name, url, queue (index or name), and playlist.
+*you can add music to playlist by name, url, queue (index|name`retro list add my_playlist music_index`) and file path* 
 
 #### $${\color{#AC3097}Remove \space \color{#56565E}Music from Playlist}$$
 ```sh
