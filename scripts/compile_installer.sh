@@ -67,9 +67,24 @@ install_ffmpeg() {
     fi
 }
 
+install_bash-completion() {
+    echo "Installing bash-completion"
+    if command -v apt > /dev/null; then
+        sudo apt install -y bash-completion
+    elif command -v dnf > /dev/null; then
+        sudo dnf install -y bash-completion
+    elif command -v pacman > /dev/null
+    then
+        sudo pacman -S bash-completion
+    else
+        echo "Could not install bash-completion. Please install it manually."
+        kill -2 $$
+    fi
+}
+
 check_dependencies() {
     echo "Checking dependencies"
-    for dependency in yt-dlp ffmpeg; do
+    for dependency in yt-dlp ffmpeg bash-completion;do
         command -v \$dependency > /dev/null || install_\$dependency
     done
 }
@@ -113,15 +128,6 @@ function install_retro {
     echo "\$retro_binary_data" | base64 -d > $install_path/retro
     chmod +x $install_path/retro
     sudo ln -s $install_path/retro /usr/local/bin/retro
-    if [ -f ~/.bashrc ]; then
-        echo "export PATH=\$PATH:$install_path" >> ~/.bashrc
-    elif [ -f ~/.zshrc ]; then
-        echo "export PATH=\$PATH:$install_path" >> ~/.zshrc
-    elif [ -f ~/.config/fish/config.fish ]; then
-        echo "set -x PATH \$PATH $install_path" >> ~/.config/fish/config.fish
-    else
-        echo "Could not find .bashrc, .zshrc or config.fish. Please add $install_path to your PATH manually."
-    fi
 }
 
 function install_retroPlayer {
@@ -155,11 +161,11 @@ function generate_completion {
         completion_path=~/.zsh_completion.d
         mkdir -p \$completion_path
         $install_path/retro completion zsh > \$completion_path/_retro
-        #check if its already in the fpath
-        # grep -q "FPATH+=\$HOME/.zsh_completion.d" ~/.zshrc ||echo "FPATH=\$HOME/.zsh_completion.d:\$FPATH" >> ~/.zshrc
 
-        # load the completion
-        grep -q "source \$HOME/.zsh_completion.d/_retro" ~/.zshrc || echo "source \$HOME/.zsh_completion.d/_retro" >> ~/.zshrc
+        # check if zshrc exists
+        if [ -f ~/.zshrc ]; then
+            grep -q "source \$HOME/.zsh_completion.d/_retro" ~/.zshrc || echo "source \$HOME/.zsh_completion.d/_retro" >> ~/.zshrc
+        fi
     fi
 
     # check if bash is installed
@@ -167,8 +173,10 @@ function generate_completion {
         echo "Generating bash completion"
         completion_path=~/.bash_completion.d
         mkdir -p \$completion_path
-        $install_path/retro completion bash > \$completion_path/retro
-        grep -q "source \$HOME/.bash_completion.d/retro" ~/.bashrc || echo "source \$HOME/.bash_completion.d/retro" >> ~/.bashrc
+        $install_path/retro completion bash > \$completion_path/_retro
+        if [ -f ~/.bashrc ]; then
+            grep -q "source \$HOME/.bash_completion.d/_retro" ~/.bashrc || echo "source \$HOME/.bash_completion.d/_retro" >> ~/.bashrc
+        fi
     fi
     echo "Completion script created, restart your shell to use it"
 }
@@ -187,7 +195,7 @@ function generate_uninstall {
       echo "sudo rm -rf $systemd_user_path/retro.service" >> $install_path/uninstall_retro.sh
       echo "rm -rf ~/.zsh_completion.d/_retro" >> $install_path/uninstall_retro.sh
       echo "rm -rf ~/.bash_completion.d/retro" >> $install_path/uninstall_retro.sh
-
+      echo "rm -rf ~/.retro" >> $install_path/uninstall_retro.sh
       echo "sudo rm -rf /usr/local/bin/retro" >> $install_path/uninstall_retro.sh
       echo "sudo rm -rf /usr/local/bin/retroPlayer" >> $install_path/uninstall_retro.sh
 
@@ -197,9 +205,9 @@ function generate_uninstall {
       chmod +x $install_path/uninstall_retro.sh
 
       echo "Removing retro from RC files..."
-      [ -f ~/.bashrc ] && sed -i '/retro/d' ~/.bashrc
-      [ -f ~/.zshrc ] && sed -i '/retro/d' ~/.zshrc
-      [ -f ~/.config/fish/config.fish ] && sed -i '/retro/d' ~/.config/fish/config.fish
+      echo "[ -f ~/.config/fish/config.fish ] && sed -i '/retro/d' ~/.config/fish/config.fish" >> $install_path/uninstall_retro.sh
+      echo "[ -f ~/.bashrc ] && sed -i '/retro/d' ~/.bashrc" >> $install_path/uninstall_retro.sh
+      echo "[ -f ~/.zshrc ] && sed -i '/retro/d' ~/.zshrc" >> $install_path/uninstall_retro.sh
 
       echo "echo \"Removing uninstall script...\"" >> $install_path/uninstall_retro.sh
       echo "rm -rf $install_path/uninstall_retro.sh" >> $install_path/uninstall_retro.sh

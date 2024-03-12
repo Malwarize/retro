@@ -116,7 +116,7 @@ func (p *Player) Play() error {
 		}
 		p.initialised = true
 	} else {
-		// this lib is very stupid in syncronizing the speaker
+		// this lib is very stupid in synchronizing the speaker
 		if !p.isSpeakerLocked() {
 			speaker.Clear()
 		} else {

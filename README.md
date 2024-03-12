@@ -1,5 +1,3 @@
-# retro
-
 <div align="center">
 
 ![retro_music](https://github.com/Malwarize/retro/assets/130087473/c9824547-9b09-48fc-a113-e1a847793cca)
@@ -13,7 +11,7 @@
 [![GitHub forks](https://img.shields.io/github/forks/Malwarize/retro?color=orange)]()
 [![GitHub watchers](https://img.shields.io/github/watchers/Malwarize/retro?color=blue)]()
 
-smart terminal music player, play music and continue your work on the terminal.
+play music and continue your work on the terminal.
 </div>
 
 ## 🗺️ map 
@@ -31,8 +29,9 @@ $${\color{#AC3097}Install \space \color{#56565E}Retro}$$
 ```sh
 wget https://github.com/Malwarize/retro/releases/download/v0.0.28/install.sh
 chmod +x install.sh
-./install.sh 
+./install.sh
 ```
+
 $${\color{#AC3097}Uninstall \space \color{#56565E}Retro}$$
 ```sh
 ~/.local/bin/uninstall_retro.sh
@@ -142,7 +141,7 @@ retro help      #❓ show all commands
 retro help play #❗ show play command help
 ```
 
-## ️⚙️ Configuration
+## Configuration 
 #### $${\color{#AC3097}Config \space \color{#56565E}File}$$
 the config file is located by default in `~/.retro/config.json`
 if not found, you can create it manually by 
@@ -179,4 +178,4 @@ with `systemctl --user restart retro`
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 d
 ## 📢 Acknowledgments
-#### $${\color{#AC3097}retro \space \color{#56565E}is \space  made  \space  by  \space  \color{#FF99EE} @Malwarize \color{#56565E} \space with \space \color{red} ❤️}$$ 
+#### $${\color{#AC3097}retro \space \color{#56565E}is \space  made  \space  by  \space  \color{#FF99EE} @Malwarize \color{#56565E} \space with \space \color{red} ❤️}$$
