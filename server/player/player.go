@@ -116,7 +116,13 @@ func (p *Player) Play() error {
 		}
 		p.initialised = true
 	} else {
-		speaker.Clear()
+		// this lib is very stupid in syncronizing the speaker
+		if !p.isSpeakerLocked() {
+			speaker.Clear()
+		} else {
+			speaker.Unlock()
+			speaker.Clear()
+		}
 	}
 	p.setPlayerState(
 		shared.Playing,
@@ -125,15 +131,14 @@ func (p *Player) Play() error {
 		done := make(
 			chan struct{},
 		)
-		music.SetVolume(
-			p.Vol,
-		)
+		music.SetVolume(p.Vol)
 		speaker.Play(
-			beep.Seq(music.Volume, beep.Callback(
-				func() {
-					done <- struct{}{}
-				},
-			)),
+			beep.Seq(
+				music.Volume,
+				beep.Callback(
+					func() { done <- struct{}{} },
+				),
+			),
 		)
 		<-done
 		p.Next()
@@ -348,9 +353,13 @@ func (p *Player) Volume(
 	if currentMusic == nil {
 		return nil
 	}
-	speaker.Lock()
-	currentMusic.SetVolume(vp)
-	speaker.Unlock()
+	p.concernSpeakerLock(
+		func() {
+			currentMusic.SetVolume(
+				vp,
+			)
+		},
+	)
 	return nil
 }
 

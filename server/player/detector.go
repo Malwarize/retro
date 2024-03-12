@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/Malwarize/retro/config"
 	"github.com/Malwarize/retro/logger"
@@ -194,10 +195,16 @@ func (p *Player) GetAvailableMusicOptions(unknown string) []shared.SearchResult 
 				)
 				continue
 			}
+			var dur time.Duration
+			p.concernSpeakerLock(
+				func() {
+					dur = music.DurationD()
+				},
+			)
 			musicChan <- shared.SearchResult{
 				Title:       m.Name,
 				Destination: m.Key,
-				Duration:    music.DurationD(),
+				Duration:    dur,
 				Type:        "cache",
 			}
 		}

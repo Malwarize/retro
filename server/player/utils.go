@@ -10,6 +10,7 @@ import (
 
 	"github.com/gopxl/beep"
 	"github.com/gopxl/beep/mp3"
+	"github.com/gopxl/beep/speaker"
 
 	"github.com/Malwarize/retro/config"
 	"github.com/Malwarize/retro/logger"
@@ -124,5 +125,28 @@ func adjustDiscordRPC(state shared.PState, music string) {
 				)
 			}
 		}
+	}
+}
+
+// returns true if the player was locked
+func (p *Player) unlockIfLocked() bool {
+	if p.getPlayerState() == shared.Stopped {
+		speaker.Unlock()
+		return true
+	}
+	return false
+}
+
+func (p *Player) isSpeakerLocked() bool {
+	return p.getPlayerState() == shared.Paused
+}
+
+func (p *Player) concernSpeakerLock(callback func()) {
+	if p.isSpeakerLocked() {
+		speaker.Unlock()
+		callback()
+		speaker.Lock()
+	} else {
+		callback()
 	}
 }
