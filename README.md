@@ -141,7 +141,7 @@ retro help      #❓ show all commands
 retro help play #❗ show play command help
 ```
 
-## ⚙️Configuration 
+## 🔧 Configuration 
 #### $${\color{#AC3097}Config \space \color{#56565E}File}$$
 the config file is located by default in `~/.retro/config.json`
 if not found, you can create it manually by 
