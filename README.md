@@ -37,7 +37,7 @@ $${\color{#AC3097}Uninstall \space \color{#56565E}Retro}$$
 ~/.local/bin/uninstall_retro.sh
 ```
 
-## 🕹️ Music Management
+## 🎮 Music Management
 $${\color{#AC3097}Play \space \color{#56565E} Music}$$
 ```sh
 retro play "Despacito - Luis Fonsi"                      # you can search and play music by name
