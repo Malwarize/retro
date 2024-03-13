@@ -16,10 +16,10 @@ play music and continue your work on the terminal.
 
 ## 🗺️ map 
 - [<code>📦 Installation</code>](#-installation)
-- [<code>⚙️ Music management</code>](#-music-management)
+- [<code>🎮 Music management</code>](#-music-management)
 - [<code>🎧 Playlist management</code>](#-playlist-management)
 - [<code>🚦️ Controls</code>](#-controls)
-- [<code>🎮 Configuration</code>](#-configuration)
+- [<code>⚙️ Configuration</code>](#-configuration)
 - [<code>🍿 Demo</code>](#-TODO)
 - [<code>📝 License</code>](#-license)
 - [<code>📢 Acknowledgments</code>](#-acknowledgments)
