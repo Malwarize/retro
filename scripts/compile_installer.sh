@@ -68,6 +68,13 @@ install_ffmpeg() {
 }
 
 install_bash-completion() {
+    # check if bash-completion is installed
+
+    if [ -f /usr/share/bash-completion/bash_completion ]; then
+        echo "bash-completion already installed"
+        return
+    fi
+
     echo "Installing bash-completion"
     if command -v apt > /dev/null; then
         sudo apt install -y bash-completion
@@ -194,7 +201,7 @@ function generate_uninstall {
       echo "rm -rf $install_path/retroPlayer" >> $install_path/uninstall_retro.sh
       echo "sudo rm -rf $systemd_user_path/retro.service" >> $install_path/uninstall_retro.sh
       echo "rm -rf ~/.zsh_completion.d/_retro" >> $install_path/uninstall_retro.sh
-      echo "rm -rf ~/.bash_completion.d/retro" >> $install_path/uninstall_retro.sh
+      echo "rm -rf ~/.bash_completion.d/_retro" >> $install_path/uninstall_retro.sh
       echo "rm -rf ~/.retro" >> $install_path/uninstall_retro.sh
       echo "sudo rm -rf /usr/local/bin/retro" >> $install_path/uninstall_retro.sh
       echo "sudo rm -rf /usr/local/bin/retroPlayer" >> $install_path/uninstall_retro.sh
@@ -211,7 +218,6 @@ function generate_uninstall {
 
       echo "echo \"Removing uninstall script...\"" >> $install_path/uninstall_retro.sh
       echo "rm -rf $install_path/uninstall_retro.sh" >> $install_path/uninstall_retro.sh
-
 
     echo "Uninstall script created: $install_path/uninstall_retro.sh"
 }
