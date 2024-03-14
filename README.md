@@ -103,7 +103,7 @@ retro list add my_playlist queue_music                                   # ➕ a
 #### $${\color{#AC3097}Remove \space \color{#56565E}Music from Playlist}$$
 ```sh
 retro list remove my_playlist "Despacito - Luis Fonsi" # ➖ remove song from playlist
-retro list remove my_playlist 1 # ➖ remove song from playlist by index
+retro list remove my_playlist 1                        # ➖ remove song from playlist by index
 ```
 
 #### $${\color{#AC3097}Show \space \color{#56565E}Playlist}$$
