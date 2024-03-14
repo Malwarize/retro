@@ -12,6 +12,8 @@
 [![GitHub watchers](https://img.shields.io/github/watchers/Malwarize/retro?color=blue)]()
 
 play music and continue your work on the terminal.
+
+<img src="https://github.com/Malwarize/retro/assets/130087473/aa91f82c-7faa-4804-b8e6-42b31ce7e6d9" alt="hi" style="width: 500px;" >
 </div>
 
 ## 🗺️ map 
