@@ -72,7 +72,7 @@ retro prev # ⏮️️
 ```
 #### $${\color{#AC3097} Remove \space \color{#56565E}Music from Queue}$$
 ```sh
-retro remove music_name
+retro remove music_name #🗑️
 ```
 *you can remove music from queue by name or index `retro remove 1`*
 
