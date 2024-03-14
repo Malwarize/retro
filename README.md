@@ -178,6 +178,6 @@ with `systemctl --user restart retro`
 * 🤖  please make sure to setup the autocompletion script to have a better experience with retro. see `retro completion`
 ## 📝 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-d
+
 ## 📢 Acknowledgments
 #### $${\color{#AC3097}retro \space \color{#56565E}is \space  made  \space  by  \space  \color{#FF99EE} @Malwarize \color{#56565E} \space with \space \color{red} ❤️}$$
