@@ -22,7 +22,7 @@ play music and continue your work on the terminal.
 - [<code>🎧 Playlist management</code>](#-playlist-management)
 - [<code>🚦️ Controls</code>](#-controls)
 - [<code>⚙️ Configuration</code>](#-configuration)
-- [<code>🍿 Demo</code>](#-TODO)
+- [<code>💾 Cache</code>](#-cache)
 - [<code>📝 License</code>](#-license)
 - [<code>📢 Acknowledgments</code>](#-acknowledgments)
 
@@ -165,6 +165,13 @@ $${\color{#AC3097}Default \space \color{#56565E}Config}$$
   "discord_rpc": false, 
   "log_file": "~/.retro/retro.log"
 }
+```
+## 💾 Cache
+
+#### $${\color{#AC3097}Cache \space \color{#56565E}Control}$$
+```
+retro cache       # 💾 show all cached data
+retro cache clear # 🧹 clear all cache
 ```
 
 
