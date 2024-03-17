@@ -142,6 +142,13 @@ retro theme blue    #🌊
 retro help      #❓ show all commands
 retro help play #❗ show play command help
 ```
+## 💾 Cache
+
+#### $${\color{#AC3097}Cache \space \color{#56565E}Control}$$
+```
+retro cache       # 💾 show all cached data
+retro cache clear # 🧹 clear all cache
+```
 
 ## 🔧 Configuration 
 #### $${\color{#AC3097}Config \space \color{#56565E}File}$$
@@ -166,15 +173,6 @@ $${\color{#AC3097}Default \space \color{#56565E}Config}$$
   "log_file": "~/.retro/retro.log"
 }
 ```
-## 💾 Cache
-
-#### $${\color{#AC3097}Cache \space \color{#56565E}Control}$$
-```
-retro cache       # 💾 show all cached data
-retro cache clear # 🧹 clear all cache
-```
-
-
 you can change the config manually, easy to understand and modify.
 
 $${\color{#AC3097}Note \space \color{#56565E}that}$$
