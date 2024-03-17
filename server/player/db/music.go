@@ -209,3 +209,37 @@ func (d *Db) FilterMusic(query string) ([]Music, error) {
 	}
 	return musics, nil
 }
+
+func (d *Db) CleanCache() error {
+	// Delete music thats not in playlist
+	_, err := d.db.Exec(
+		`DELETE FROM music WHERE hash NOT IN (SELECT hash FROM playlist)`,
+	)
+	return err
+}
+
+func (d *Db) GetCachedMusics() ([]Music, error) {
+	rows, err := d.db.Query(
+		`SELECT * FROM music where music.hash NOT IN  (SELECT hash FROM music_playlist)`,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var musics []Music
+	for rows.Next() {
+		var music Music
+		err := rows.Scan(
+			&music.Name,
+			&music.Source,
+			&music.Key,
+			&music.Data,
+			&music._hash,
+		)
+		if err != nil {
+			return nil, err
+		}
+		musics = append(musics, music)
+	}
+	return musics, nil
+}

@@ -202,11 +202,27 @@ func (p *Player) RPCSetTheme(theme string, reply *int) error {
 	return nil
 }
 
-func (p *Player) GetLogs(_ int, reply *[]string) error {
+func (p *Player) RPCGetLogs(_ int, reply *[]string) error {
 	logger.LogInfo("GetLogs called")
 	var err error
 	*reply, err = logger.GetLogs()
 	logger.LogInfo("GetLogs done")
+	return err
+}
+
+func (p *Player) RPCCleanCache(_ int, reply *int) error {
+	logger.LogInfo("RPCCleanCache called")
+	p.CleanCache()
+	*reply = 1
+	logger.LogInfo("RPCCleanCache done")
+	return nil
+}
+
+func (p *Player) RPCGetCachedMusics(_ int, reply *[]string) error {
+	logger.LogInfo("RPCGetCachedMusics called")
+	var err error
+	*reply, err = p.GetCachedMusics()
+	logger.LogInfo("RPCGetCachedMusics done with reply :", reply)
 	return err
 }
 

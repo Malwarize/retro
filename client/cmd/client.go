@@ -513,3 +513,25 @@ var logWarnCmd = &cobra.Command{
 		controller.PrintWarnLogs(client)
 	},
 }
+
+var cacheCmd = &cobra.Command{
+	Use:   "cache",
+	Short: "get cached musics",
+	Long: `get cached musics
+  this command will get the cached musics from the server
+  `,
+	Run: func(_ *cobra.Command, _ []string) {
+		views.CacheDisplay(client)
+	},
+}
+
+var cleanCacheCmd = &cobra.Command{
+	Use:   "clean",
+	Short: "clean the cache",
+	Long: `clean the cache
+  this command will clean the cache from the server
+  `,
+	Run: func(_ *cobra.Command, _ []string) {
+		controller.CleanCache(client)
+	},
+}

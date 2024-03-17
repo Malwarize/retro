@@ -133,6 +133,25 @@ func SetTheme(theme string, client *rpc.Client) {
 	}
 }
 
+func GetCachedMusics(client *rpc.Client) []string {
+	var reply []string
+	err := client.Call("Player.RPCGetCachedMusics", 0, &reply)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	return reply
+}
+
+func CleanCache(client *rpc.Client) {
+	var reply int
+	err := client.Call("Player.RPCCleanCache", 0, &reply)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
 var client *rpc.Client
 
 func GetClient() (*rpc.Client, error) {

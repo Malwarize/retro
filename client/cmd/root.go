@@ -57,6 +57,9 @@ func init() {
 	playlistCmd.AddCommand(playlistPlayCmd)
 
 	logCmd.AddCommand(logErrCmd)
-  logCmd.AddCommand(logInfoCmd)
-  logCmd.AddCommand(logWarnCmd)
+	logCmd.AddCommand(logInfoCmd)
+	logCmd.AddCommand(logWarnCmd)
+
+	rootCmd.AddCommand(cacheCmd)
+	cacheCmd.AddCommand(cleanCacheCmd)
 }

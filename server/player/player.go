@@ -763,6 +763,35 @@ func (p *Player) SetTheme(theme string) error {
 	return nil
 }
 
+func (p *Player) CleanCache() error {
+	err := p.Director.Db.CleanCache()
+	if err != nil {
+		return logger.LogError(
+			logger.GError(
+				"Failed to clean cache",
+				err,
+			),
+		)
+	}
+	return nil
+}
+
+func (p *Player) GetCachedMusics() ([]string, error) {
+	musics, err := p.Director.Db.GetCachedMusics()
+	var music_names []string
+	if err != nil {
+		return nil, logger.LogError(
+			logger.GError("Failed to get cached musics",
+				err,
+			),
+		)
+	}
+	for _, music := range musics {
+		music_names = append(music_names, music.Name)
+	}
+	return music_names, nil
+}
+
 func (p *Player) GetPlayerStatus() shared.Status {
 	return shared.Status{
 		CurrMusicIndex:    p.Queue.GetCurrIndex(),

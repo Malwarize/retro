@@ -9,7 +9,7 @@ import (
 
 func GetLogs(client *rpc.Client) []string {
 	var reply []string
-	err := client.Call("Player.GetLogs", 0, &reply)
+	err := client.Call("Player.RPCGetLogs", 0, &reply)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
