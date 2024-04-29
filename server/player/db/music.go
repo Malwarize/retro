@@ -240,8 +240,9 @@ func (d *Db) CleanCache() error {
 }
 
 func (d *Db) GetCachedMusics() ([]Music, error) {
+	// join table
 	rows, err := d.db.Query(
-		`SELECT * FROM music where music.hash NOT IN  (SELECT hash FROM music_playlist)`,
+		`select * from music where hash not in (SELECT hash FROM music INNER JOIN music_playlist ON music.name = music_playlist.music_name)`,
 	)
 	if err != nil {
 		return nil, err
