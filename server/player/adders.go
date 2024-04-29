@@ -11,6 +11,25 @@ import (
 
 type callback func(m db.Music) error
 
+func (p *Player) AddMusicFromHash(
+	hash string,
+	how callback,
+) error {
+	m, err := p.Director.Db.GetMusicByHashPrefix(
+		hash,
+	)
+	if err != nil {
+		return err
+	}
+	if how != nil {
+		err = how(m)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (p *Player) AddMusicFromFile(
 	path string,
 	how callback,

@@ -218,7 +218,7 @@ func (p *Player) RPCCleanCache(_ int, reply *int) error {
 	return nil
 }
 
-func (p *Player) RPCGetCachedMusics(_ int, reply *[]string) error {
+func (p *Player) RPCGetCachedMusics(_ int, reply *[]shared.NameHash) error {
 	logger.LogInfo("RPCGetCachedMusics called")
 	var err error
 	*reply, err = p.GetCachedMusics()

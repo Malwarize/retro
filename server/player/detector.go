@@ -90,8 +90,14 @@ func (p *Player) CheckWhatIsThis(unknown string) DResults {
 			}
 		}
 	}
+
+	// check if its cache hash prefix
+	_, err := p.Director.Db.GetMusicByHashPrefix(unknown)
+	if err == nil {
+		return DCache
+	}
 	// check if its play list name
-	_, err := p.Director.Db.GetPlaylist(
+	_, err = p.Director.Db.GetPlaylist(
 		unknown,
 	)
 	if err == nil {
@@ -313,6 +319,20 @@ func (p *Player) DetectAndAddToPlayList(
 			m.Name,
 			pl.Name,
 		)
+	case DCache:
+		logger.LogInfo(
+			"Detected cache",
+			unknown,
+		)
+		return nil, p.AddMusicFromHash(
+			unknown,
+			func(m db.Music) error {
+				return p.Director.Db.AddMusicToPlaylist(
+					m.Name,
+					plname,
+				)
+			},
+		)
 	case DUnknown:
 		logger.LogInfo(
 			"Detected unknown",
@@ -398,6 +418,25 @@ func (p *Player) DetectAndPlay(unknown string) ([]shared.SearchResult, error) {
 	case DUnknown:
 		logger.LogInfo("Detected unknown, searching for", unknown)
 		return p.GetAvailableMusicOptions(unknown), nil
+	case DCache:
+		logger.LogInfo("Detected cache, searching for", unknown)
+		return nil, p.AddMusicFromHash(
+			unknown,
+			func(m db.Music) error {
+				pmusic, err := NewMusic(
+					m.Name,
+					m.Data,
+				)
+				if err != nil {
+					return err
+				}
+				logger.LogInfo(
+					"Enqueue the music", m.Name,
+				)
+				p.Queue.Enqueue(*pmusic)
+				return p.Play()
+			},
+		)
 	default:
 		logger.LogInfo("Detected Engine", whatIsThis)
 		go p.AddMusicFromOnline(

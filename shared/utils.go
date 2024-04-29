@@ -123,3 +123,8 @@ type IntOrString struct {
 	StrVal string
 	IsInt  bool
 }
+
+type NameHash struct {
+	Name string
+	Hash string
+}

@@ -5,6 +5,7 @@ import (
 	"net/rpc"
 
 	"github.com/Malwarize/retro/client/controller"
+	"github.com/Malwarize/retro/shared"
 )
 
 func CacheDisplay(client *rpc.Client) {
@@ -14,9 +15,9 @@ func CacheDisplay(client *rpc.Client) {
 		return
 	}
 	fmt.Println(GetTheme().ProgressStyle.Render("📁 Cache :"))
-	for index, song := range songs {
+	for _, song := range songs {
 		fmt.Printf(
-			"\n    %d : %s\n", index, song,
+			"\n    %s : %s\n", song.Hash[:shared.HashPrefixLength], song.Name,
 		)
 	}
 }

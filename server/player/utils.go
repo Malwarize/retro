@@ -83,6 +83,7 @@ const (
 	DQueue    DResults = "queue"
 	DPlaylist DResults = "playlist"
 	DYoutube  DResults = "youtube"
+	DCache    DResults = "cache"
 )
 
 func adjustDiscordRPC(state shared.PState, music string) {

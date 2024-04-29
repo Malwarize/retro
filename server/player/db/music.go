@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
+	"github.com/Malwarize/retro/shared"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -14,7 +15,7 @@ type Music struct {
 	Source string
 	Key    string
 	Data   []byte
-	_hash  string
+	Hash   string
 }
 
 func (d *Db) InitMusic() error {
@@ -42,7 +43,7 @@ func (d *Db) GetMusic(source string, key string) (Music, error) {
 		&music.Source,
 		&music.Key,
 		&music.Data,
-		&music._hash,
+		&music.Hash,
 	)
 	return music, err
 }
@@ -137,9 +138,27 @@ func (d *Db) GetMusicByName(name string) (Music, error) {
 		&music.Source,
 		&music.Key,
 		&music.Data,
-		&music._hash,
+		&music.Hash,
 	)
 	return music, err
+}
+
+func (d *Db) GetMusicByHash(hash string) (Music, error) {
+	var music Music
+	err := d.db.QueryRow(
+		`SELECT name, source, key, data, hash FROM music WHERE hash = ?`,
+		hash,
+	).Scan(
+		&music.Name,
+		&music.Source,
+		&music.Key,
+		&music.Data,
+		&music.Hash,
+	)
+	if err != nil {
+		return Music{}, err
+	}
+	return music, nil
 }
 
 func (d *Db) GetMusicByKeySource(source string, key string) (Music, error) {
@@ -153,7 +172,7 @@ func (d *Db) GetMusicByKeySource(source string, key string) (Music, error) {
 		&music.Source,
 		&music.Key,
 		&music.Data,
-		&music._hash,
+		&music.Hash,
 	)
 	return music, err
 }
@@ -165,20 +184,22 @@ func hash(data []byte) string {
 }
 
 func (m Music) GetHash() string {
-	return m._hash
+	return m.Hash
 }
 
-func (d *Db) GetMusicByHash(hash string) (Music, error) {
+func (d *Db) GetMusicByHashPrefix(hash_p string) (Music, error) {
 	var music Music
 	err := d.db.QueryRow(
-		`SELECT name, source, key, data, hash FROM music WHERE hash = ?`,
-		hash,
+		`SELECT name, source, key, data, hash FROM music WHERE SUBSTRING(hash, 1, ?) = SUBSTRING(?, 1, ?)`,
+		shared.HashPrefixLength,
+		hash_p,
+		shared.HashPrefixLength,
 	).Scan(
 		&music.Name,
 		&music.Source,
 		&music.Key,
 		&music.Data,
-		&music._hash,
+		&music.Hash,
 	)
 	return music, err
 }
@@ -200,7 +221,7 @@ func (d *Db) FilterMusic(query string) ([]Music, error) {
 			&music.Source,
 			&music.Key,
 			&music.Data,
-			&music._hash,
+			&music.Hash,
 		)
 		if err != nil {
 			return nil, err
@@ -234,7 +255,7 @@ func (d *Db) GetCachedMusics() ([]Music, error) {
 			&music.Source,
 			&music.Key,
 			&music.Data,
-			&music._hash,
+			&music.Hash,
 		)
 		if err != nil {
 			return nil, err

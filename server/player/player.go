@@ -776,9 +776,9 @@ func (p *Player) CleanCache() error {
 	return nil
 }
 
-func (p *Player) GetCachedMusics() ([]string, error) {
+func (p *Player) GetCachedMusics() ([]shared.NameHash, error) {
 	musics, err := p.Director.Db.GetCachedMusics()
-	var music_names []string
+	var music_names []shared.NameHash
 	if err != nil {
 		return nil, logger.LogError(
 			logger.GError("Failed to get cached musics",
@@ -787,7 +787,10 @@ func (p *Player) GetCachedMusics() ([]string, error) {
 		)
 	}
 	for _, music := range musics {
-		music_names = append(music_names, music.Name)
+		music_names = append(music_names, shared.NameHash{
+			Name: music.Name,
+			Hash: music.Hash,
+		})
 	}
 	return music_names, nil
 }

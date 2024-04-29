@@ -24,3 +24,7 @@ const (
 	Paused
 	Stopped
 )
+
+const (
+	HashPrefixLength = 5
+)
