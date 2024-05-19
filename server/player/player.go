@@ -34,6 +34,7 @@ type Player struct {
 	Tasks       map[string]shared.Task
 	Vol         uint8
 	_lmeta      lmeta
+	up          *Updater
 	mu          sync.Mutex
 }
 
@@ -52,6 +53,15 @@ func NewPlayer() *Player {
 		log.Fatal(err)
 	}
 
+	up := NewUpdater()
+	logger.LogInfo("Checking for updates")
+	up.CheckUpdate()
+	logger.LogInfo("Update check done")
+	if up.IsUpdateAvailable {
+		logger.LogInfo("Update available" + up.RemoteVersion)
+	} else {
+		logger.LogInfo("No update available")
+	}
 	return &Player{
 		Queue:       NewMusicQueue(),
 		playerState: shared.Stopped,
@@ -60,6 +70,7 @@ func NewPlayer() *Player {
 		Director:    director,
 		Vol:         100,
 		Tasks:       make(map[string]shared.Task),
+		up:          up,
 	}
 }
 

@@ -242,7 +242,7 @@ EOF
 }
 
 function compress_installer {
-  tar -czf ./bin/installer.tar.gz $installer_path
+  tar -czf ./bin/installer.tar.gz --directory=./bin installer.sh
   echo "Installer compressed: ./bin/installer.tar.gz"
 }
 

@@ -226,10 +226,51 @@ func (p *Player) RPCGetCachedMusics(_ int, reply *[]shared.NameHash) error {
 	return err
 }
 
+func (p *Player) IsUpdateAvailable(_ int, reply *bool) error {
+	logger.LogInfo("NeedUpdate called")
+	*reply = p.up.IsUpdateAvailable
+	logger.LogInfo("NeedUpdate done with reply :", reply)
+	return nil
+}
+
+func (p *Player) Update(_ int, reply *int) error {
+	logger.LogInfo("Update called")
+	p.up.Update()
+	logger.LogInfo("Update done")
+	return nil
+}
+
+func (p *Player) DisableTheUpdatePrompt(_ int, reply *int) error {
+	logger.LogInfo("DisableTheUpdatePrompt called")
+	p.up.EnableUpdatePrompt = false
+	*reply = 1
+	logger.LogInfo("DisableTheUpdatePrompt done")
+	return nil
+}
+
+func (p *Player) IsUpdatePromptEnabled(_ int, reply *bool) error {
+	logger.LogInfo("IsUpdatePromptEnabled called")
+	*reply = p.up.EnableUpdatePrompt
+	logger.LogInfo("IsUpdatePromptEnabled done with reply :", reply)
+	return nil
+}
+
 func StartIPCServer(port string) {
+
+	// check update
+
 	logger.LogInfo("Creating Player instance")
 	player := NewPlayer()
-	rpc.Register(player)
+	err := rpc.Register(player)
+	if err != nil {
+		logger.LogError(
+			logger.GError(
+				"Failed to register Player instance to RPC",
+				err,
+			),
+		)
+		return
+	}
 	logger.LogInfo("Player instance created and registered to RPC")
 	lis, err := net.Listen("tcp", ":"+port)
 
