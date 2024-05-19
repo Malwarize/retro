@@ -56,7 +56,7 @@ jobs:
         draft: false
         prerelease: false
         name: "retro-${{ env.RELEASE_VERSION}}"
-        files: ./bin/installer.sh
+        files: ./bin/installer.tar.gz
         token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
