@@ -126,15 +126,17 @@ func (u *Updater) Update() {
 			return
 		}
 		logger.LogInfo("Running installer.sh")
-		cmd = exec.Command("bash", "nohup /tmp/installer.sh &")
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err = cmd.Run()
-		if err != nil {
+		os.Chmod("/tmp/installer.sh", 0777)
+		cmd = exec.Command("bash", "/tmp/installer.sh")
+		if err := cmd.Start(); err != nil {
 			logger.LogError(
 				logger.GError("Error Updating", err),
 			)
 			u.IsUpdateAvailable = true
+			return
+		}
+		if err := cmd.Process.Release(); err != nil {
+			logger.LogError(logger.GError("Error releasing process:", err))
 			return
 		}
 		logger.LogInfo("Cleaning up")
