@@ -535,3 +535,18 @@ var cleanCacheCmd = &cobra.Command{
 		controller.CleanCache(client)
 	},
 }
+
+var updateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "update the retro",
+	Long: `update the retro
+	  this command will update the retro client
+			  `,
+	Run: func(_ *cobra.Command, _ []string) {
+		if err := controller.Update(); err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("retro updated successfully")
+	},
+}
