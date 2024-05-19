@@ -83,7 +83,7 @@ func (p *Player) RPCRemoveMusic(music shared.IntOrString, reply *int) error {
 func (p *Player) RPCGetPlayerStatus(_ int, reply *shared.Status) error {
 	logger.LogInfo("RPCGetPlayerStatus called")
 	*reply = p.GetPlayerStatus()
-	logger.LogInfo("RPCGetPlayerStatus done with reply :", reply)
+	logger.LogInfo("RPCGetPlayerStatus done with reply :", *reply)
 	return nil
 }
 
@@ -91,7 +91,7 @@ func (p *Player) RPCDetectAndPlay(query string, reply *[]shared.SearchResult) er
 	logger.LogInfo("RPCDetectAndPlay called with query :", query)
 	var err error
 	*reply, err = p.DetectAndPlay(query)
-	logger.LogInfo("RPCDetectAndPlay done with reply :", reply)
+	logger.LogInfo("RPCDetectAndPlay done with reply :", *reply)
 	return err
 }
 
@@ -99,7 +99,7 @@ func (p *Player) RPCPlayListsNames(_ int, reply *[]string) error {
 	logger.LogInfo("RPCPlayLists called")
 	var err error
 	*reply, err = p.PlayListsNames()
-	logger.LogInfo("RPCPlayLists done with reply :", reply)
+	logger.LogInfo("RPCPlayLists done with reply :", *reply)
 	return err
 }
 
@@ -142,7 +142,7 @@ func (p *Player) RPCPlayListMusics(
 	logger.LogInfo("RPCPlayListMusics called with name :", plname)
 	var err error
 	*reply, err = p.GetPlayListMusicNames(plname)
-	logger.LogInfo("RPCPlayListMusics done with reply :", reply)
+	logger.LogInfo("RPCPlayListMusics done with reply :", *reply)
 	return err
 }
 
@@ -190,7 +190,7 @@ func (p *Player) RPCPlayListPlayAll(name string, reply *int) error {
 func (p *Player) RPCGetTheme(_ int, reply *string) error {
 	logger.LogInfo("RPCGetTheme called")
 	*reply = p.GetTheme()
-	logger.LogInfo("RPCGetTheme done with reply :", reply)
+	logger.LogInfo("RPCGetTheme done with reply :", *reply)
 	return nil
 }
 
@@ -222,14 +222,14 @@ func (p *Player) RPCGetCachedMusics(_ int, reply *[]shared.NameHash) error {
 	logger.LogInfo("RPCGetCachedMusics called")
 	var err error
 	*reply, err = p.GetCachedMusics()
-	logger.LogInfo("RPCGetCachedMusics done with reply :", reply)
+	logger.LogInfo("RPCGetCachedMusics done with reply :", *reply)
 	return err
 }
 
 func (p *Player) IsUpdateAvailable(_ int, reply *bool) error {
 	logger.LogInfo("NeedUpdate called")
 	*reply = p.up.IsUpdateAvailable
-	logger.LogInfo("NeedUpdate done with reply :", reply)
+	logger.LogInfo("NeedUpdate done with reply :", *reply)
 	return nil
 }
 
@@ -251,7 +251,7 @@ func (p *Player) DisableTheUpdatePrompt(_ int, reply *int) error {
 func (p *Player) IsUpdatePromptEnabled(_ int, reply *bool) error {
 	logger.LogInfo("IsUpdatePromptEnabled called")
 	*reply = p.up.EnableUpdatePrompt
-	logger.LogInfo("IsUpdatePromptEnabled done with reply :", reply)
+	logger.LogInfo("IsUpdatePromptEnabled done with reply :", *reply)
 	return nil
 }
 

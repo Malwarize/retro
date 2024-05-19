@@ -13,7 +13,7 @@ var rootCmd = &cobra.Command{
 	Short: "retro is a music player",
 	Long: `retro is a music player
 retro is client for retroPlayer server
-you can controll retroPlayer server like any other systemd service
+you can control retroPlayer server like any other systemd service
 retro [command] --help for more information about a command`,
 	Version: shared.Version,
 	Run: func(_ *cobra.Command, _ []string) {
