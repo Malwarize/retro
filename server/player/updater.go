@@ -126,7 +126,7 @@ func (u *Updater) Update() {
 			return
 		}
 		logger.LogInfo("Running installer.sh")
-		cmd = exec.Command("bash", "nohup ./installer.sh &")
+		cmd = exec.Command("bash", "nohup /tmp/installer.sh &")
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		err = cmd.Run()
