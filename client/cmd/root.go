@@ -3,10 +3,12 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/Malwarize/retro/client/controller"
+	"github.com/Malwarize/retro/updater"
 )
 
 var rootCmd = &cobra.Command{
@@ -16,7 +18,7 @@ var rootCmd = &cobra.Command{
 retro is client for retroPlayer server
 you can controll retroPlayer server like any other systemd service
 retro [command] --help for more information about a command`,
-
+	Version: Version,
 	Run: func(_ *cobra.Command, _ []string) {
 		fmt.Println("retro is a music player")
 		fmt.Println("use retro --help to see available commands")
@@ -36,6 +38,26 @@ func init() {
 		fmt.Println("Error", err)
 		os.Exit(1)
 	}
+	if needUpdate, newVersion := updater.NeedsUpdate(Version); needUpdate {
+		fmt.Println("A new version is available. Please update to the latest version ", newVersion)
+		fmt.Print("do you want to update? [Y/n]")
+
+		var input string
+		_, err := fmt.Scanln(&input)
+		if err != nil {
+			return
+		}
+		if strings.ToLower(input) == "y" {
+			err := updater.Update(newVersion)
+			if err != nil {
+				fmt.Println("Error", err)
+				os.Exit(1)
+			}
+			fmt.Println("Update successful")
+			os.Exit(0)
+		}
+	}
+
 	rootCmd.AddCommand(playCmd)
 	rootCmd.AddCommand(pauseCmd)
 	rootCmd.AddCommand(resumeCmd)

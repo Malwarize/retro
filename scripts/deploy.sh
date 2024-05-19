@@ -7,6 +7,7 @@
 # then push the new tag to the repo 
 # get the latest tag name from remote
 # then update the (
+#   client/cmd/version.go
 #   README.md,
 # )
 
@@ -17,6 +18,12 @@ echo "latest tag is $latest_tag"
 # then increment it
 new_tag=$(echo "$latest_tag" | awk -F. -v OFS=. '{$NF++;print}')
 echo "new tag is $new_tag"
+
+# update version.go 
+code='package cmd
+const Version ='
+code+="\"$new_tag\""
+echo "$code"  > client/cmd/version.go
 
 # update the README 
 echo "updating README.md with the new version $new_tag"

@@ -46,7 +46,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: installer-script
-        path: ./bin/install.sh
+        path: ./bin/installer.tar.gz
     
     - name: Release Installer 
       uses: softprops/action-gh-release@v1
@@ -56,7 +56,7 @@ jobs:
         draft: false
         prerelease: false
         name: "retro-${{ env.RELEASE_VERSION}}"
-        files: ./bin/install.sh
+        files: ./bin/installer.sh
         token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -6,7 +6,7 @@ retroPlayer_binary=./bin/retroPlayer
 service_file=./etc/retro_player.service
 install_path="~/.local/bin"
 systemd_user_path=/etc/systemd/user
-installer_path=./bin/install.sh
+installer_path=./bin/installer.sh
 
 # Function to build binaries
 function build_binary {
@@ -241,6 +241,11 @@ EOF
 	echo "Installer script created: $installer_path"
 }
 
+function compress_installer {
+  tar -czf ./bin/installer.tar.gz $installer_path
+  echo "Installer compressed: ./bin/installer.tar.gz"
+}
+
 function main {
 	echo "Building retro and retroPlayer"
 	build_binary "$retro_binary" "client/main.go"
@@ -248,6 +253,12 @@ function main {
 
 	echo "Generating installer"
 	generate_installer
+
+	echo "set permissions"
+	chmod +x $retro_binary
+
+  echo "Compressing installer"
+  compress_installer
 }
 
 main
