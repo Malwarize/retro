@@ -3,7 +3,6 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Malwarize/retro/logger"
 	"github.com/Malwarize/retro/shared"
 	"io"
 	"net/http"
@@ -57,68 +56,46 @@ type Download struct {
 func Update() error {
 	needsUpdate, newVersion := NeedsUpdate(shared.Version)
 	if !needsUpdate {
-		return fmt.Errorf("No update available")
+		return fmt.Errorf("⛔ No update available")
 	}
 
 	var DownloadEndpoint = "https://github.com/Malwarize/retro/releases/download/" + newVersion + "/installer.tar.gz"
-	logger.LogInfo("Downloading", DownloadEndpoint)
+	fmt.Println("⬇️ Downloading", DownloadEndpoint)
 	req, err := http.Get(DownloadEndpoint)
 	if err != nil {
-		return logger.LogError(
-			logger.GError("Error Updating", err),
-		)
-
+		return err
 	}
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
-		return logger.LogError(
-			logger.GError("Error Updating", err),
-		)
+		return err
 	}
 	defer req.Body.Close()
-	logger.LogInfo("Downloaded", DownloadEndpoint)
 	tmpFile, err := os.CreateTemp("", "retro")
-	logger.LogInfo("Saving to temp file", tmpFile.Name())
 	if err != nil {
-		return logger.LogError(
-			logger.GError("Error Updating", err),
-		)
-
+		return err
 	}
-	//defer os.Remove(tmpFile.Name())
+	defer os.Remove(tmpFile.Name())
 	_, err = tmpFile.Write(body)
 	err = tmpFile.Close()
 	if err != nil {
-		return logger.LogError(
-			logger.GError("Error Updating", err),
-		)
+		return err
 	}
-	logger.LogInfo("Saved to temp file", tmpFile.Name())
-	logger.LogInfo("Extracting", tmpFile.Name())
+	fmt.Println("💿  Saved to temp file", tmpFile.Name())
 	cmd := exec.Command("tar", "-xf", tmpFile.Name(), "-C", "/tmp")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	logger.LogInfo("Extracting", tmpFile.Name())
+	fmt.Println("📁 Extracting", tmpFile.Name())
 	err = cmd.Run()
 	if err != nil {
-		return logger.LogError(
-			logger.GError("Error Updating", err),
-		)
+		return err
 	}
-	logger.LogInfo("Running installer.sh")
+	fmt.Println("🚀 Running installer.sh")
 	os.Chmod("/tmp/installer.sh", 0777)
 	cmd = exec.Command("bash", "/tmp/installer.sh")
-	if err := cmd.Start(); err != nil {
-		return logger.LogError(
-			logger.GError("Error Updating", err),
-		)
+	if err := cmd.Run(); err != nil {
+		return err
 	}
-	if err := cmd.Process.Release(); err != nil {
-		return logger.LogError(logger.GError("Error releasing process:", err))
-
-	}
-	logger.LogInfo("Cleaning up")
-	logger.LogInfo("Update done")
+	fmt.Println("✅ Update done")
 	return nil
 
 }
