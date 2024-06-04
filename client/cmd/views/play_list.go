@@ -21,7 +21,7 @@ func addToPlayListCallback(m model) error {
 }
 
 func AddToPlayListQuitMessage(m model) string {
-	return quitTextStyle.Render(
+	return GetTheme().QuitTextStyle.Render(
 		"🔋 Adding music " + m.selectList.Items()[m.selectList.Index()].(searchResultItem).title + " to playlist " + m.args[0].(string),
 	)
 }

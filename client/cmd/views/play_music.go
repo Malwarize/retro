@@ -19,7 +19,7 @@ func playCallback(m model) error {
 
 func PlayQuitMessage(m model) string {
 	randEmoji := playingEmojies[rand.Intn(len(playingEmojies))]
-	return quitTextStyle.Render(
+	return GetTheme().QuitTextStyle.Render(
 		randEmoji + " Playing song " + m.selectList.Items()[m.selectList.Index()].(searchResultItem).title + ", this may take a while if download needed",
 	)
 }

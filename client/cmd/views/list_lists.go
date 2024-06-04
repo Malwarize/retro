@@ -13,9 +13,16 @@ func PlayListsDisplay(client *rpc.Client) {
 		fmt.Println("No playlists")
 		return
 	}
-	fmt.Println(GetTheme().ProgressStyle.Render("📼 Playlists:	"))
-	for _, playlist := range playlists {
-		fmt.Printf("\n   - %s\n", playlist)
+	fmt.Println(GetTheme().PositionStyle.Render("📼 Playlists"))
+	fmt.Println()
+
+	for index, playlist := range playlists {
+		if index == len(playlists)-1 {
+			fmt.Print(GetTheme().PositionStyle.Copy().Inherit(GetTheme().ColoredTextStyle).Render("└──[ "))
+		} else {
+			fmt.Print(GetTheme().PositionStyle.Copy().Inherit(GetTheme().ColoredTextStyle).Render("├──[ "))
+		}
+		fmt.Println(playlist)
 	}
 }
 
@@ -25,10 +32,14 @@ func PlayListMusicsDisplay(name string, client *rpc.Client) {
 		fmt.Println("No songs in playlist")
 		return
 	}
-	fmt.Println(GetTheme().ProgressStyle.Render("🎧 Playlist: ") + name)
+	fmt.Println(GetTheme().PositionStyle.Render("🎧 Playlist: ") + name)
+	fmt.Println()
 	for index, song := range songs {
-		fmt.Printf(
-			"\n    %d : %s\n", index, song,
-		)
+		if index == len(songs)-1 {
+			fmt.Print(GetTheme().PositionStyle.Copy().Inherit(GetTheme().ColoredTextStyle).Render("└──[ "))
+		} else {
+			fmt.Print(GetTheme().PositionStyle.Copy().Inherit(GetTheme().ColoredTextStyle).Render("├──[ "))
+		}
+		fmt.Println(song)
 	}
 }

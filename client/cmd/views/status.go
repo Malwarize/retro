@@ -44,13 +44,13 @@ func DisplayStatus(client *rpc.Client) {
 
 		totalDurationStr := reformatDuration(status.CurrMusicDuration)
 
-		prog := progress.New(progress.WithSolidFill(GetTheme().MainColor), progress.WithWidth(40))
+		prog := progress.New(progress.WithSolidFill(GetTheme().MainColorStyle), progress.WithWidth(40))
 		prog.SetPercent(0.5)
 		prog.ShowPercentage = false
 		fmt.Println(GetTheme().ProgressStyle.Render(prog.ViewAs(currentPosition.Seconds() / status.CurrMusicDuration.Seconds())))
 
 		fmt.Println("   "+playingEmojies[rand.Intn(len(playingEmojies))], currentMusicName)
-		fmt.Println(GetTheme().PositionStyle.Render(currentPositionStr + " / " + totalDurationStr))
+		fmt.Println(GetTheme().PositionStyle.Copy().Inherit(GetTheme().ColoredTextStyle).Render(currentPositionStr, " / ", totalDurationStr))
 
 		switch status.PlayerState {
 		case shared.Playing:

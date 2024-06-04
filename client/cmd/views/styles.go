@@ -1,73 +1,60 @@
 package views
 
 import (
-	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/lipgloss"
-
 	"github.com/Malwarize/retro/client/controller"
 	"github.com/Malwarize/retro/shared"
+	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/lipgloss"
 )
 
-var emojiesType = map[string]string{
-	"youtube": "🎬",
-	"cache":   "💾",
-	"file":    "🎵",
-	"dir":     "📁",
-}
+// Emoji and status mappings
+var (
+	emojiesType = map[string]string{
+		"youtube": "🎬",
+		"cache":   "💾",
+		"file":    "🎵",
+		"dir":     "📁",
+	}
 
-var playingEmojies = []string{
-	"🎵",
-	"🎶",
-	"🎷",
-	"🎸",
-	"🎹",
-	"🎺",
-}
+	playingEmojies = []string{
+		"🎵",
+		"🎶",
+		"🎷",
+		"🎸",
+		"🎹",
+		"🎺",
+	}
 
-var emojiesStatus = map[shared.PState]string{
-	shared.Playing: "▶️",
-	shared.Stopped: "🛑",
-	shared.Paused:  "⏸️",
-}
+	emojiesStatus = map[shared.PState]string{
+		shared.Playing: "▶️",
+		shared.Stopped: "🛑",
+		shared.Paused:  "⏸️",
+	}
 
-var tasksEmojies = map[int]string{
-	shared.Downloading: "📥",
-	shared.Searching:   "🔍",
-}
+	tasksEmojies = map[int]string{
+		shared.Downloading: "📥",
+		shared.Searching:   "🔍",
+	}
 
-var volumeLevels = []string{
-	"🔇",
-	"🔈",
-	"🔉",
-	"🔊",
-}
+	volumeLevels = []string{
+		"🔇",
+		"🔈",
+		"🔉",
+		"🔊",
+	}
 
-var failedEmojie = "❌"
+	failedEmojie  = "❌"
+	defaultMargin = lipgloss.NewStyle().Margin(1, 2)
+)
 
-var docStyle = lipgloss.NewStyle().Margin(1, 2)
-
-var quitTextStyle = lipgloss.NewStyle().Margin(1, 0, 2, 4)
-
-// var spinnerStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-
-// var progressStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3)
-// var runningStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#FFFF00")).Margin(1, 0, 2, 3)
-// var stoppedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000")).Margin(1, 0, 2, 3)
-// var pausedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#0000FF")).Margin(1, 0, 2, 3)
-
-// var positionStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3)
-// var selectMusicStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(0, 0, 0, 1)
-// var durationStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3)
-// var taskStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#00FFFF")).Margin(1, 0, 0, 3)
-// var failedtaskStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#FFA500")).Margin(1, 0, 0, 3)
-
-// var playListNameStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3)
-
+// Themes struct encapsulates all theme-related styles
 type Themes struct {
+	MainColorStyle   string
 	DocStyle         lipgloss.Style
 	QuitTextStyle    lipgloss.Style
 	SpinnerStyle     lipgloss.Style
 	ProgressStyle    lipgloss.Style
+	ColoredTextStyle lipgloss.Style
 	RunningStyle     lipgloss.Style
 	StoppedStyle     lipgloss.Style
 	PausedStyle      lipgloss.Style
@@ -75,13 +62,11 @@ type Themes struct {
 	SelectMusicStyle lipgloss.Style
 	FailStyle        lipgloss.Style
 	TaskStyle        lipgloss.Style
-	MainColor        string
 	ListDelegate     list.DefaultDelegate
 }
 
-func purpleItemStyle() (s list.DefaultItemStyles) {
-	purple := lipgloss.AdaptiveColor{Light: "#D8BFD8", Dark: "#800080"}
-
+// Helper function to create item styles
+func createItemStyle(mainColor lipgloss.AdaptiveColor) (s list.DefaultItemStyles) {
 	s.NormalTitle = lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#1a1a1a", Dark: "#dddddd"}).
 		Padding(0, 0, 0, 2)
@@ -91,48 +76,12 @@ func purpleItemStyle() (s list.DefaultItemStyles) {
 
 	s.SelectedTitle = lipgloss.NewStyle().
 		Border(lipgloss.NormalBorder(), false, false, false, true).
-		BorderForeground(purple).
-		Foreground(purple).
+		BorderForeground(mainColor).
+		Foreground(mainColor).
 		Padding(0, 0, 0, 1)
 
 	s.SelectedDesc = s.SelectedTitle.Copy().
-		Foreground(purple)
-
-	s.DimmedTitle = lipgloss.NewStyle().
-		Foreground(lipgloss.AdaptiveColor{Light: "#A49FA5", Dark: "#777777"}).
-		Padding(0, 0, 0, 2)
-
-	s.DimmedDesc = s.DimmedTitle.Copy().
-		Foreground(lipgloss.AdaptiveColor{Light: "#C2B8C2", Dark: "#4D4D4D"})
-
-	s.FilterMatch = lipgloss.NewStyle().Underline(true)
-	return s
-}
-
-func ListPurpleDelegate() list.DefaultDelegate {
-	def := list.NewDefaultDelegate()
-	def.Styles = purpleItemStyle()
-	return def
-}
-
-func blueItemStyle() (s list.DefaultItemStyles) {
-	blue := lipgloss.AdaptiveColor{Light: "#ADD8E6", Dark: "#0000FF"}
-
-	s.NormalTitle = lipgloss.NewStyle().
-		Foreground(lipgloss.AdaptiveColor{Light: "#1a1a1a", Dark: "#dddddd"}).
-		Padding(0, 0, 0, 2)
-
-	s.NormalDesc = s.NormalTitle.Copy().
-		Foreground(lipgloss.AdaptiveColor{Light: "#A49FA5", Dark: "#777777"})
-
-	s.SelectedTitle = lipgloss.NewStyle().
-		Border(lipgloss.NormalBorder(), false, false, false, true).
-		BorderForeground(blue).
-		Foreground(blue).
-		Padding(0, 0, 0, 1)
-
-	s.SelectedDesc = s.SelectedTitle.Copy().
-		Foreground(blue)
+		Foreground(mainColor)
 
 	s.DimmedTitle = lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#A49FA5", Dark: "#777777"}).
@@ -146,101 +95,71 @@ func blueItemStyle() (s list.DefaultItemStyles) {
 	return s
 }
 
-func ListBlueDelegate() list.DefaultDelegate {
+// Create list delegate with specific color
+func createListDelegate(mainColor lipgloss.AdaptiveColor) list.DefaultDelegate {
 	def := list.NewDefaultDelegate()
-	def.Styles = blueItemStyle()
+	def.Styles = createItemStyle(mainColor)
 	return def
 }
 
+// Common theme attributes
+func commonStyles(mainColor lipgloss.AdaptiveColor) Themes {
+	positionStyle := lipgloss.NewStyle().Margin(0, 0, 0, 3)
+	colorStyle := lipgloss.NewStyle().Foreground(mainColor)
+	return Themes{
+		DocStyle:      defaultMargin,
+		QuitTextStyle: lipgloss.NewStyle().Margin(1, 0, 2, 4),
+		SpinnerStyle:  lipgloss.NewStyle().Foreground(mainColor),
+		ProgressStyle: positionStyle.Copy().Inherit(colorStyle).MarginTop(1),
+		RunningStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#00FF00")).
+			Margin(1, 0, 2, 3),
+		StoppedStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#FF0000")).
+			Margin(1, 0, 2, 3),
+		PausedStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#0000FF")).
+			Margin(1, 0, 2, 3),
+		PositionStyle:    positionStyle,
+		SelectMusicStyle: lipgloss.NewStyle().Foreground(mainColor).Margin(0, 0, 0, 1).Bold(true),
+		FailStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#FFA500")).
+			Margin(1, 0, 0, 3),
+		TaskStyle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#00FFFF")).
+			Margin(1, 0, 0, 3),
+		ColoredTextStyle: colorStyle,
+	}
+}
+
+// Purple theme settings
 func NewPurpleTheme() Themes {
 	purple := lipgloss.AdaptiveColor{Light: "#D8BFD8", Dark: "#800080"}
-	return Themes{
-		DocStyle:      lipgloss.NewStyle().Margin(1, 2),
-		QuitTextStyle: lipgloss.NewStyle().Margin(1, 0, 2, 4),
-		SpinnerStyle:  lipgloss.NewStyle().Foreground(purple),
-		ProgressStyle: lipgloss.NewStyle().Foreground(purple).Margin(1, 0, 0, 3),
-		RunningStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#00FF00")).
-			Margin(1, 0, 2, 3),
-		StoppedStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FF0000")).
-			Margin(1, 0, 2, 3),
-		PausedStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#0000FF")).
-			Margin(1, 0, 2, 3),
-		PositionStyle:    lipgloss.NewStyle().Foreground(purple).Margin(1, 0, 0, 3),
-		SelectMusicStyle: lipgloss.NewStyle().Foreground(purple).Margin(0, 0, 0, 1).Bold(true),
-		FailStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FFA500")).
-			Margin(1, 0, 0, 3),
-		TaskStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#00FFFF")).
-			Margin(1, 0, 0, 3),
-		MainColor:    "#A020F0",
-		ListDelegate: ListPurpleDelegate(),
-	}
+	theme := commonStyles(purple)
+	theme.MainColorStyle = "#800080"
+	theme.ListDelegate = createListDelegate(purple)
+	return theme
 }
 
+// Pink theme settings
 func NewPinkTheme() Themes {
-	return Themes{
-		DocStyle:      lipgloss.NewStyle().Margin(1, 2),
-		QuitTextStyle: lipgloss.NewStyle().Margin(1, 0, 2, 4),
-		SpinnerStyle:  lipgloss.NewStyle().Foreground(lipgloss.Color("205")),
-		ProgressStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3),
-		RunningStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FFFF00")).
-			Margin(1, 0, 2, 3),
-		StoppedStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#ff0000")).
-			Margin(1, 0, 2, 3),
-		PausedStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#0000FF")).
-			Margin(1, 0, 2, 3),
-		PositionStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Margin(1, 0, 0, 3),
-		SelectMusicStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("205")).
-			Margin(0, 0, 0, 1).
-			Bold(true),
-		FailStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FFA500")).
-			Margin(1, 0, 0, 3),
-		TaskStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#00FFFF")).
-			Margin(1, 0, 0, 3),
-		MainColor:    "205",
-		ListDelegate: list.NewDefaultDelegate(),
-	}
+	pink := lipgloss.AdaptiveColor{Light: "#FFC0CB", Dark: "#FF1493"}
+	theme := commonStyles(pink)
+	theme.MainColorStyle = "#FF1493"
+	theme.ListDelegate = list.NewDefaultDelegate()
+	return theme
 }
 
+// Blue theme settings
 func NewBlueTheme() Themes {
-	blue := lipgloss.AdaptiveColor{Light: "#ADD8E6", Dark: "#0000FF"}
-	return Themes{
-		DocStyle:      lipgloss.NewStyle().Margin(1, 2),
-		QuitTextStyle: lipgloss.NewStyle().Margin(1, 0, 2, 4),
-		SpinnerStyle:  lipgloss.NewStyle().Foreground(blue),
-		ProgressStyle: lipgloss.NewStyle().Foreground(blue).Margin(1, 0, 0, 3),
-		RunningStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#00FF00")).
-			Margin(1, 0, 2, 3),
-		StoppedStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FF0000")).
-			Margin(1, 0, 2, 3),
-		PausedStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#0000FF")).
-			Margin(1, 0, 2, 3),
-		PositionStyle:    lipgloss.NewStyle().Foreground(blue).Margin(1, 0, 0, 3),
-		SelectMusicStyle: lipgloss.NewStyle().Foreground(blue).Margin(0, 0, 0, 1).Bold(true),
-		FailStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FFA500")).
-			Margin(1, 0, 0, 3),
-		TaskStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#00FFFF")).
-			Margin(1, 0, 0, 3),
-		MainColor:    "#0000FF",
-		ListDelegate: ListBlueDelegate(),
-	}
+	blue := lipgloss.AdaptiveColor{Light: "#ADD8E6", Dark: "#0000C7"}
+	theme := commonStyles(blue)
+	theme.MainColorStyle = "#0000C7"
+	theme.ListDelegate = createListDelegate(blue)
+	return theme
 }
 
+// GetTheme returns the theme based on client settings
 func GetTheme() Themes {
 	client, err := controller.GetClient()
 	if client == nil || err != nil {

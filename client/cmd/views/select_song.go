@@ -84,7 +84,7 @@ func (m model) View() string {
 		return m.quitMessage(m)
 	}
 	if m.searchState == shared.Finished {
-		return docStyle.Render(m.selectList.View())
+		return GetTheme().DocStyle.Render(m.selectList.View())
 	}
 	return fmt.Sprintf("%s Searching for %q...", m.spin.View(), m.query)
 }
