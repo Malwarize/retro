@@ -11,7 +11,7 @@
 [![GitHub forks](https://img.shields.io/github/forks/Malwarize/retro?color=orange)]()
 [![GitHub watchers](https://img.shields.io/github/watchers/Malwarize/retro?color=blue)]()
 
-play music and continue your work on the terminal.
+play music then continue your work on the terminal.
 
 <img src="https://github.com/Malwarize/retro/assets/130087473/aa91f82c-7faa-4804-b8e6-42b31ce7e6d9" alt="hi" style="width: 500px;" >
 </div>
@@ -23,9 +23,10 @@ play music and continue your work on the terminal.
 - [<code>🚦️ Controls</code>](#-controls)
 - [<code>⚙️ Configuration</code>](#-configuration)
 - [<code>💾 Cache</code>](#-cache)
+- [<code>🌐 Update</code>](#-update)
 - [<code>📝 License</code>](#-license)
 - [<code>📢 Acknowledgments</code>](#-acknowledgments)
-
+ 
 ## 📦 Installation
 $${\color{#AC3097}Install \space \color{#56565E}Retro}$$ 
 ```sh
@@ -34,6 +35,7 @@ tar -xvf installer.tar.gz
 chmod +x installer.sh
 ./installer.sh
 ```
+this installer is for linux of `systemd` based systems, if you are using other systems you can install it manually by compiling the source code then run the server as you like.
 
 $${\color{#AC3097}Uninstall \space \color{#56565E}Retro}$$
 ```sh
@@ -171,7 +173,8 @@ $${\color{#AC3097}Default \space \color{#56565E}Config}$$
   "theme": "pink",        
   "db_path": "~/.retro/retro.db",
   "discord_rpc": false, 
-  "log_file": "~/.retro/retro.log"
+  "log_file": "~/.retro/retro.log",
+  "server_port": "3131"
 }
 ```
 you can change the config manually, easy to understand and modify.
@@ -182,6 +185,14 @@ $${\color{#AC3097}Note \space \color{#56565E}that}$$
 with `systemctl --user restart retro`
 * ⚠️  the config file will override the default values.
 * 🤖  please make sure to setup the autocompletion script to have a better experience with retro. see `retro completion`
+## 🌐 Update
+$$\color{#AC3097}Retro \space \color{#56565E}Update$$
+
+to update retro to the latest version on github you can use the following command
+```sh
+retro update
+```
+
 ## 📝 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
