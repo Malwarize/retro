@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"github.com/Malwarize/retro/config"
 	"net/rpc"
 	"os"
 
@@ -155,9 +156,10 @@ func CleanCache(client *rpc.Client) {
 var client *rpc.Client
 
 func GetClient() (*rpc.Client, error) {
+	cfg := config.GetConfig()
 	if client == nil {
 		var err error
-		client, err = rpc.Dial("tcp", "localhost:3131")
+		client, err = rpc.Dial("tcp", "localhost:"+cfg.ServerPort)
 		if err != nil {
 			return nil, err
 		}

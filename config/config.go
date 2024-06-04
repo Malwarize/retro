@@ -29,6 +29,7 @@ type Config struct {
 	DBPath        string        `json:"db_path"`        // path to the database
 	DiscordRPC    bool          `json:"discord_rpc"`    // Discord Rich Presence
 	LogFile       string        `json:"log_file"`       // path to the log file
+	ServerPort    string        `json:"server_port"`    // port to run the server on
 }
 
 func initConfig() *Config {
@@ -43,6 +44,7 @@ func initConfig() *Config {
 		DiscordRPC:    true,
 		LogFile:       filepath.Join(retro_path, "retro.log"),
 		DBPath:        filepath.Join(retro_path, "retro.db"),
+		ServerPort:    "3131",
 	}
 
 	// Attempt to load from file
@@ -91,6 +93,8 @@ func EditConfigField(field, value string) error {
 		}
 	case "log_file":
 		config.LogFile = value
+	case "server_port":
+		config.ServerPort = value
 	default:
 		return errors.New("unknown field: " + field)
 	}
