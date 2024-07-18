@@ -198,3 +198,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📢 Acknowledgments
 #### $${\color{#AC3097}retro \space \color{#56565E}is \space  made  \space  by  \space  \color{#FF99EE} @Malwarize \color{#56565E} \space with \space \color{red} ❤️}$$
+
+## $${\color{#AC3097}Thanks \space to \space our \space sponsor \space \color{#FF99EE}@HelloHabiba}$$ 
+[@HelloHabiba](https://github.com/HelloHabiba)
