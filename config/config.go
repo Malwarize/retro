@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -32,9 +33,46 @@ type Config struct {
 	ServerPort    string        `json:"server_port"`    // port to run the server on
 }
 
+// Merges file config with default config
+func mergeConfigs(config, defaultConfig *Config) *Config {
+	if config.RetroPath == "" {
+		config.RetroPath = defaultConfig.RetroPath
+	}
+	if config.PathYTDL == "" {
+		config.PathYTDL = defaultConfig.PathYTDL
+	}
+	if config.PathFFmpeg == "" {
+		config.PathFFmpeg = defaultConfig.PathFFmpeg
+	}
+	if config.PathFFprobe == "" {
+		config.PathFFprobe = defaultConfig.PathFFprobe
+	}
+	if config.SearchTimeout == 0 {
+		config.SearchTimeout = defaultConfig.SearchTimeout
+	}
+	if config.Theme == "" {
+		config.Theme = defaultConfig.Theme
+	}
+	if config.LogFile == "" {
+		config.LogFile = defaultConfig.LogFile
+	}
+	if config.DBPath == "" {
+		config.DBPath = defaultConfig.DBPath
+	}
+	if config.ServerPort == "" {
+		config.ServerPort = defaultConfig.ServerPort
+	}
+	// No need to check boolean field (DiscordRPC) since false is a meaningful value
+	return config
+}
+
 func initConfig() *Config {
 	retro_path := os.Getenv("HOME") + "/.retro/"
-	config := &Config{
+	configPath := filepath.Join(retro_path, "config.json")
+	var config *Config
+
+	// Load default config
+	defaultConfig := &Config{
 		RetroPath:     retro_path,
 		PathYTDL:      "yt-dlp",
 		PathFFmpeg:    "ffmpeg",
@@ -49,12 +87,18 @@ func initConfig() *Config {
 
 	// Attempt to load from file
 	if jsonFile, err := os.ReadFile(configPath); err == nil {
-		if err = json.Unmarshal(jsonFile, config); err != nil {
-			return config // Return default config if unmarshaling fails
+		config = &Config{}
+		if err = json.Unmarshal(jsonFile, config); err == nil {
+			// Merge file config with default config
+			config = mergeConfigs(config, defaultConfig)
+			return config
+		} else {
+			fmt.Println("Error loading config file:", err)
 		}
 	}
 
-	return config
+	// If we can't load from file, return the default config
+	return defaultConfig
 }
 
 func GetConfig() *Config {
@@ -63,7 +107,6 @@ func GetConfig() *Config {
 	})
 	return cfg
 }
-
 func EditConfigField(field, value string) error {
 	config := GetConfig()
 	switch field {
