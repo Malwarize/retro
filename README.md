@@ -30,7 +30,7 @@ play music then continue your work on the terminal.
 ## 📦 Installation
 $${\color{#AC3097}Install \space \color{#56565E}Retro}$$ 
 ```sh
-wget https://github.com/Malwarize/retro/releases/download/v0.0.42/installer.tar.gz
+wget https://github.com/Malwarize/retro/releases/download/v0.0.43/installer.tar.gz
 tar -xvf installer.tar.gz
 chmod +x installer.sh
 ./installer.sh
