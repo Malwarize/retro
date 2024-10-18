@@ -234,13 +234,12 @@ func (d *Db) FilterMusic(query string) ([]Music, error) {
 func (d *Db) CleanCache() error {
 	// Delete music thats not in playlist
 	_, err := d.db.Exec(
-		`DELETE FROM music WHERE hash NOT IN (SELECT hash FROM playlist)`,
+		`DELETE FROM music WHERE hash NOT IN (SELECT hash FROM music INNER JOIN music_playlist ON music.name = music_playlist.music_name)`,
 	)
 	return err
 }
 
 func (d *Db) GetCachedMusics() ([]Music, error) {
-	// join table
 	rows, err := d.db.Query(
 		`select * from music where hash not in (SELECT hash FROM music INNER JOIN music_playlist ON music.name = music_playlist.music_name)`,
 	)
