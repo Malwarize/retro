@@ -229,6 +229,7 @@ function main {
     install_retroPlayer
     install_service
     start_services
+    sleep 3
     generate_completion
     generate_uninstall
     echo "Installation complete, use retro --help to get started"
