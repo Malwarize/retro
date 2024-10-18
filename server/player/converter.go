@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Malwarize/retro/config"
+	"github.com/Malwarize/retro/logger"
 )
 
 type Converter struct {
@@ -51,10 +52,18 @@ func (c *Converter) ConvertToMP3(inputData []byte) ([]byte, error) {
 	cmd.Stderr = &stderr
 
 	err := cmd.Run()
+	// if err != nil {
+	// 	return nil, fmt.Errorf("error converting to MP3: %v\n%s", err, stderr.String())
+	// }
 	if err != nil {
-		return nil, fmt.Errorf("error converting to MP3: %v\n%s", err, stderr.String())
+		return nil, logger.LogError(
+			logger.GError(
+				"Error converting to MP3",
+				err,
+			),
+			stderr.String(),
+		)
 	}
-
 	return out.Bytes(), nil
 }
 
@@ -68,14 +77,22 @@ func (c *Converter) IsMp3(fileData []byte) (bool, error) {
 
 	cmd.Stdin = bytes.NewReader(fileData)
 	out, err := cmd.CombinedOutput()
+	// if err != nil {
+	// 	return false, fmt.Errorf(
+	// 		"error running ffprobe to check if fileData is mp3: %v %s",
+	// 		err,
+	// 		string(out),
+	// 	)
+	// }
 	if err != nil {
-		return false, fmt.Errorf(
-			"error running ffprobe to check if fileData is mp3: %v %s",
-			err,
+		return false, logger.LogError(
+			logger.GError(
+				"Error running ffprobe to check if fileData is mp3",
+				err,
+			),
 			string(out),
 		)
 	}
-
 	fileFormat := strings.TrimSpace(string(out))
 	isMP3 := fileFormat == "mp3"
 	return isMP3, nil
