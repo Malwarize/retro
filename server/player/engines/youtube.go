@@ -128,9 +128,25 @@ import (
 // }
 
 func (yt *youtubeEngine) Exists(videoUrl string) (bool, error) {
-	_, err := yt.Client.GetVideo(videoUrl)
+	cmd := exec.Command(
+		yt.ytdlpPath,
+		"--ies",
+		"all,-generic",
+		videoUrl,
+		"--skip-download",
+	)
+	cmd.Stderr = logger.ERRORLogger.Writer()
+	logger.LogInfo("excuting command", cmd.Args)
+	// yt-dlp --ies all,-generic https://www.youtube.com/watch?v=videoId
+	out, err := cmd.Output()
 	if err != nil {
-		return false, err
+		return false, logger.LogError(
+			logger.GError(
+				"Check video existence failed",
+				err,
+			),
+			string(out),
+		)
 	}
 	return true, nil
 }
