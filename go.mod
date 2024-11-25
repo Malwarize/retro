@@ -10,7 +10,6 @@ require (
 	github.com/charmbracelet/lipgloss v0.9.1
 	github.com/gopxl/beep v1.3.0
 	github.com/hugolgst/rich-go v0.0.0-20230917173849-4a4fb1d3c362
-	github.com/kkdai/youtube/v2 v2.10.1
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/spf13/cobra v1.8.0
 )
@@ -35,17 +34,15 @@ require (
 )
 
 require (
-	github.com/bitly/go-simplejson v0.5.1 // indirect
-	github.com/dlclark/regexp2 v1.11.0 // indirect
-	github.com/dop251/goja v0.0.0-20240220182346-e401ed450204 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/ebitengine/oto/v3 v3.1.0 // indirect
 	github.com/ebitengine/purego v0.5.0 // indirect
-	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
-	github.com/google/pprof v0.0.0-20240320155624-b11c3daa6f07 // indirect
 	github.com/hajimehoshi/go-mp3 v0.3.4 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/stretchr/testify v1.9.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
